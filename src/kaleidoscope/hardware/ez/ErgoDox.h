@@ -34,33 +34,30 @@
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::ez::ErgoDox
 #include "Kaleidoscope-HIDAdaptor-KeyboardioHID.h"
 
-#include "kaleidoscope/macro_helpers.h"
-
 struct cRGB {
   uint8_t r, g, b;
 };
 
 #define CRGB(r,g,b) (cRGB){b, g, r}
 
-#include "kaleidoscope/Hardware.h"
-#include "kaleidoscope/MatrixAddr.h"
+#include "kaleidoscope/hardware/ez/ErgoDox/ErgoDoxKeyScannerDescription.h"
+#include "kaleidoscope/driver/mcu/ATMega32U4.h"
+
+#include "kaleidoscope/DeviceDescription.h"
+#include "kaleidoscope/Device.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace ez {
 
-class ErgoDox : public kaleidoscope::Hardware {
+struct ErgoDoxDeviceDescription : public kaleidoscope::DeviceDescription {
+  typedef ErgoDoxKeyScannerDescription KeyScannerDescription;
+  typedef kaleidoscope::driver::mcu::ATMega32U4 MCU;
+};
+
+class ErgoDox : public kaleidoscope::Device<ErgoDoxDeviceDescription> {
  public:
   ErgoDox(void) {}
-
-  static constexpr byte matrix_columns = 6;
-  static constexpr byte matrix_rows = 14;
-  static constexpr int8_t led_count = 0;
-
-  typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
-  static constexpr int8_t numKeys() {
-    return matrix_columns * matrix_rows;
-  }
 
   void scanMatrix(void);
   void readMatrix(void);
@@ -68,29 +65,15 @@ class ErgoDox : public kaleidoscope::Hardware {
   void setup();
 
   void maskKey(KeyAddr key_addr);
-  DEPRECATED(ROW_COL_FUNC) void maskKey(byte row, byte col) {
-    maskKey(KeyAddr(row, col));
-  }
   void unMaskKey(KeyAddr key_addr);
-  DEPRECATED(ROW_COL_FUNC) void unMaskKey(byte row, byte col) {
-    unMaskKey(KeyAddr(row, col));
-  }
   bool isKeyMasked(KeyAddr key_addr);
-  DEPRECATED(ROW_COL_FUNC) bool isKeyMasked(byte row, byte col) {
-    return isKeyMasked(KeyAddr(row, col));
-  }
 
   bool isKeyswitchPressed(KeyAddr key_addr);
-  DEPRECATED(ROW_COL_FUNC) bool isKeyswitchPressed(byte row, byte col) {
-    return isKeyswitchPressed(KeyAddr(row, col));
-  }
   bool isKeyswitchPressed(uint8_t keyIndex);
   uint8_t pressedKeyswitchCount();
 
   bool wasKeyswitchPressed(KeyAddr key_addr);
-  DEPRECATED(ROW_COL_FUNC) bool wasKeyswitchPressed(byte row, byte col) {
-    return wasKeyswitchPressed(KeyAddr(row, col));
-  }
+
   bool wasKeyswitchPressed(uint8_t keyIndex);
   uint8_t previousPressedKeyswitchCount();
 
