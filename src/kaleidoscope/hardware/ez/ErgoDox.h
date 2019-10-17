@@ -43,8 +43,7 @@ struct cRGB {
 #include "kaleidoscope/hardware/ez/ErgoDox/ErgoDoxKeyScannerDescription.h"
 #include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
 #include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
-
-#include "kaleidoscope/Device.h"
+#include "kaleidoscope/hardware/avr/AVRDevice.h"
 
 namespace kaleidoscope {
 namespace hardware {
@@ -55,7 +54,7 @@ struct ErgoDoxDeviceDescription : public kaleidoscope::hardware::avr::AVRDeviceD
   typedef kaleidoscope::driver::bootloader::avr::HalfKay BootLoader;
 };
 
-class ErgoDox : public kaleidoscope::Device<ErgoDoxDeviceDescription> {
+class ErgoDox : public kaleidoscope::hardware::avr::AVRDevice<ErgoDoxDeviceDescription> {
  public:
   ErgoDox(void) {}
 
