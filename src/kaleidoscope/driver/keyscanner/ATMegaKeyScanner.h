@@ -20,8 +20,6 @@
 #include <Arduino.h>
 #include "Kaleidoscope-HIDAdaptor-KeyboardioHID.h"
 
-#include "kaleidoscope/key_events.h"
-#include "kaleidoscope/key_defs.h"
 #include "kaleidoscope/driver/BaseKeyScanner.h"
 
 #include <avr/wdt.h>
@@ -32,6 +30,9 @@ namespace keyscanner {
 
 template <typename _KeyScannerDescription>
 class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScannerDescription> {
+ private:
+  typedef ATMegaKeyScanner<_KeyScannerDescription> ThisType;
+
  public:
   void setup() {
     static_assert(
@@ -90,7 +91,7 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
         if (keyState) {
-          handleKeyswitchEvent(Key_NoKey, KeyAddr(row, col), keyState);
+          ThisType::handleKeyswitchEvent(Key_NoKey, KeyAddr(row, col), keyState);
         }
       }
       previousKeyState_[row] = keyState_[row];

@@ -36,6 +36,8 @@ class Model01;
 class Model01KeyScanner : public kaleidoscope::driver::BaseKeyScanner<Model01KeyScannerDescription> {
   friend class Model01LedDriver;
   friend class Model01;
+ private:
+  typedef Model01KeyScanner ThisType;
  public:
   static void setup();
   static void scanMatrix();

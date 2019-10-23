@@ -18,6 +18,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "kaleidoscope/key_defs.h"
 
 namespace kaleidoscope {
 namespace driver {
@@ -28,6 +29,8 @@ class BaseKeyScanner {
   BaseKeyScanner() {}
 
   typedef typename _KeyScannerDescription::KeyAddr KeyAddr;
+
+  static void handleKeyswitchEvent(Key mappedKey, KeyAddr key_addr, uint8_t keyState);
 
   void setup() {}
   void readMatrix() {}

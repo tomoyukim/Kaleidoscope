@@ -69,7 +69,7 @@ void Model01KeyScanner::actOnHalfRow(byte row, byte colState, byte colPrevState,
       uint8_t keyState = ((bitRead(colPrevState, 0) << 0) |
                           (bitRead(colState,     0) << 1));
       if (keyState)
-        handleKeyswitchEvent(Key_NoKey, KeyAddr(row, startPos - col), keyState);
+        ThisType::handleKeyswitchEvent(Key_NoKey, KeyAddr(row, startPos - col), keyState);
 
       // Throw away the data we've just used, so we can read the next column
       colState = colState >> 1;
