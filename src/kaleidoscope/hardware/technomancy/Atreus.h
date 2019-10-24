@@ -29,7 +29,7 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::technomancy::Atreus
 
-#include "kaleidoscope/hardware/technomancy/atreus/AtreusKeyScannerDescription.h"
+#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerDescription.h"
 #include "kaleidoscope/driver/keyscanner/ATMegaKeyScanner.h"
 #include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
 #include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
@@ -40,8 +40,29 @@ namespace hardware {
 namespace technomancy {
 
 struct AtreusDeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef AtreusKeyScannerDescription KeyScannerDescription;
-  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<AtreusKeyScannerDescription> KeyScanner;
+  typedef struct AtreusKeyScannerDescription : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerDescription {
+#ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR
+    ATMEGA_KEYSCANNER_DESCRIPTION(
+      ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D3, PIN_D2}),
+      COL_PIN_LIST({PIN_D7, PIN_C6, PIN_B5, PIN_B4, PIN_E6, PIN_D4, PIN_B6, PIN_F6, PIN_F7, PIN_D6, PIN_B7})
+    );
+#endif
+
+#ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR_DOWN
+    ATMEGA_KEYSCANNER_DESCRIPTION(
+      ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D3, PIN_D2}),
+      COL_PIN_LIST({PIN_B7, PIN_D6, PIN_F7, PIN_F6, PIN_B6, PIN_D4, PIN_E6, PIN_B4, PIN_B5, PIN_C6, PIN_D7})
+    );
+#endif
+
+#ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_LEGACY_TEENSY2
+    ATMEGA_KEYSCANNER_DESCRIPTION(
+      ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D2, PIN_D3}),
+      COL_PIN_LIST({PIN_F6, PIN_F5, PIN_F4, PIN_B7, PIN_B6, PIN_B5, PIN_B4, PIN_B3, PIN_B2, PIN_B1, PIN_B0})
+    );
+#endif
+  } KeyScannerDescription;
+  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerDescription> KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::HalfKay BootLoader;
 };
 
