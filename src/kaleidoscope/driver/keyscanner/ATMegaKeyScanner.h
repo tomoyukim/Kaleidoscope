@@ -91,7 +91,7 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
         if (keyState) {
-          ThisType::handleKeyswitchEvent(Key_NoKey, KeyAddr(row, col), keyState);
+          ThisType::handleKeyswitchEvent(Key_NoKey, typename _KeyScannerDescription::KeyAddr(row, col), keyState);
         }
       }
       previousKeyState_[row] = keyState_[row];
@@ -106,7 +106,7 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
     }
     return count;
   }
-  bool isKeyswitchPressed(KeyAddr key_addr) {
+  bool isKeyswitchPressed(typename _KeyScannerDescription::KeyAddr key_addr) {
     return (bitRead(keyState_[key_addr.row()],
                     key_addr.col()) != 0);
   }
@@ -119,24 +119,24 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
     }
     return count;
   }
-  bool wasKeyswitchPressed(KeyAddr key_addr) {
+  bool wasKeyswitchPressed(typename _KeyScannerDescription::KeyAddr key_addr) {
     return (bitRead(previousKeyState_[key_addr.row()],
                     key_addr.col()) != 0);
   }
 
-  void maskKey(KeyAddr key_addr) {
+  void maskKey(typename _KeyScannerDescription::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return;
 
     bitWrite(masks_[key_addr.row()], key_addr.col(), 1);
   }
-  void unMaskKey(KeyAddr key_addr) {
+  void unMaskKey(typename _KeyScannerDescription::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return;
 
     bitWrite(masks_[key_addr.row()], key_addr.col(), 0);
   }
-  bool isKeyMasked(KeyAddr key_addr) {
+  bool isKeyMasked(typename _KeyScannerDescription::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return false;
 
