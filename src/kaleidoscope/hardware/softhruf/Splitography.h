@@ -31,8 +31,7 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::softhruf::Splitography
 
-#include "kaleidoscope/hardware/softhruf/splitography/SplitographyKeyScannerDescription.h"
-
+#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerDescription.h"
 #include "kaleidoscope/driver/keyscanner/ATMegaKeyScanner.h"
 #include "kaleidoscope/driver/bootloader/avr/FLIP.h"
 #include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
@@ -43,8 +42,13 @@ namespace hardware {
 namespace softhruf {
 
 struct SplitographyDeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef SplitographyKeyScannerDescription KeyScannerDescription;
-  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<SplitographyKeyScannerDescription> KeyScanner;
+  typedef struct SplitographyKeyScannerDescription : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerDescription {
+    ATMEGA_KEYSCANNER_DESCRIPTION(
+      ROW_PIN_LIST({ PIN_D0, PIN_D1, PIN_D2, PIN_D3 }),
+      COL_PIN_LIST({ PIN_F0, PIN_F1, PIN_F4, PIN_F5, PIN_F6, PIN_F7, PIN_C7, PIN_C6, PIN_B6, PIN_B5, PIN_B4, PIN_D7 })
+    );
+  } KeyScannerDescription;
+  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerDescription> KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::FLIP BootLoader;
 };
 
