@@ -42,7 +42,7 @@ class BaseLedDriver {
     };
     return c;
   }
-  typename _LedDriverDescription::LedCountType getLedIndex(KeyAddr key_addr) {
+  typename _LedDriverDescription::LedCountType getLedIndex(uint8_t key_offset) {
     return -1;
   }
 };

@@ -37,7 +37,7 @@ class Model01LedDriver : public kaleidoscope::driver::BaseLedDriver<Model01LedDr
   static void setCrgbAt(int8_t i, cRGB crgb);
   static cRGB getCrgbAt(int8_t i);
 
-  static int8_t getLedIndex(KeyAddr key_addr);
+  static int8_t getLedIndex(uint8_t key_offset);
 
   static void enableHighPowerLeds();
   static boolean ledPowerFault();

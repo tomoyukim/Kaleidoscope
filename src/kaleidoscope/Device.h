@@ -176,7 +176,7 @@ class Device {
   * LEDs there.
   */
   int8_t getLedIndex(KeyAddr key_addr) {
-    return leds_.getLedIndex(key_addr);
+    return leds_.getLedIndex(key_addr.toInt());
   }
   /**
    * Returns the index of the LED at a given row & column.

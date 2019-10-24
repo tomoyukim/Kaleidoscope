@@ -72,8 +72,8 @@ void Model01LedDriver::setCrgbAt(int8_t i, cRGB crgb) {
   }
 }
 
-int8_t Model01LedDriver::getLedIndex(KeyAddr key_addr) {
-  return pgm_read_byte(&(key_led_map[key_addr.toInt()]));
+int8_t Model01LedDriver::getLedIndex(uint8_t key_offset) {
+  return pgm_read_byte(&(key_led_map[key_offset]));
 }
 
 cRGB Model01LedDriver::getCrgbAt(int8_t i) {
