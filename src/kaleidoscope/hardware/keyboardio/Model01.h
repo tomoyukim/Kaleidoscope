@@ -107,8 +107,8 @@ class Model01KeyScanner : public kaleidoscope::driver::BaseKeyScanner<Model01Key
 };
 
 struct Model01DeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef Model01LedDriverDescription  LEDsDescription;
-  typedef Model01LedDriver LEDs;
+  typedef Model01LedDriverDescription  LEDDriverDescription;
+  typedef Model01LedDriver LEDDriver;
   typedef Model01KeyScannerDescription KeyScannerDescription;
   typedef Model01KeyScanner KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;

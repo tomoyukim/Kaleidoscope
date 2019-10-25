@@ -285,7 +285,7 @@ uint8_t Model01KeyScanner::previousPressedKeyswitchCount() {
 
 void Model01::setup() {
   KeyScanner::setup();
-  LEDs::setup();
+  LEDDriver::setup();
 
   TWBR = 12; // This is 400mhz, which is the fastest we can drive the ATTiny
 }
