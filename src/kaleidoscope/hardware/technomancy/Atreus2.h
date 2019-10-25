@@ -78,6 +78,4 @@ class Atreus2: public kaleidoscope::hardware::avr::AVRDevice<Atreus2DeviceDescri
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::technomancy::Atreus2 &Atreus2;
-
 #endif

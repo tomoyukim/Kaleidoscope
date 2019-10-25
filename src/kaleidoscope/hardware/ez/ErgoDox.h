@@ -140,6 +140,4 @@ class ErgoDox : public kaleidoscope::hardware::avr::AVRDevice<ErgoDoxDeviceDescr
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::ez::ErgoDox &ErgoDox;
-
 #endif
