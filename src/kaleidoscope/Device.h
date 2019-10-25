@@ -70,14 +70,15 @@ class Device {
   typedef typename _DeviceDescription::KeyScanner KeyScanner;
   typedef typename _DeviceDescription::KeyScannerDescription KeyScannerDescription;
   typedef typename _DeviceDescription::KeyScannerDescription::KeyAddr KeyAddr;
-  typedef typename _DeviceDescription::LEDs LEDs;
+  typedef typename _DeviceDescription::LEDDriverDescription LEDDriverDescription;
+  typedef typename _DeviceDescription::LEDDriver LEDDriver;
   typedef typename _DeviceDescription::MCU MCU;
   typedef typename _DeviceDescription::BootLoader BootLoader;
   typedef typename _DeviceDescription::Storage Storage;
 
-  static constexpr uint8_t matrix_rows = _DeviceDescription::KeyScannerDescription::matrix_rows;
-  static constexpr uint8_t matrix_columns = _DeviceDescription::KeyScannerDescription::matrix_columns;
-  static constexpr typename _DeviceDescription::LEDs::LedCountType led_count = _DeviceDescription::LEDs::led_count;
+  static constexpr uint8_t matrix_rows = KeyScannerDescription::matrix_rows;
+  static constexpr uint8_t matrix_columns = KeyScannerDescription::matrix_columns;
+  static constexpr typename LEDDriverDescription::LedCountType led_count = LEDDriverDescription::led_count;
 
   /**
    * @returns the number of keys on the keyboard.
@@ -109,7 +110,7 @@ class Device {
    * changes made before this call are reflected on the device.
    */
   void syncLeds(void) {
-    leds_.syncLeds();
+    led_driver_.syncLeds();
   }
   /**
    * Set the color of a per-key LED at a given row and column.
@@ -146,7 +147,7 @@ class Device {
    * @param color is the color to set it to.
    */
   void setCrgbAt(uint8_t i, cRGB color) {
-    leds_.setCrgbAt(i, color);
+    led_driver_.setCrgbAt(i, color);
   }
   /**
    * Returns the color of the LED at a given index.
@@ -156,7 +157,7 @@ class Device {
    * @returns The color at the given position.
    */
   cRGB getCrgbAt(uint8_t i) {
-    return leds_.getCrgbAt(i);
+    return led_driver_.getCrgbAt(i);
   }
   /**
    * Returns the color of the LED at a given index.
@@ -177,7 +178,7 @@ class Device {
   * LEDs there.
   */
   int8_t getLedIndex(KeyAddr key_addr) {
-    return leds_.getLedIndex(key_addr.toInt());
+    return led_driver_.getLedIndex(key_addr.toInt());
   }
   /**
    * Returns the index of the LED at a given row & column.
@@ -189,7 +190,7 @@ class Device {
    * LEDs there.
    */
   DEPRECATED(ROW_COL_FUNC) int8_t getLedIndex(uint8_t row, byte col) {
-    return leds_.getLedIndex(KeyAddr(row, col));
+    return led_driver_.getLedIndex(KeyAddr(row, col));
   }
   /** @} */
 
@@ -444,7 +445,7 @@ class Device {
    */
   void setup() {
     key_scanner_.setup();
-    leds_.setup();
+    led_driver_.setup();
     mcu_.setup();
   }
 
@@ -477,7 +478,7 @@ class Device {
 
  protected:
   KeyScanner key_scanner_;
-  LEDs leds_;
+  LEDDriver led_driver_;
   MCU mcu_;
   BootLoader bootloader_;
   Storage storage_;

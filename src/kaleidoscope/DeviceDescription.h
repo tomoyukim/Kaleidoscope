@@ -28,8 +28,8 @@ namespace kaleidoscope {
 struct DeviceDescription {
   typedef kaleidoscope::driver::keyscanner::NoKeyScannerDescription KeyScannerDescription;
   typedef kaleidoscope::driver::keyscanner::None KeyScanner;
-  typedef kaleidoscope::driver::led::NoLedDriverDescription LEDsDescription;
-  typedef kaleidoscope::driver::led::None LEDs;
+  typedef kaleidoscope::driver::led::NoLedDriverDescription LEDDriverDescription;
+  typedef kaleidoscope::driver::led::None LEDDriver;
   typedef kaleidoscope::driver::mcu::None MCU;
   typedef kaleidoscope::driver::bootloader::None BootLoader;
   typedef kaleidoscope::driver::storage::NoStorageDescription StorageDescription;

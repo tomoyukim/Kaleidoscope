@@ -30,9 +30,6 @@ class BaseLedDriver {
  public:
   BaseLedDriver() {}
 
-  static constexpr typename _LedDriverDescription::LedCountType led_count = _LedDriverDescription::led_count;
-  typedef typename _LedDriverDescription::LedCountType LedCountType;
-
   void setup() {}
   void syncLeds(void) {}
   void setCrgbAt(typename _LedDriverDescription::LedCountType i, cRGB color) {}
