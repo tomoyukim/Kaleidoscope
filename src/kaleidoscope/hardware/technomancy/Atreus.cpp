@@ -29,17 +29,7 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-namespace kaleidoscope {
-namespace hardware {
-namespace technomancy {
-
-ATMEGA_KEYSCANNER_DATA(kaleidoscope::hardware::technomancy::AtreusDeviceDescription::KeyScanner);
-
-}
-}
-}
-
+ATMEGA_KEYSCANNER_DATA(technomancy::Atreus);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
-kaleidoscope::hardware::technomancy::Atreus &Atreus = KeyboardHardware;
 
 #endif

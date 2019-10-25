@@ -20,17 +20,7 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-namespace kaleidoscope {
-namespace hardware {
-namespace olkb {
-
-ATMEGA_KEYSCANNER_DATA(kaleidoscope::hardware::olkb::PlanckDeviceDescription::KeyScanner);
-
-}
-}
-}
-
+ATMEGA_KEYSCANNER_DATA(olkb::Planck);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
-kaleidoscope::hardware::olkb::Planck &Planck = KeyboardHardware;
 
 #endif

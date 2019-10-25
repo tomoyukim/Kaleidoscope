@@ -70,6 +70,4 @@ class KBD4x: public kaleidoscope::hardware::avr::AVRDevice<KBD4xDeviceDescriptio
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::kbdfans::KBD4x &KBD4x;
-
 #endif

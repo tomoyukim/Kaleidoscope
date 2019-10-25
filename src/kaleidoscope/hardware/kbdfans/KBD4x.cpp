@@ -21,17 +21,7 @@
 #include <avr/wdt.h>
 #include <avr/boot.h>
 
-namespace kaleidoscope {
-namespace hardware {
-namespace kbdfans {
-
-ATMEGA_KEYSCANNER_DATA(kaleidoscope::hardware::kbdfans::KBD4xDeviceDescription::KeyScanner);
-
-}
-}
-}
-
+ATMEGA_KEYSCANNER_DATA(kbdfans::KBD4x);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
-kaleidoscope::hardware::kbdfans::KBD4x &KBD4x = KeyboardHardware;
 
 #endif

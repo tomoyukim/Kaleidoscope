@@ -36,18 +36,20 @@
   constexpr uint8_t BOARD::matrix_row_pins[matrix_rows];    \
   constexpr uint8_t BOARD::matrix_col_pins[matrix_columns];
 
-#define _SD(BOARD) \
-  BOARD::KeyScannerDescription_
+#define __SD(BOARD) \
+  kaleidoscope::hardware::BOARD::KeyScannerDescription
+#define __KS(BOARD) \
+  kaleidoscope::hardware::BOARD::KeyScanner
 #define ATMEGA_KEYSCANNER_DATA(BOARD)                                                      \
-  ATMEGA_KEYSCANNER_DESCRIPTION_DATA(BOARD ## Description)                                 \
+  ATMEGA_KEYSCANNER_DESCRIPTION_DATA(kaleidoscope::hardware::BOARD::KeyScannerDescription) \
   template<>                                                                               \
-  volatile uint16_t BOARD::previousKeyState_[_SD(BOARD)::matrix_rows] = {}; \
+  volatile uint16_t __KS(BOARD)::previousKeyState_[__SD(BOARD)::matrix_rows] = {}; \
   template<>                                                                               \
-  volatile uint16_t BOARD::keyState_[_SD(BOARD)::matrix_rows] = {};     \
+  volatile uint16_t __KS(BOARD)::keyState_[__SD(BOARD)::matrix_rows] = {}; \
   template<>                                                                               \
-  uint16_t BOARD::masks_[_SD(BOARD)::matrix_rows] = {};                 \
+  uint16_t __KS(BOARD)::masks_[__SD(BOARD)::matrix_rows] = {};            \
   template<>                                                                               \
-  uint8_t BOARD::debounce_matrix_[_SD(BOARD)::matrix_rows][_SD(BOARD)::matrix_columns] = {}; \
+  uint8_t __KS(BOARD)::debounce_matrix_[__SD(BOARD)::matrix_rows][__SD(BOARD)::matrix_columns] = {}; \
                                                                                            \
   ISR(TIMER1_OVF_vect) {                                                                   \
     KeyboardHardware.readMatrix();                                                         \

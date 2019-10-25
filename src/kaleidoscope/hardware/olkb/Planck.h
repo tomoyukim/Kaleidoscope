@@ -66,6 +66,4 @@ class Planck: public kaleidoscope::hardware::avr::AVRDevice<PlanckDeviceDescript
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::olkb::Planck &Planck;
-
 #endif

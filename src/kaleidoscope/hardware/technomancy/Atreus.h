@@ -101,6 +101,4 @@ class Atreus: public kaleidoscope::hardware::avr::AVRDevice<AtreusDeviceDescript
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::technomancy::Atreus &Atreus;
-
 #endif

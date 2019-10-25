@@ -93,6 +93,4 @@ class Splitography: public kaleidoscope::hardware::avr::AVRDevice<SplitographyDe
 
 #include "kaleidoscope/hardware/key_indexes.h"
 
-extern kaleidoscope::hardware::softhruf::Splitography &Splitography;
-
 #endif
