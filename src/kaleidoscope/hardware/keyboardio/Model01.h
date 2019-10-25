@@ -27,9 +27,10 @@
 
 #define CRGB(r,g,b) (cRGB){b, g, r}
 
-#include "kaleidoscope/hardware/keyboardio/model01/Model01KeyScannerDescription.h"
-#include "kaleidoscope/hardware/keyboardio/model01/Model01KeyScanner.h"
-#include "kaleidoscope/hardware/keyboardio/model01/Model01LedDriver.h"
+#include "kaleidoscope/driver/BaseKeyScanner.h"
+#include "kaleidoscope/driver/BaseKeyScannerDescription.h"
+#include "kaleidoscope/driver/BaseLedDriver.h"
+#include "kaleidoscope/driver/BaseLedDriverDescription.h"
 #include "kaleidoscope/driver/bootloader/avr/Caterina.h"
 #include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
@@ -38,11 +39,78 @@ namespace kaleidoscope {
 namespace hardware {
 namespace keyboardio {
 
+class Model01;
+
+struct Model01LedDriverDescription : public kaleidoscope::driver::BaseLedDriverDescription {
+  static constexpr LedCountType led_count = 64;
+};
+
+class Model01LedDriver : public kaleidoscope::driver::BaseLedDriver<Model01LedDriverDescription> {
+ public:
+  static void setup();
+  static void syncLeds();
+  static void setCrgbAt(int8_t i, cRGB crgb);
+  static cRGB getCrgbAt(int8_t i);
+
+  static int8_t getLedIndex(uint8_t key_offset);
+
+  static void enableHighPowerLeds();
+  static boolean ledPowerFault();
+
+ private:
+  static bool isLEDChanged;
+};
+
+struct Model01KeyScannerDescription : public kaleidoscope::driver::BaseKeyScannerDescription {
+  KEYSCANNER_DESCRIPTION(4, 16);
+};
+
+class Model01KeyScanner : public kaleidoscope::driver::BaseKeyScanner<Model01KeyScannerDescription> {
+  friend class Model01LedDriver;
+  friend class Model01;
+ private:
+  typedef Model01KeyScanner ThisType;
+ public:
+  static void setup();
+  static void scanMatrix();
+  static void readMatrix();
+  static void actOnMatrixScan();
+
+  static void maskKey(KeyAddr key_addr);
+  static void unMaskKey(KeyAddr key_addr);
+  static bool isKeyMasked(KeyAddr key_addr);
+  static void maskHeldKeys();
+
+  static bool isKeyswitchPressed(KeyAddr key_addr);
+  static uint8_t pressedKeyswitchCount();
+
+  static bool wasKeyswitchPressed(KeyAddr key_addr);
+  static uint8_t previousPressedKeyswitchCount();
+
+  static void setKeyscanInterval(uint8_t interval);
+
+ protected:
+
+  static keydata_t leftHandState;
+  static keydata_t rightHandState;
+  static keydata_t previousLeftHandState;
+  static keydata_t previousRightHandState;
+
+  static KeyboardioScanner leftHand;
+  static KeyboardioScanner rightHand;
+
+  static keydata_t leftHandMask;
+  static keydata_t rightHandMask;
+
+  static void actOnHalfRow(byte row, byte colState, byte colPrevState, byte startPos);
+  static void enableScannerPower();
+};
+
 struct Model01DeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
+  typedef Model01LedDriverDescription  LEDsDescription;
+  typedef Model01LedDriver LEDs;
   typedef Model01KeyScannerDescription KeyScannerDescription;
   typedef Model01KeyScanner KeyScanner;
-  typedef Model01LedDriverDescription LEDsDescription;
-  typedef Model01LedDriver LEDs;
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;
 };
 
