@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseKeyScannerDescription -- KeyScannerDescription base class
+ * BaseKeyScannerBlueprint -- KeyScannerBlueprint base class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -20,19 +20,19 @@
 #include <Arduino.h>
 #include "kaleidoscope/MatrixAddr.h"
 
-#define KEYSCANNER_DESCRIPTION(ROWS_, COLS_)                   \
+#define KEYSCANNER_BLUEPRINT(ROWS_, COLS_)                  \
   static constexpr uint8_t matrix_rows = ROWS_;             \
   static constexpr uint8_t matrix_columns = COLS_;          \
   typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
 
-#define KEYSCANNER_DESCRIPTION_DATA(BOARD)                     \
+#define KEYSCANNER_BLUEPRINT_IMPLEMENTATION(BOARD)           \
   const uint8_t BOARD::matrix_rows;                          \
   const uint8_t BOARD::matrix_columns;
 
 namespace kaleidoscope {
 namespace driver {
 
-struct BaseKeyScannerDescription {
+struct BaseKeyScannerBlueprint {
   static constexpr uint8_t matrix_rows = 0;
   static constexpr uint8_t matrix_columns = 0;
 

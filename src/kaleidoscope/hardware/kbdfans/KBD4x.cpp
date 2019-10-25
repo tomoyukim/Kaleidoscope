@@ -21,7 +21,7 @@
 #include <avr/wdt.h>
 #include <avr/boot.h>
 
-ATMEGA_KEYSCANNER_DATA(kbdfans::KBD4x);
+ATMEGA_KEYSCANNER_IMPLEMENTATION(kbdfans::KBD4x);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

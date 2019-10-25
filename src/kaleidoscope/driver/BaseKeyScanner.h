@@ -18,17 +18,19 @@
 #pragma once
 
 #include <Arduino.h>
+
 #include "kaleidoscope/key_defs.h"
+#include "kaleidoscope/driver/BaseKeyScannerBlueprint.h"
 
 namespace kaleidoscope {
 namespace driver {
 
-template <typename _KeyScannerDescription>
+template <typename _KeyScannerBlueprint>
 class BaseKeyScanner {
  public:
   BaseKeyScanner() {}
 
-  typedef typename _KeyScannerDescription::KeyAddr KeyAddr;
+  typedef typename _KeyScannerBlueprint::KeyAddr KeyAddr;
 
   static void handleKeyswitchEvent(Key mappedKey, KeyAddr key_addr, uint8_t keyState);
 

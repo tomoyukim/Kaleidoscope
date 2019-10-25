@@ -27,7 +27,7 @@ namespace hardware {
 namespace keyboardio {
 
 /********* LED Driver *********/
-bool Model01LedDriver::isLEDChanged = true;
+bool Model01LEDDriver::isLEDChanged = true;
 
 static constexpr int8_t key_led_map[Model01::led_count] PROGMEM = {
   3, 4, 11, 12, 19, 20, 26, 27,     36, 37, 43, 44, 51, 52, 59, 60,
@@ -36,7 +36,7 @@ static constexpr int8_t key_led_map[Model01::led_count] PROGMEM = {
   0, 7, 8, 15, 16, 23, 31, 30,     33, 32, 40, 47, 48, 55, 56, 63,
 };
 
-void Model01LedDriver::enableHighPowerLeds(void) {
+void Model01LEDDriver::enableHighPowerLeds(void) {
   // This lets the keyboard pull up to 1.6 amps from the host.
   // That violates the USB spec. But it sure is pretty looking
   DDRE |= _BV(6);
@@ -47,13 +47,13 @@ void Model01LedDriver::enableHighPowerLeds(void) {
   PORTB &= ~_BV(4);	// set bit, enable pull-up resistor
 }
 
-void Model01LedDriver::setup() {
+void Model01LEDDriver::setup() {
   // TODO: Consider not doing this until 30s after keyboard
   // boot up, to make it easier to rescue things in case of power draw issues.
   enableHighPowerLeds();
 }
 
-void Model01LedDriver::setCrgbAt(int8_t i, cRGB crgb) {
+void Model01LEDDriver::setCrgbAt(int8_t i, cRGB crgb) {
   if (i < 0) {
     return;
   }
@@ -74,11 +74,11 @@ void Model01LedDriver::setCrgbAt(int8_t i, cRGB crgb) {
   }
 }
 
-int8_t Model01LedDriver::getLedIndex(uint8_t key_offset) {
+int8_t Model01LEDDriver::getLedIndex(uint8_t key_offset) {
   return pgm_read_byte(&(key_led_map[key_offset]));
 }
 
-cRGB Model01LedDriver::getCrgbAt(int8_t i) {
+cRGB Model01LEDDriver::getCrgbAt(int8_t i) {
   if (i < 0 || i >= 64)
     return {0, 0, 0};
 
@@ -89,7 +89,7 @@ cRGB Model01LedDriver::getCrgbAt(int8_t i) {
   }
 }
 
-void Model01LedDriver::syncLeds() {
+void Model01LEDDriver::syncLeds() {
   if (!isLEDChanged)
     return;
 
@@ -114,7 +114,7 @@ void Model01LedDriver::syncLeds() {
   isLEDChanged = false;
 }
 
-boolean Model01LedDriver::ledPowerFault() {
+boolean Model01LEDDriver::ledPowerFault() {
   if (PINB & _BV(4)) {
     return true;
   } else {

@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * hardware::avr::AVRDeviceDescription -- Generic AVR device description base class
+ * hardware::avr::AVRDeviceBlueprint -- Generic AVR device blueprint base class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,16 +20,16 @@
 #include "kaleidoscope/driver/mcu/ATMega32U4.h"
 #include "kaleidoscope/driver/storage/AVREEPROM.h"
 
-#include "kaleidoscope/DeviceDescription.h"
+#include "kaleidoscope/DeviceBlueprint.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace avr {
 
-struct AVRDeviceDescription : kaleidoscope::DeviceDescription {
+struct AVRDeviceBlueprint : kaleidoscope::DeviceBlueprint {
   typedef kaleidoscope::driver::mcu::ATMega32U4 MCU;
-  typedef kaleidoscope::driver::storage::AVREEPROMStorageDescription StorageDescription;
-  typedef kaleidoscope::driver::storage::AVREEPROM<StorageDescription> Storage;
+  typedef kaleidoscope::driver::storage::AVREEPROMStorageBlueprint StorageBlueprint;
+  typedef kaleidoscope::driver::storage::AVREEPROM<StorageBlueprint> Storage;
 };
 
 }

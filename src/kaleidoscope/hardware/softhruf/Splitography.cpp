@@ -27,7 +27,7 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-ATMEGA_KEYSCANNER_DATA(softhruf::Splitography);
+ATMEGA_KEYSCANNER_IMPLEMENTATION(softhruf::Splitography);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

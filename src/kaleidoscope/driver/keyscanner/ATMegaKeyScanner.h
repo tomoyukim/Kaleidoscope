@@ -21,6 +21,7 @@
 #include "Kaleidoscope-HIDAdaptor-KeyboardioHID.h"
 
 #include "kaleidoscope/driver/BaseKeyScanner.h"
+#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerBlueprint.h"
 
 #include <avr/wdt.h>
 
@@ -28,32 +29,32 @@ namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
-template <typename _KeyScannerDescription>
-class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScannerDescription> {
+template <typename _KeyScannerBlueprint>
+class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScannerBlueprint> {
  private:
-  typedef ATMegaKeyScanner<_KeyScannerDescription> ThisType;
+  typedef ATMegaKeyScanner<_KeyScannerBlueprint> ThisType;
 
  public:
   void setup() {
     static_assert(
-      sizeof(_KeyScannerDescription::matrix_row_pins) > 0,
+      sizeof(_KeyScannerBlueprint::matrix_row_pins) > 0,
       "The key scanner description has an empty array of matrix row pins."
     );
     static_assert(
-      sizeof(_KeyScannerDescription::matrix_col_pins) > 0,
+      sizeof(_KeyScannerBlueprint::matrix_col_pins) > 0,
       "The key scanner description has an empty array of matrix column pins."
     );
 
     wdt_disable();
 
-    for (uint8_t i = 0; i < _KeyScannerDescription::matrix_columns; i++) {
-      DDR_INPUT(_KeyScannerDescription::matrix_col_pins[i]);
-      ENABLE_PULLUP(_KeyScannerDescription::matrix_col_pins[i]);
+    for (uint8_t i = 0; i < _KeyScannerBlueprint::matrix_columns; i++) {
+      DDR_INPUT(_KeyScannerBlueprint::matrix_col_pins[i]);
+      ENABLE_PULLUP(_KeyScannerBlueprint::matrix_col_pins[i]);
     }
 
-    for (uint8_t i = 0; i < _KeyScannerDescription::matrix_rows; i++) {
-      DDR_OUTPUT(_KeyScannerDescription::matrix_row_pins[i]);
-      OUTPUT_HIGH(_KeyScannerDescription::matrix_row_pins[i]);
+    for (uint8_t i = 0; i < _KeyScannerBlueprint::matrix_rows; i++) {
+      DDR_OUTPUT(_KeyScannerBlueprint::matrix_row_pins[i]);
+      OUTPUT_HIGH(_KeyScannerBlueprint::matrix_row_pins[i]);
     }
 
     /* Set up Timer1 for 1700usec */
@@ -68,14 +69,14 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   }
 
   void __attribute__((optimize(3))) readMatrix(void) {
-    for (uint8_t current_row = 0; current_row < _KeyScannerDescription::matrix_rows; current_row++) {
+    for (uint8_t current_row = 0; current_row < _KeyScannerBlueprint::matrix_rows; current_row++) {
       uint16_t mask, cols;
 
       mask = debounceMaskForRow(current_row);
 
-      OUTPUT_TOGGLE(_KeyScannerDescription::matrix_row_pins[current_row]);
+      OUTPUT_TOGGLE(_KeyScannerBlueprint::matrix_row_pins[current_row]);
       cols = (readCols() & mask) | (keyState_[current_row] & ~mask);
-      OUTPUT_TOGGLE(_KeyScannerDescription::matrix_row_pins[current_row]);
+      OUTPUT_TOGGLE(_KeyScannerBlueprint::matrix_row_pins[current_row]);
       debounceRow(cols ^ keyState_[current_row], current_row);
       keyState_[current_row] = cols;
     }
@@ -86,12 +87,12 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
-    for (byte row = 0; row < _KeyScannerDescription::matrix_rows; row++) {
-      for (byte col = 0; col < _KeyScannerDescription::matrix_columns; col++) {
+    for (byte row = 0; row < _KeyScannerBlueprint::matrix_rows; row++) {
+      for (byte col = 0; col < _KeyScannerBlueprint::matrix_columns; col++) {
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
         if (keyState) {
-          ThisType::handleKeyswitchEvent(Key_NoKey, typename _KeyScannerDescription::KeyAddr(row, col), keyState);
+          ThisType::handleKeyswitchEvent(Key_NoKey, typename _KeyScannerBlueprint::KeyAddr(row, col), keyState);
         }
       }
       previousKeyState_[row] = keyState_[row];
@@ -101,12 +102,12 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   uint8_t pressedKeyswitchCount() {
     uint8_t count = 0;
 
-    for (int8_t r = 0; r < _KeyScannerDescription::matrix_rows; r++) {
+    for (int8_t r = 0; r < _KeyScannerBlueprint::matrix_rows; r++) {
       count += __builtin_popcount(keyState_[r]);
     }
     return count;
   }
-  bool isKeyswitchPressed(typename _KeyScannerDescription::KeyAddr key_addr) {
+  bool isKeyswitchPressed(typename _KeyScannerBlueprint::KeyAddr key_addr) {
     return (bitRead(keyState_[key_addr.row()],
                     key_addr.col()) != 0);
   }
@@ -114,29 +115,29 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   uint8_t previousPressedKeyswitchCount() {
     uint8_t count = 0;
 
-    for (int8_t r = 0; r < _KeyScannerDescription::matrix_rows; r++) {
+    for (int8_t r = 0; r < _KeyScannerBlueprint::matrix_rows; r++) {
       count += __builtin_popcount(previousKeyState_[r]);
     }
     return count;
   }
-  bool wasKeyswitchPressed(typename _KeyScannerDescription::KeyAddr key_addr) {
+  bool wasKeyswitchPressed(typename _KeyScannerBlueprint::KeyAddr key_addr) {
     return (bitRead(previousKeyState_[key_addr.row()],
                     key_addr.col()) != 0);
   }
 
-  void maskKey(typename _KeyScannerDescription::KeyAddr key_addr) {
+  void maskKey(typename _KeyScannerBlueprint::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return;
 
     bitWrite(masks_[key_addr.row()], key_addr.col(), 1);
   }
-  void unMaskKey(typename _KeyScannerDescription::KeyAddr key_addr) {
+  void unMaskKey(typename _KeyScannerBlueprint::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return;
 
     bitWrite(masks_[key_addr.row()], key_addr.col(), 0);
   }
-  bool isKeyMasked(typename _KeyScannerDescription::KeyAddr key_addr) {
+  bool isKeyMasked(typename _KeyScannerBlueprint::KeyAddr key_addr) {
     if (!key_addr.isValid())
       return false;
 
@@ -145,11 +146,11 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   }
 
  private:
-  typedef _KeyScannerDescription KeyScannerDescription_;
-  static volatile uint16_t previousKeyState_[_KeyScannerDescription::matrix_rows];
-  static volatile uint16_t keyState_[_KeyScannerDescription::matrix_rows];
-  static uint16_t masks_[_KeyScannerDescription::matrix_rows];
-  static uint8_t debounce_matrix_[_KeyScannerDescription::matrix_rows][_KeyScannerDescription::matrix_columns];
+  typedef _KeyScannerBlueprint KeyScannerBlueprint_;
+  static volatile uint16_t previousKeyState_[_KeyScannerBlueprint::matrix_rows];
+  static volatile uint16_t keyState_[_KeyScannerBlueprint::matrix_rows];
+  static uint16_t masks_[_KeyScannerBlueprint::matrix_rows];
+  static uint8_t debounce_matrix_[_KeyScannerBlueprint::matrix_rows][_KeyScannerBlueprint::matrix_columns];
 
   /*
    * This function has loop unrolling disabled on purpose: we want to give the
@@ -167,9 +168,9 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   __attribute__((optimize("no-unroll-loops")))
   uint16_t readCols() {
     uint16_t results = 0x00 ;
-    for (uint8_t i = 0; i < _KeyScannerDescription::matrix_columns; i++) {
+    for (uint8_t i = 0; i < _KeyScannerBlueprint::matrix_columns; i++) {
       asm("NOP"); // We need to pause a beat before reading or we may read before the pin is hot
-      results |= (!READ_PIN(_KeyScannerDescription::matrix_col_pins[i]) << i);
+      results |= (!READ_PIN(_KeyScannerBlueprint::matrix_col_pins[i]) << i);
     }
     return results;
   }
@@ -177,7 +178,7 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   uint16_t debounceMaskForRow(uint8_t row) {
     uint16_t result = 0;
 
-    for (uint16_t c = 0; c < _KeyScannerDescription::matrix_columns; ++c) {
+    for (uint16_t c = 0; c < _KeyScannerBlueprint::matrix_columns; ++c) {
       if (debounce_matrix_[row][c]) {
         --debounce_matrix_[row][c];
       } else {
@@ -188,9 +189,9 @@ class ATMegaKeyScanner : public kaleidoscope::driver::BaseKeyScanner<_KeyScanner
   }
 
   void debounceRow(uint16_t change, uint8_t row) {
-    for (uint16_t i = 0; i < _KeyScannerDescription::matrix_columns; ++i) {
+    for (uint16_t i = 0; i < _KeyScannerBlueprint::matrix_columns; ++i) {
       if (change & _BV(i)) {
-        debounce_matrix_[row][i] = _KeyScannerDescription::debounce;
+        debounce_matrix_[row][i] = _KeyScannerBlueprint::debounce;
       }
     }
   }

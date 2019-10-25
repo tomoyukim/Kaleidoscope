@@ -23,28 +23,26 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::technomancy::Atreus2
 
-#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerDescription.h"
 #include "kaleidoscope/driver/keyscanner/ATMegaKeyScanner.h"
 #include "kaleidoscope/driver/bootloader/avr/Caterina.h"
-#include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace technomancy {
 
-struct Atreus2DeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef struct Atreus2KeyScannerDescription : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerDescription {
-    ATMEGA_KEYSCANNER_DESCRIPTION(
+struct Atreus2DeviceBlueprint : kaleidoscope::hardware::avr::AVRDeviceBlueprint {
+  typedef struct Atreus2KeyScannerBlueprint : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerBlueprint {
+    ATMEGA_KEYSCANNER_BLUEPRINT(
       ROW_PIN_LIST({PIN_F6, PIN_F5, PIN_F4, PIN_F1}),
       COL_PIN_LIST({PIN_F7, PIN_E2, PIN_C7, PIN_C6, PIN_B6, PIN_B5, PIN_D7, PIN_D6, PIN_D4, PIN_D5, PIN_D3, PIN_D2})
     );
-  } KeyScannerDescription;
-  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerDescription> KeyScanner;
+  } KeyScannerBlueprint;
+  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerBlueprint> KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;
 };
 
-class Atreus2: public kaleidoscope::hardware::avr::AVRDevice<Atreus2DeviceDescription> {};
+class Atreus2: public kaleidoscope::hardware::avr::AVRDevice<Atreus2DeviceBlueprint> {};
 
 #define PER_KEY_DATA(dflt,                                                    \
     R0C0, R0C1, R0C2, R0C3, R0C4,             R0C7, R0C8, R0C9, R0C10, R0C11, \

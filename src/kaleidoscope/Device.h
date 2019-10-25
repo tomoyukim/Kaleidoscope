@@ -25,6 +25,8 @@
 #include "kaleidoscope_internal/deprecations.h"
 #include "kaleidoscope/macro_helpers.h"
 
+#include "kaleidoscope/DeviceBlueprint.h"
+
 #ifndef CRGB
 #error cRGB and CRGB *must* be defined before including this header!
 #endif
@@ -53,7 +55,7 @@ namespace kaleidoscope {
  * Essential methods all hardware libraries must implement.
  */
 
-template<typename _DeviceDescription>
+template<typename _DeviceBlueprint>
 class Device {
  private:
   class DummySerial {
@@ -65,20 +67,20 @@ class Device {
 
  public:
 
-  typedef _DeviceDescription Description;
+  typedef _DeviceBlueprint Blueprint;
 
-  typedef typename _DeviceDescription::KeyScanner KeyScanner;
-  typedef typename _DeviceDescription::KeyScannerDescription KeyScannerDescription;
-  typedef typename _DeviceDescription::KeyScannerDescription::KeyAddr KeyAddr;
-  typedef typename _DeviceDescription::LEDDriverDescription LEDDriverDescription;
-  typedef typename _DeviceDescription::LEDDriver LEDDriver;
-  typedef typename _DeviceDescription::MCU MCU;
-  typedef typename _DeviceDescription::BootLoader BootLoader;
-  typedef typename _DeviceDescription::Storage Storage;
+  typedef typename _DeviceBlueprint::KeyScanner KeyScanner;
+  typedef typename _DeviceBlueprint::KeyScannerBlueprint KeyScannerBlueprint;
+  typedef typename _DeviceBlueprint::KeyScannerBlueprint::KeyAddr KeyAddr;
+  typedef typename _DeviceBlueprint::LEDDriverBlueprint LEDDriverBlueprint;
+  typedef typename _DeviceBlueprint::LEDDriver LEDDriver;
+  typedef typename _DeviceBlueprint::MCU MCU;
+  typedef typename _DeviceBlueprint::BootLoader BootLoader;
+  typedef typename _DeviceBlueprint::Storage Storage;
 
-  static constexpr uint8_t matrix_rows = KeyScannerDescription::matrix_rows;
-  static constexpr uint8_t matrix_columns = KeyScannerDescription::matrix_columns;
-  static constexpr typename LEDDriverDescription::LedCountType led_count = LEDDriverDescription::led_count;
+  static constexpr uint8_t matrix_rows = KeyScannerBlueprint::matrix_rows;
+  static constexpr uint8_t matrix_columns = KeyScannerBlueprint::matrix_columns;
+  static constexpr typename LEDDriverBlueprint::LEDCountType led_count = LEDDriverBlueprint::led_count;
 
   /**
    * @returns the number of keys on the keyboard.

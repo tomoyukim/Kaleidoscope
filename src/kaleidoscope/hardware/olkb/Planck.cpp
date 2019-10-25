@@ -20,7 +20,7 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-ATMEGA_KEYSCANNER_DATA(olkb::Planck);
+ATMEGA_KEYSCANNER_IMPLEMENTATION(olkb::Planck);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

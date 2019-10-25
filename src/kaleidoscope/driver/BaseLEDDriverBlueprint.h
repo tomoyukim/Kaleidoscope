@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseLedDriverDescription -- LED hardware driver description base class
+ * BaseLEDDriverBlueprint -- LED hardware driver blueprint base class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -20,9 +20,9 @@
 namespace kaleidoscope {
 namespace driver {
 
-struct BaseLedDriverDescription {
-  typedef int8_t LedCountType;
-  static constexpr LedCountType led_count = 0;
+struct BaseLEDDriverBlueprint {
+  typedef int8_t LEDCountType;
+  static constexpr LEDCountType led_count = 0;
 };
 
 }

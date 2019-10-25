@@ -29,44 +29,42 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::technomancy::Atreus
 
-#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerDescription.h"
 #include "kaleidoscope/driver/keyscanner/ATMegaKeyScanner.h"
 #include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
-#include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace technomancy {
 
-struct AtreusDeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef struct AtreusKeyScannerDescription : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerDescription {
+struct AtreusDeviceBlueprint : kaleidoscope::hardware::avr::AVRDeviceBlueprint {
+  typedef struct AtreusKeyScannerBlueprint : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerBlueprint {
 #ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR
-    ATMEGA_KEYSCANNER_DESCRIPTION(
+    ATMEGA_KEYSCANNER_BLUEPRINT(
       ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D3, PIN_D2}),
       COL_PIN_LIST({PIN_D7, PIN_C6, PIN_B5, PIN_B4, PIN_E6, PIN_D4, PIN_B6, PIN_F6, PIN_F7, PIN_D6, PIN_B7})
     );
 #endif
 
 #ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR_DOWN
-    ATMEGA_KEYSCANNER_DESCRIPTION(
+    ATMEGA_KEYSCANNER_BLUEPRINT(
       ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D3, PIN_D2}),
       COL_PIN_LIST({PIN_B7, PIN_D6, PIN_F7, PIN_F6, PIN_B6, PIN_D4, PIN_E6, PIN_B4, PIN_B5, PIN_C6, PIN_D7})
     );
 #endif
 
 #ifdef KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_LEGACY_TEENSY2
-    ATMEGA_KEYSCANNER_DESCRIPTION(
+    ATMEGA_KEYSCANNER_BLUEPRINT(
       ROW_PIN_LIST({PIN_D0, PIN_D1, PIN_D2, PIN_D3}),
       COL_PIN_LIST({PIN_F6, PIN_F5, PIN_F4, PIN_B7, PIN_B6, PIN_B5, PIN_B4, PIN_B3, PIN_B2, PIN_B1, PIN_B0})
     );
 #endif
-  } KeyScannerDescription;
-  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerDescription> KeyScanner;
+  } KeyScannerBlueprint;
+  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerBlueprint> KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::HalfKay BootLoader;
 };
 
-class Atreus: public kaleidoscope::hardware::avr::AVRDevice<AtreusDeviceDescription> {};
+class Atreus: public kaleidoscope::hardware::avr::AVRDevice<AtreusDeviceBlueprint> {};
 
 #define PER_KEY_DATA(dflt,                                                  \
     R0C0, R0C1, R0C2, R0C3, R0C4,             R0C7, R0C8, R0C9, R0C10, R0C11, \

@@ -27,22 +27,22 @@ struct cRGB {
 
 #endif
 
-#include "kaleidoscope/driver/BaseLedDriverDescription.h"
-#include "kaleidoscope/driver/BaseLedDriver.h"
+#include "kaleidoscope/driver/BaseLEDDriverBlueprint.h"
+#include "kaleidoscope/driver/BaseLEDDriver.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace led {
 
-struct NoLedDriverDescription : public kaleidoscope::driver::BaseLedDriverDescription {};
+struct NoLedDriverBlueprint : public kaleidoscope::driver::BaseLEDDriverBlueprint {};
 
 /*
- * The purpose of this class (and the accompanying Description) is to serve as a
- * default for the base `DeviceDescription` class, with a name more descriptive
- * than `BaseLedDriver`. In practice, one shouldn't use it, and should override
- * the it in the device description.
+ * The purpose of this class (and the accompanying Blueprint) is to serve as a
+ * default for the base `DeviceBlueprint` class, with a name more descriptive
+ * than `BaseLEDDriver`. In practice, one shouldn't use it, and should override
+ * the it in the device blueprint.
  */
-class None : public kaleidoscope::driver::BaseLedDriver<NoLedDriverDescription> {};
+class None : public kaleidoscope::driver::BaseLEDDriver<NoLedDriverBlueprint> {};
 
 }
 }

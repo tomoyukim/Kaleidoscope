@@ -29,7 +29,7 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-ATMEGA_KEYSCANNER_DATA(technomancy::Atreus);
+ATMEGA_KEYSCANNER_IMPLEMENTATION(technomancy::Atreus);
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

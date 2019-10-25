@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseStorageDescription -- Storage driver description base class
+ * BaseLEDDriver -- LED hardware driver base class for Kaleidoscope
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -17,11 +17,32 @@
 
 #pragma once
 
+#ifndef CRGB
+#error cRGB and CRGB *must* be defined before including this header!
+#endif
+
+#include "kaleidoscope/driver/BaseLEDDriverBlueprint.h"
+
 namespace kaleidoscope {
 namespace driver {
 
-struct BaseStorageDescription {
-  static constexpr uint16_t length = 0;
+template <typename _LEDDriverBlueprint>
+class BaseLEDDriver {
+ public:
+  BaseLEDDriver() {}
+
+  void setup() {}
+  void syncLeds(void) {}
+  void setCrgbAt(typename _LEDDriverBlueprint::LEDCountType i, cRGB color) {}
+  cRGB getCrgbAt(typename _LEDDriverBlueprint::LEDCountType i) {
+    cRGB c = {
+      0, 0, 0
+    };
+    return c;
+  }
+  typename _LEDDriverBlueprint::LEDCountType getLedIndex(uint8_t key_offset) {
+    return -1;
+  }
 };
 
 }

@@ -21,13 +21,14 @@
 
 #include <Arduino.h>
 #include "kaleidoscope/Device.h"
+#include "kaleidoscope/hardware/avr/AVRDeviceBlueprint.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace avr {
 
-template <typename _DeviceDescription>
-class AVRDevice : public kaleidoscope::Device<_DeviceDescription> {
+template <typename _DeviceBlueprint>
+class AVRDevice : public kaleidoscope::Device<_DeviceBlueprint> {
  public:
   auto serialPort() -> decltype(Serial) & {
     return Serial;

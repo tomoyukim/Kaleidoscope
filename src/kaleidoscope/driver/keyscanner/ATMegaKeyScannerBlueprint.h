@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * ATMegaKeyScannerDescription -- ATMega-based keyscanner component, description
+ * ATMegaKeyScannerBlueprint -- ATMega-based keyscanner component, blueprint
  * Copyright (C) 2018-2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -19,29 +19,29 @@
 
 #include <Arduino.h>
 
-#include "kaleidoscope/driver/BaseKeyScannerDescription.h"
+#include "kaleidoscope/driver/BaseKeyScannerBlueprint.h"
 #include "kaleidoscope/hardware/avr/pins_and_ports.h"
 #include "kaleidoscope/macro_helpers.h"
 
 #define ROW_PIN_LIST(...)  __VA_ARGS__
 #define COL_PIN_LIST(...)  __VA_ARGS__
 
-#define ATMEGA_KEYSCANNER_DESCRIPTION(ROW_PINS_, COL_PINS_)             \
-  KEYSCANNER_DESCRIPTION(NUM_ARGS(ROW_PINS_), NUM_ARGS(COL_PINS_));     \
+#define ATMEGA_KEYSCANNER_BLUEPRINT(ROW_PINS_, COL_PINS_)               \
+  KEYSCANNER_BLUEPRINT(NUM_ARGS(ROW_PINS_), NUM_ARGS(COL_PINS_));       \
   static constexpr uint8_t matrix_row_pins[matrix_rows] =  ROW_PINS_;   \
   static constexpr uint8_t matrix_col_pins[matrix_columns] =  COL_PINS_;
 
-#define ATMEGA_KEYSCANNER_DESCRIPTION_DATA(BOARD)           \
-  KEYSCANNER_DESCRIPTION_DATA(BOARD);                       \
+#define ATMEGA_KEYSCANNER_BLUEPRINT_IMPLEMENTATION(BOARD)   \
+  KEYSCANNER_BLUEPRINT_IMPLEMENTATION(BOARD);               \
   constexpr uint8_t BOARD::matrix_row_pins[matrix_rows];    \
   constexpr uint8_t BOARD::matrix_col_pins[matrix_columns];
 
 #define __SD(BOARD) \
-  kaleidoscope::hardware::BOARD::KeyScannerDescription
+  kaleidoscope::hardware::BOARD::KeyScannerBlueprint
 #define __KS(BOARD) \
   kaleidoscope::hardware::BOARD::KeyScanner
-#define ATMEGA_KEYSCANNER_DATA(BOARD)                                                      \
-  ATMEGA_KEYSCANNER_DESCRIPTION_DATA(kaleidoscope::hardware::BOARD::KeyScannerDescription) \
+#define ATMEGA_KEYSCANNER_IMPLEMENTATION(BOARD)                                                      \
+  ATMEGA_KEYSCANNER_BLUEPRINT_IMPLEMENTATION(kaleidoscope::hardware::BOARD::KeyScannerBlueprint) \
   template<>                                                                               \
   volatile uint16_t __KS(BOARD)::previousKeyState_[__SD(BOARD)::matrix_rows] = {}; \
   template<>                                                                               \
@@ -59,7 +59,7 @@ namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
-struct ATMegaKeyScannerDescription : kaleidoscope::driver::BaseKeyScannerDescription {
+struct ATMegaKeyScannerBlueprint : kaleidoscope::driver::BaseKeyScannerBlueprint {
   static const uint8_t debounce = 3;
 
   /*

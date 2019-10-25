@@ -17,22 +17,21 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/BaseStorageDescription.h"
 #include "kaleidoscope/driver/BaseStorage.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace storage {
 
-struct NoStorageDescription : public kaleidoscope::driver::BaseStorageDescription {};
+struct NoStorageBlueprint : public kaleidoscope::driver::BaseStorageBlueprint {};
 
 /*
- * The purpose of this class (and the accompanying Description) is to serve as a
- * default for the base `DeviceDescription` class, with a name more descriptive
+ * The purpose of this class (and the accompanying Blueprint) is to serve as a
+ * default for the base `DeviceBlueprint` class, with a name more descriptive
  * than `BaseStorage`. In practice, one shouldn't use it, and should override
- * the it in the device description.
+ * the it in the device blueprint.
  */
-class None : public kaleidoscope::driver::BaseStorage<NoStorageDescription> {};
+class None : public kaleidoscope::driver::BaseStorage<NoStorageBlueprint> {};
 
 }
 }

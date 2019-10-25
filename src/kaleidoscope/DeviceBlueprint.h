@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * DeviceDescription -- Device description base class
+ * DeviceBlueprint -- Device blueprint base class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -25,14 +25,14 @@
 
 namespace kaleidoscope {
 
-struct DeviceDescription {
-  typedef kaleidoscope::driver::keyscanner::NoKeyScannerDescription KeyScannerDescription;
+struct DeviceBlueprint {
+  typedef kaleidoscope::driver::keyscanner::NoKeyScannerBlueprint KeyScannerBlueprint;
   typedef kaleidoscope::driver::keyscanner::None KeyScanner;
-  typedef kaleidoscope::driver::led::NoLedDriverDescription LEDDriverDescription;
+  typedef kaleidoscope::driver::led::NoLedDriverBlueprint LEDDriverBlueprint;
   typedef kaleidoscope::driver::led::None LEDDriver;
   typedef kaleidoscope::driver::mcu::None MCU;
   typedef kaleidoscope::driver::bootloader::None BootLoader;
-  typedef kaleidoscope::driver::storage::NoStorageDescription StorageDescription;
+  typedef kaleidoscope::driver::storage::NoStorageBlueprint StorageBlueprint;
   typedef kaleidoscope::driver::storage::None Storage;
 };
 

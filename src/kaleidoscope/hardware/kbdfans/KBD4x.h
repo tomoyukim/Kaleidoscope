@@ -24,28 +24,26 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::kbdfans::KBD4x
 
-#include "kaleidoscope/driver/keyscanner/ATMegaKeyScannerDescription.h"
 #include "kaleidoscope/driver/keyscanner/ATMegaKeyScanner.h"
 #include "kaleidoscope/driver/bootloader/avr/FLIP.h"
-#include "kaleidoscope/hardware/avr/AVRDeviceDescription.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace kbdfans {
 
-struct KBD4xDeviceDescription : kaleidoscope::hardware::avr::AVRDeviceDescription {
-  typedef struct KBD4xKeyScannerDescription : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerDescription {
-    ATMEGA_KEYSCANNER_DESCRIPTION(
+struct KBD4xDeviceBlueprint : kaleidoscope::hardware::avr::AVRDeviceBlueprint {
+  typedef struct KBD4xKeyScannerBlueprint : public kaleidoscope::driver::keyscanner::ATMegaKeyScannerBlueprint {
+    ATMEGA_KEYSCANNER_BLUEPRINT(
       ROW_PIN_LIST({ PIN_D0, PIN_D1, PIN_D2, PIN_D3 }),
       COL_PIN_LIST({ PIN_F0, PIN_F1, PIN_F4, PIN_F5, PIN_F6, PIN_F7, PIN_B3, PIN_B1, PIN_B0, PIN_D5, PIN_B7, PIN_C7 })
     );
-  } KeyScannerDescription;
-  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerDescription> KeyScanner;
+  } KeyScannerBlueprint;
+  typedef kaleidoscope::driver::keyscanner::ATMegaKeyScanner<KeyScannerBlueprint> KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::FLIP BootLoader;
 };
 
-class KBD4x: public kaleidoscope::hardware::avr::AVRDevice<KBD4xDeviceDescription> {
+class KBD4x: public kaleidoscope::hardware::avr::AVRDevice<KBD4xDeviceBlueprint> {
  public:
   KBD4x() {
     mcu_.disableJTAG();

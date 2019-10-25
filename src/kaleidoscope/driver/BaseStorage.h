@@ -17,10 +17,12 @@
 
 #pragma once
 
+#include "kaleidoscope/driver/BaseStorageBlueprint.h"
+
 namespace kaleidoscope {
 namespace driver {
 
-template <typename _StorageDescription>
+template <typename _StorageBlueprint>
 class BaseStorage {
  public:
   template<typename T>
@@ -42,7 +44,7 @@ class BaseStorage {
   void update(int idx, uint8_t val) {}
 
   const uint16_t length() {
-    return _StorageDescription::length;
+    return _StorageBlueprint::length;
   }
 
   void commit() {}
