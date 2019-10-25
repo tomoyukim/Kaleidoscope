@@ -68,6 +68,7 @@ class Device {
   typedef _DeviceDescription Description;
 
   typedef typename _DeviceDescription::KeyScanner KeyScanner;
+  typedef typename _DeviceDescription::KeyScannerDescription KeyScannerDescription;
   typedef typename _DeviceDescription::KeyScannerDescription::KeyAddr KeyAddr;
   typedef typename _DeviceDescription::LEDs LEDs;
   typedef typename _DeviceDescription::MCU MCU;
