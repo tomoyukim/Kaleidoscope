@@ -39,7 +39,7 @@ void Model01::enableHardwareTestMode() {
   PORTB |= (1 << 0);
 
   // Disable the debouncer on the ATTinys
-  KeyboardHardware.setKeyscanInterval(2);
+  Model01KeyScanner::setKeyscanInterval(2);
 }
 
 }

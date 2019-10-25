@@ -51,23 +51,6 @@ class Model01 : public kaleidoscope::hardware::avr::AVRDevice<Model01DeviceDescr
   static void setup();
 
   static void enableHardwareTestMode();
-
-  void setKeyscanInterval(uint8_t interval) {
-    key_scanner_.setKeyscanInterval(interval);
-  }
-  keydata_t leftHandState() {
-    return key_scanner_.leftHandState;
-  }
-  keydata_t rightHandState() {
-    return key_scanner_.rightHandState;
-  }
-  keydata_t previousLeftHandState() {
-    return key_scanner_.previousLeftHandState;
-  }
-  keydata_t previousRightHandState() {
-    return key_scanner_.previousRightHandState;
-  }
-
 };
 
 }
