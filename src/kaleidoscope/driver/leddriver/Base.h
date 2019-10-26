@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseLEDDriverBlueprint -- LED hardware driver blueprint base class
+ * BaseLEDDriver -- LED hardware driver base class for Kaleidoscope
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -17,13 +17,38 @@
 
 #pragma once
 
+#ifndef CRGB
+#error cRGB and CRGB *must* be defined before including this header!
+#endif
+
 namespace kaleidoscope {
 namespace driver {
+namespace leddriver {
 
-struct BaseLEDDriverBlueprint {
+struct BaseProps {
   typedef int8_t LEDCountType;
   static constexpr LEDCountType led_count = 0;
 };
 
+template <typename _LEDDriverProps>
+class Base {
+ public:
+  Base() {}
+
+  void setup() {}
+  void syncLeds(void) {}
+  void setCrgbAt(typename _LEDDriverProps::LEDCountType i, cRGB color) {}
+  cRGB getCrgbAt(typename _LEDDriverProps::LEDCountType i) {
+    cRGB c = {
+      0, 0, 0
+    };
+    return c;
+  }
+  typename _LEDDriverProps::LEDCountType getLedIndex(uint8_t key_offset) {
+    return -1;
+  }
+};
+
+}
 }
 }

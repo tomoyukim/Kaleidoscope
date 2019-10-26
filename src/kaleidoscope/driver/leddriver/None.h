@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseStorageBlueprint -- Storage driver blueprint base class
+ * kaleidoscope::driver::leddriver::None -- Dummy LED hardware driver for Kaleidoscope
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -17,12 +17,32 @@
 
 #pragma once
 
-namespace kaleidoscope {
-namespace driver {
+#ifndef CRGB
 
-struct BaseStorageBlueprint {
-  static constexpr uint16_t length = 0;
+struct cRGB {
+  uint8_t r, g, b;
 };
 
+#define CRGB(r,g,b) (cRGB){b, g, r}
+
+#endif
+
+#include "kaleidoscope/driver/leddriver/Base.h"
+
+namespace kaleidoscope {
+namespace driver {
+namespace leddriver {
+
+struct NoProps : public kaleidoscope::driver::leddriver::BaseProps {};
+
+/*
+ * The purpose of this class (and the accompanying Props) is to serve as a
+ * default for the base `DeviceProps` class, with a name more descriptive than
+ * `Base`. In practice, one shouldn't use it, and should override the it in the
+ * device blueprint.
+ */
+class None : public kaleidoscope::driver::leddriver::Base<NoProps> {};
+
+}
 }
 }

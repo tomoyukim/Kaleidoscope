@@ -40,7 +40,7 @@ struct cRGB {
 
 #define CRGB(r,g,b) (cRGB){b, g, r}
 
-#include "kaleidoscope/driver/BaseKeyScannerBlueprint.h"
+#include "kaleidoscope/driver/keyscanner/Base.h"
 #include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
@@ -48,14 +48,14 @@ namespace kaleidoscope {
 namespace hardware {
 namespace ez {
 
-struct ErgoDoxDeviceBlueprint : public kaleidoscope::hardware::avr::AVRDeviceBlueprint {
-  typedef struct ErgoDoxKeyScannerBlueprint : kaleidoscope::driver::BaseKeyScannerBlueprint {
-    KEYSCANNER_BLUEPRINT(14, 6);
-  } KeyScannerBlueprint;
-  typedef kaleidoscope::driver::bootloader::avr::HalfKay BootLoader;
+struct ErgoDoxDeviceProps : public kaleidoscope::hardware::avr::AVRDeviceProps {
+  typedef struct ErgoDoxKeyScannerProps : kaleidoscope::driver::keyscanner::BaseProps {
+    KEYSCANNER_PROPS(14, 6);
+  } KeyScannerProps;
+  typedef kaleidoscope::driver::bootloader::avr::HalfKay Bootloader;
 };
 
-class ErgoDox : public kaleidoscope::hardware::avr::AVRDevice<ErgoDoxDeviceBlueprint> {
+class ErgoDox : public kaleidoscope::hardware::avr::AVRDevice<ErgoDoxDeviceProps> {
  public:
   ErgoDox(void) {}
 

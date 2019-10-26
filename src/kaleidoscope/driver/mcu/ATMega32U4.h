@@ -17,13 +17,13 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/BaseMCU.h"
+#include "kaleidoscope/driver/mcu/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace mcu {
 
-class ATMega32U4 : public kaleidoscope::driver::BaseMCU {
+class ATMega32U4 : public kaleidoscope::driver::mcu::Base {
  public:
   void detachFromHost() {
     UDCON |= _BV(DETACH);

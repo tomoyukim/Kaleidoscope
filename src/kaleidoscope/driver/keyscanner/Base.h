@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseKeyScanner -- Keyscanner base component
+ * kaleidoscope::driver::keyscanner::base -- Keyscanner base class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -20,17 +20,34 @@
 #include <Arduino.h>
 
 #include "kaleidoscope/key_defs.h"
-#include "kaleidoscope/driver/BaseKeyScannerBlueprint.h"
+#include "kaleidoscope/MatrixAddr.h"
+
+#define KEYSCANNER_PROPS(ROWS_, COLS_)                      \
+  static constexpr uint8_t matrix_rows = ROWS_;             \
+  static constexpr uint8_t matrix_columns = COLS_;          \
+  typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
+
+#define KEYSCANNER_PROPS_IMPLEMENTATION(BOARD)      \
+  const uint8_t BOARD::matrix_rows;                 \
+  const uint8_t BOARD::matrix_columns;
 
 namespace kaleidoscope {
 namespace driver {
+namespace keyscanner {
 
-template <typename _KeyScannerBlueprint>
-class BaseKeyScanner {
+struct BaseProps {
+  static constexpr uint8_t matrix_rows = 0;
+  static constexpr uint8_t matrix_columns = 0;
+
+  typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
+};
+
+template <typename _KeyScannerProps>
+class Base {
  public:
-  BaseKeyScanner() {}
+  Base() {}
 
-  typedef typename _KeyScannerBlueprint::KeyAddr KeyAddr;
+  typedef typename _KeyScannerProps::KeyAddr KeyAddr;
 
   static void handleKeyswitchEvent(Key mappedKey, KeyAddr key_addr, uint8_t keyState);
 
@@ -60,5 +77,6 @@ class BaseKeyScanner {
   }
 };
 
+}
 }
 }

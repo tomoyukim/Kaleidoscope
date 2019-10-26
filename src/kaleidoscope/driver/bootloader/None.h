@@ -18,7 +18,7 @@
 #pragma once
 
 #include <avr/wdt.h>
-#include "kaleidoscope/driver/BaseBootloader.h"
+#include "kaleidoscope/driver/bootloader/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
@@ -30,7 +30,7 @@ namespace bootloader {
  * `BaseBootloader`. In practice, one shouldn't use it, and should override the
  * bootloader in the device description.
  */
-class None : public kaleidoscope::driver::BaseBootloader {};
+class None : public kaleidoscope::driver::bootloader::Base {};
 
 }
 }

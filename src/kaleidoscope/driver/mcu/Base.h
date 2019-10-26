@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * BaseLEDDriver -- LED hardware driver base class for Kaleidoscope
+ * driver::mcu::Base -- MCU driver base class for Kaleidoscope
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -17,33 +17,31 @@
 
 #pragma once
 
-#ifndef CRGB
-#error cRGB and CRGB *must* be defined before including this header!
-#endif
-
-#include "kaleidoscope/driver/BaseLEDDriverBlueprint.h"
-
 namespace kaleidoscope {
 namespace driver {
+namespace mcu {
 
-template <typename _LEDDriverBlueprint>
-class BaseLEDDriver {
+class Base {
  public:
-  BaseLEDDriver() {}
+  Base() {}
 
   void setup() {}
-  void syncLeds(void) {}
-  void setCrgbAt(typename _LEDDriverBlueprint::LEDCountType i, cRGB color) {}
-  cRGB getCrgbAt(typename _LEDDriverBlueprint::LEDCountType i) {
-    cRGB c = {
-      0, 0, 0
-    };
-    return c;
-  }
-  typename _LEDDriverBlueprint::LEDCountType getLedIndex(uint8_t key_offset) {
-    return -1;
-  }
+
+  /**
+   * Detach the device from the host.
+   *
+   * Must detach the device, without rebooting or cutting power. Only the end
+   * points should get detached, the device must remain powered on.
+   */
+  void detachFromHost() {}
+  /**
+   * Attack the device to the host.
+   *
+   * Must restore the link detachFromHost severed.
+   */
+  void attachToHost() {}
 };
 
+}
 }
 }

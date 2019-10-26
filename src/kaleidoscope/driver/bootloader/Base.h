@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * kaleidoscope::driver::BaseBootloader -- Base Bootloader Driver
+ * kaleidoscope::driver::bootloader::base -- Base Bootloader Driver
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -19,13 +19,15 @@
 
 namespace kaleidoscope {
 namespace driver {
+namespace bootloader {
 
-class BaseBootloader {
+class Base {
  public:
-  BaseBootloader() {}
+  Base() {}
 
   static void rebootBootloader() {}
 };
 
+}
 }
 }

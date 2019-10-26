@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * driver::BaseMCU -- MCU driver base class for Kaleidoscope
+ * kaleidoscope::driver::storage::Base -- Base Storage driver class
  * Copyright (C) 2019  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -19,27 +19,40 @@
 
 namespace kaleidoscope {
 namespace driver {
+namespace storage {
 
-class BaseMCU {
- public:
-  BaseMCU() {}
-
-  void setup() {}
-
-  /**
-   * Detach the device from the host.
-   *
-   * Must detach the device, without rebooting or cutting power. Only the end
-   * points should get detached, the device must remain powered on.
-   */
-  void detachFromHost() {}
-  /**
-   * Attack the device to the host.
-   *
-   * Must restore the link detachFromHost severed.
-   */
-  void attachToHost() {}
+struct BaseProps {
+  static constexpr uint16_t length = 0;
 };
 
+template <typename _StorageProps>
+class Base {
+ public:
+  template<typename T>
+  static T& get(uint16_t offset, T& t) {
+    return t;
+  }
+
+  template<typename T>
+  static const T& put(uint16_t offset, T& t) {
+    return t;
+  }
+
+  uint8_t read(int idx) {
+    return 0;
+  }
+
+  void write(int idx, uint8_t val) {}
+
+  void update(int idx, uint8_t val) {}
+
+  const uint16_t length() {
+    return _StorageProps::length;
+  }
+
+  void commit() {}
+};
+
+}
 }
 }

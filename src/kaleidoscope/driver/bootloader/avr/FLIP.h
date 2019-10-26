@@ -19,18 +19,18 @@
 
 #include <avr/wdt.h>
 
-#ifndef KALEIDOSCOPE_BOOTLOADER_FLIP
-#error To use the FLIP bootloader driver, KALEIDOSCOPE_BOOTLOADER_FLIP *must* be defined prior to including this header!
+#ifndef KALEIDOSCOPE_BOOTLOADER_FLIP_WORKAROUND
+#error To use the FLIP bootloader driver, KALEIDOSCOPE_BOOTLOADER_FLIP_WORKAROUND *must* be defined prior to including this header!
 #endif
 
-#include "kaleidoscope/driver/BaseBootloader.h"
+#include "kaleidoscope/driver/bootloader/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace bootloader {
 namespace avr {
 
-class FLIP : public kaleidoscope::driver::BaseBootloader {
+class FLIP : public kaleidoscope::driver::bootloader::Base {
  public:
   static void rebootBootloader();
 };

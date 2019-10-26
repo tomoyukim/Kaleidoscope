@@ -17,7 +17,7 @@
 
 #include <Kaleidoscope.h>
 
-#ifdef KALEIDOSCOPE_BOOTLOADER_FLIP
+#ifdef KALEIDOSCOPE_BOOTLOADER_FLIP_WORKAROUND
 #include "kaleidoscope/driver/bootloader/avr/FLIP.h"
 
 namespace kaleidoscope {

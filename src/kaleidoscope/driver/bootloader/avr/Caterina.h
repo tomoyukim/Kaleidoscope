@@ -18,14 +18,14 @@
 #pragma once
 
 #include <avr/wdt.h>
-#include "kaleidoscope/driver/BaseBootloader.h"
+#include "kaleidoscope/driver/bootloader/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace bootloader {
 namespace avr {
 
-class Caterina : public kaleidoscope::driver::BaseBootloader {
+class Caterina : public kaleidoscope::driver::bootloader::Base {
  public:
   static void rebootBootloader() {
     // Set the magic bits to get a Caterina-based device

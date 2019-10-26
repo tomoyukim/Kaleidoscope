@@ -19,21 +19,21 @@
 
 #include <Arduino.h>
 
-#include "kaleidoscope/driver/BaseKeyScanner.h"
+#include "kaleidoscope/driver/keyscanner/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
-struct NoKeyScannerBlueprint : kaleidoscope::driver::BaseKeyScannerBlueprint {};
+struct NoProps : kaleidoscope::driver::keyscanner::BaseProps {};
 
 /*
- * The purpose of this class (and the accompanying Blueprint) is to serve as a
- * default for the base `DeviceBlueprint` class, with a name more descriptive
- * than `BaseKeyScanner`. In practice, one shouldn't use it, and should override
- * the it in the device blueprint.
+ * The purpose of this class (and the accompanying Props) is to serve as a
+ * default for the base `DeviceProps` class, with a name more descriptive than
+ * `Base`. In practice, one shouldn't use it, and should override the it in the
+ * device blueprint.
  */
-class None : public kaleidoscope::driver::BaseKeyScanner<NoKeyScannerBlueprint> {};
+class None : public kaleidoscope::driver::keyscanner::Base<NoProps> {};
 
 }
 }

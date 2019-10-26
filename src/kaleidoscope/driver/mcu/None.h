@@ -17,19 +17,19 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/BaseMCU.h"
+#include "kaleidoscope/driver/mcu/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace mcu {
 
 /*
- * The purpose of this class (and the accompanying Description) is to serve as a
- * default for the base `DeviceDescription` class, with a name more descriptive
- * than `BaseLedDriver`. In practice, one shouldn't use it, and should override
- * the it in the device description.
+ * The purpose of this class (and the accompanying Props) is to serve as a
+ * default for the base `DeviceProps` class, with a name more descriptive than
+ * `Base`. In practice, one shouldn't use it, and should override the it in the
+ * device description.
  */
-class None : public kaleidoscope::driver::BaseMCU {};
+class None : public kaleidoscope::driver::mcu::Base {};
 
 }
 }

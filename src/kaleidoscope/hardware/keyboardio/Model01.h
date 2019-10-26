@@ -27,8 +27,8 @@
 
 #define CRGB(r,g,b) (cRGB){b, g, r}
 
-#include "kaleidoscope/driver/BaseKeyScanner.h"
-#include "kaleidoscope/driver/BaseLEDDriver.h"
+#include "kaleidoscope/driver/keyscanner/Base.h"
+#include "kaleidoscope/driver/leddriver/Base.h"
 #include "kaleidoscope/driver/bootloader/avr/Caterina.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
@@ -38,11 +38,11 @@ namespace keyboardio {
 
 class Model01;
 
-struct Model01LEDDriverBlueprint : public kaleidoscope::driver::BaseLEDDriverBlueprint {
+struct Model01LEDDriverProps : public kaleidoscope::driver::leddriver::BaseProps {
   static constexpr LEDCountType led_count = 64;
 };
 
-class Model01LEDDriver : public kaleidoscope::driver::BaseLEDDriver<Model01LEDDriverBlueprint> {
+class Model01LEDDriver : public kaleidoscope::driver::leddriver::Base<Model01LEDDriverProps> {
  public:
   static void setup();
   static void syncLeds();
@@ -58,11 +58,11 @@ class Model01LEDDriver : public kaleidoscope::driver::BaseLEDDriver<Model01LEDDr
   static bool isLEDChanged;
 };
 
-struct Model01KeyScannerBlueprint : public kaleidoscope::driver::BaseKeyScannerBlueprint {
-  KEYSCANNER_BLUEPRINT(4, 16);
+struct Model01KeyScannerProps : public kaleidoscope::driver::keyscanner::BaseProps {
+  KEYSCANNER_PROPS(4, 16);
 };
 
-class Model01KeyScanner : public kaleidoscope::driver::BaseKeyScanner<Model01KeyScannerBlueprint> {
+class Model01KeyScanner : public kaleidoscope::driver::keyscanner::Base<Model01KeyScannerProps> {
   friend class Model01LEDDriver;
   friend class Model01;
  private:
@@ -103,15 +103,15 @@ class Model01KeyScanner : public kaleidoscope::driver::BaseKeyScanner<Model01Key
   static void enableScannerPower();
 };
 
-struct Model01DeviceBlueprint : kaleidoscope::hardware::avr::AVRDeviceBlueprint {
-  typedef Model01LEDDriverBlueprint  LEDDriverBlueprint;
+struct Model01DeviceProps : kaleidoscope::hardware::avr::AVRDeviceProps {
+  typedef Model01LEDDriverProps  LEDDriverProps;
   typedef Model01LEDDriver LEDDriver;
-  typedef Model01KeyScannerBlueprint KeyScannerBlueprint;
+  typedef Model01KeyScannerProps KeyScannerProps;
   typedef Model01KeyScanner KeyScanner;
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;
 };
 
-class Model01 : public kaleidoscope::hardware::avr::AVRDevice<Model01DeviceBlueprint> {
+class Model01 : public kaleidoscope::hardware::avr::AVRDevice<Model01DeviceProps> {
  public:
   static void setup();
 

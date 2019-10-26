@@ -17,19 +17,19 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/BaseStorage.h"
+#include "kaleidoscope/driver/storage/Base.h"
 #include <EEPROM.h>
 
 namespace kaleidoscope {
 namespace driver {
 namespace storage {
 
-struct AVREEPROMStorageBlueprint : kaleidoscope::driver::BaseStorageBlueprint {
+struct AVREEPROMProps : kaleidoscope::driver::storage::BaseProps {
   static constexpr uint16_t length = 1024;
 };
 
-template <typename _StorageBlueprint>
-class AVREEPROM : public kaleidoscope::driver::BaseStorage<_StorageBlueprint> {
+template <typename _StorageProps>
+class AVREEPROM : public kaleidoscope::driver::storage::Base<_StorageProps> {
  public:
   template<typename T>
   static T& get(uint16_t offset, T& t) {

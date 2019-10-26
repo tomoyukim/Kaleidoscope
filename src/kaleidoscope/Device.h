@@ -25,7 +25,11 @@
 #include "kaleidoscope_internal/deprecations.h"
 #include "kaleidoscope/macro_helpers.h"
 
-#include "kaleidoscope/DeviceBlueprint.h"
+#include "kaleidoscope/driver/keyscanner/None.h"
+#include "kaleidoscope/driver/leddriver/None.h"
+#include "kaleidoscope/driver/mcu/None.h"
+#include "kaleidoscope/driver/bootloader/None.h"
+#include "kaleidoscope/driver/storage/None.h"
 
 #ifndef CRGB
 #error cRGB and CRGB *must* be defined before including this header!
@@ -51,11 +55,18 @@
 
 namespace kaleidoscope {
 
-/** Kaleidoscope Hardware base class.
- * Essential methods all hardware libraries must implement.
- */
+struct DeviceProps {
+  typedef kaleidoscope::driver::keyscanner::NoProps KeyScannerProps;
+  typedef kaleidoscope::driver::keyscanner::None KeyScanner;
+  typedef kaleidoscope::driver::leddriver::NoProps LEDDriverProps;
+  typedef kaleidoscope::driver::leddriver::None LEDDriver;
+  typedef kaleidoscope::driver::mcu::None MCU;
+  typedef kaleidoscope::driver::bootloader::None Bootloader;
+  typedef kaleidoscope::driver::storage::NoProps StorageProps;
+  typedef kaleidoscope::driver::storage::None Storage;
+};
 
-template<typename _DeviceBlueprint>
+template<typename _DeviceProps>
 class Device {
  private:
   class DummySerial {
@@ -67,20 +78,20 @@ class Device {
 
  public:
 
-  typedef _DeviceBlueprint Blueprint;
+  typedef _DeviceProps Props;
 
-  typedef typename _DeviceBlueprint::KeyScanner KeyScanner;
-  typedef typename _DeviceBlueprint::KeyScannerBlueprint KeyScannerBlueprint;
-  typedef typename _DeviceBlueprint::KeyScannerBlueprint::KeyAddr KeyAddr;
-  typedef typename _DeviceBlueprint::LEDDriverBlueprint LEDDriverBlueprint;
-  typedef typename _DeviceBlueprint::LEDDriver LEDDriver;
-  typedef typename _DeviceBlueprint::MCU MCU;
-  typedef typename _DeviceBlueprint::BootLoader BootLoader;
-  typedef typename _DeviceBlueprint::Storage Storage;
+  typedef typename _DeviceProps::KeyScanner KeyScanner;
+  typedef typename _DeviceProps::KeyScannerProps KeyScannerProps;
+  typedef typename _DeviceProps::KeyScannerProps::KeyAddr KeyAddr;
+  typedef typename _DeviceProps::LEDDriverProps LEDDriverProps;
+  typedef typename _DeviceProps::LEDDriver LEDDriver;
+  typedef typename _DeviceProps::MCU MCU;
+  typedef typename _DeviceProps::Bootloader Bootloader;
+  typedef typename _DeviceProps::Storage Storage;
 
-  static constexpr uint8_t matrix_rows = KeyScannerBlueprint::matrix_rows;
-  static constexpr uint8_t matrix_columns = KeyScannerBlueprint::matrix_columns;
-  static constexpr typename LEDDriverBlueprint::LEDCountType led_count = LEDDriverBlueprint::led_count;
+  static constexpr uint8_t matrix_rows = KeyScannerProps::matrix_rows;
+  static constexpr uint8_t matrix_columns = KeyScannerProps::matrix_columns;
+  static constexpr typename LEDDriverProps::LEDCountType led_count = LEDDriverProps::led_count;
 
   /**
    * @returns the number of keys on the keyboard.
@@ -482,7 +493,7 @@ class Device {
   KeyScanner key_scanner_;
   LEDDriver led_driver_;
   MCU mcu_;
-  BootLoader bootloader_;
+  Bootloader bootloader_;
   Storage storage_;
 };
 }

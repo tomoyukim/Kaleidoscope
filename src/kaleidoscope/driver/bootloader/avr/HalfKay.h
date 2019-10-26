@@ -18,14 +18,14 @@
 #pragma once
 
 #include <avr/wdt.h>
-#include "kaleidoscope/driver/BaseBootloader.h"
+#include "kaleidoscope/driver/bootloader/Base.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace bootloader {
 namespace avr {
 
-class HalfKay : public kaleidoscope::driver::BaseBootloader {
+class HalfKay : public kaleidoscope::driver::bootloader::Base {
  public:
   // To reset a Teensy with the HalfKay bootloader, we need to disable all
   // interrupts, all peripherals we have attached, USB, the watchdog timer, etc.
