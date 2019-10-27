@@ -38,6 +38,11 @@ namespace keyboardio {
 
 class Model01;
 
+struct Model01Hands {
+  static KeyboardioScanner leftHand;
+  static KeyboardioScanner rightHand;
+};
+
 struct Model01LEDDriverProps : public kaleidoscope::driver::leddriver::BaseProps {
   static constexpr LEDCountType led_count = 64;
 };
@@ -63,8 +68,6 @@ struct Model01KeyScannerProps : public kaleidoscope::driver::keyscanner::BasePro
 };
 
 class Model01KeyScanner : public kaleidoscope::driver::keyscanner::Base<Model01KeyScannerProps> {
-  friend class Model01LEDDriver;
-  friend class Model01;
  private:
   typedef Model01KeyScanner ThisType;
  public:
@@ -87,14 +90,10 @@ class Model01KeyScanner : public kaleidoscope::driver::keyscanner::Base<Model01K
   static void setKeyscanInterval(uint8_t interval);
 
  protected:
-
   static keydata_t leftHandState;
   static keydata_t rightHandState;
   static keydata_t previousLeftHandState;
   static keydata_t previousRightHandState;
-
-  static KeyboardioScanner leftHand;
-  static KeyboardioScanner rightHand;
 
   static keydata_t leftHandMask;
   static keydata_t rightHandMask;

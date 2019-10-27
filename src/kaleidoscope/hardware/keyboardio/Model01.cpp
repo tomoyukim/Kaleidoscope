@@ -26,6 +26,11 @@ namespace kaleidoscope {
 namespace hardware {
 namespace keyboardio {
 
+/********* Model01Hands *********/
+
+KeyboardioScanner Model01Hands::leftHand(0);
+KeyboardioScanner Model01Hands::rightHand(3);
+
 /********* LED Driver *********/
 bool Model01LEDDriver::isLEDChanged = true;
 
@@ -61,12 +66,12 @@ void Model01LEDDriver::setCrgbAt(int8_t i, cRGB crgb) {
     cRGB oldColor = getCrgbAt(i);
     isLEDChanged |= !(oldColor.r == crgb.r && oldColor.g == crgb.g && oldColor.b == crgb.b);
 
-    Model01KeyScanner::leftHand.ledData.leds[i] = crgb;
+    Model01Hands::leftHand.ledData.leds[i] = crgb;
   } else if (i < 64) {
     cRGB oldColor = getCrgbAt(i);
     isLEDChanged |= !(oldColor.r == crgb.r && oldColor.g == crgb.g && oldColor.b == crgb.b);
 
-    Model01KeyScanner::rightHand.ledData.leds[i - 32] = crgb;
+    Model01Hands::rightHand.ledData.leds[i - 32] = crgb;
   } else {
     // TODO(anyone):
     // how do we want to handle debugging assertions about crazy user
@@ -83,9 +88,9 @@ cRGB Model01LEDDriver::getCrgbAt(int8_t i) {
     return {0, 0, 0};
 
   if (i < 32) {
-    return Model01KeyScanner::leftHand.ledData.leds[i];
+    return Model01Hands::leftHand.ledData.leds[i];
   } else {
-    return Model01KeyScanner::rightHand.ledData.leds[i - 32];
+    return Model01Hands::rightHand.ledData.leds[i - 32];
   }
 }
 
@@ -99,17 +104,17 @@ void Model01LEDDriver::syncLeds() {
   // we run into a race condition with updating the next bank
   // on an ATTiny before it's done writing the previous one to memory
 
-  Model01KeyScanner::leftHand.sendLEDData();
-  Model01KeyScanner::rightHand.sendLEDData();
+  Model01Hands::leftHand.sendLEDData();
+  Model01Hands::rightHand.sendLEDData();
 
-  Model01KeyScanner::leftHand.sendLEDData();
-  Model01KeyScanner::rightHand.sendLEDData();
+  Model01Hands::leftHand.sendLEDData();
+  Model01Hands::rightHand.sendLEDData();
 
-  Model01KeyScanner::leftHand.sendLEDData();
-  Model01KeyScanner::rightHand.sendLEDData();
+  Model01Hands::leftHand.sendLEDData();
+  Model01Hands::rightHand.sendLEDData();
 
-  Model01KeyScanner::leftHand.sendLEDData();
-  Model01KeyScanner::rightHand.sendLEDData();
+  Model01Hands::leftHand.sendLEDData();
+  Model01Hands::rightHand.sendLEDData();
 
   isLEDChanged = false;
 }
@@ -123,9 +128,6 @@ boolean Model01LEDDriver::ledPowerFault() {
 }
 
 /********* Key scanner *********/
-
-KeyboardioScanner Model01KeyScanner::leftHand(0);
-KeyboardioScanner Model01KeyScanner::rightHand(3);
 
 keydata_t Model01KeyScanner::leftHandState;
 keydata_t Model01KeyScanner::rightHandState;
@@ -151,12 +153,12 @@ void Model01KeyScanner::readMatrix() {
   previousLeftHandState = leftHandState;
   previousRightHandState = rightHandState;
 
-  if (leftHand.readKeys()) {
-    leftHandState = leftHand.getKeyData();
+  if (Model01Hands::leftHand.readKeys()) {
+    leftHandState = Model01Hands::leftHand.getKeyData();
   }
 
-  if (rightHand.readKeys()) {
-    rightHandState = rightHand.getKeyData();
+  if (Model01Hands::rightHand.readKeys()) {
+    rightHandState = Model01Hands::rightHand.getKeyData();
   }
 }
 
@@ -249,8 +251,8 @@ void Model01KeyScanner::maskHeldKeys() {
 
 
 void Model01KeyScanner::setKeyscanInterval(uint8_t interval) {
-  leftHand.setKeyscanInterval(interval);
-  rightHand.setKeyscanInterval(interval);
+  Model01Hands::leftHand.setKeyscanInterval(interval);
+  Model01Hands::rightHand.setKeyscanInterval(interval);
 }
 
 bool Model01KeyScanner::isKeyswitchPressed(KeyAddr key_addr) {
