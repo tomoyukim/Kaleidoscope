@@ -28,20 +28,20 @@ namespace keyboardio {
 
 /********* Model01Hands *********/
 
+struct Model01Hands {
+  static KeyboardioScanner leftHand;
+  static KeyboardioScanner rightHand;
+
+  static void setup();
+};
+
 KeyboardioScanner Model01Hands::leftHand(0);
 KeyboardioScanner Model01Hands::rightHand(3);
 
-/********* LED Driver *********/
-bool Model01LEDDriver::isLEDChanged = true;
+void Model01Hands::setup(void) {
+  // TODO: Consider not doing this until 30s after keyboard
+  // boot up, to make it easier to rescue things in case of power draw issues.
 
-static constexpr int8_t key_led_map[Model01::led_count] PROGMEM = {
-  3, 4, 11, 12, 19, 20, 26, 27,     36, 37, 43, 44, 51, 52, 59, 60,
-  2, 5, 10, 13, 18, 21, 25, 28,     35, 38, 42, 45, 50, 53, 58, 61,
-  1, 6, 9, 14, 17, 22, 24, 29,     34, 39, 41, 46, 49, 54, 57, 62,
-  0, 7, 8, 15, 16, 23, 31, 30,     33, 32, 40, 47, 48, 55, 56, 63,
-};
-
-void Model01LEDDriver::enableHighPowerLeds(void) {
   // This lets the keyboard pull up to 1.6 amps from the host.
   // That violates the USB spec. But it sure is pretty looking
   DDRE |= _BV(6);
@@ -52,11 +52,15 @@ void Model01LEDDriver::enableHighPowerLeds(void) {
   PORTB &= ~_BV(4);	// set bit, enable pull-up resistor
 }
 
-void Model01LEDDriver::setup() {
-  // TODO: Consider not doing this until 30s after keyboard
-  // boot up, to make it easier to rescue things in case of power draw issues.
-  enableHighPowerLeds();
-}
+/********* LED Driver *********/
+bool Model01LEDDriver::isLEDChanged = true;
+
+static constexpr int8_t key_led_map[Model01::led_count] PROGMEM = {
+  3, 4, 11, 12, 19, 20, 26, 27,     36, 37, 43, 44, 51, 52, 59, 60,
+  2, 5, 10, 13, 18, 21, 25, 28,     35, 38, 42, 45, 50, 53, 58, 61,
+  1, 6, 9, 14, 17, 22, 24, 29,     34, 39, 41, 46, 49, 54, 57, 62,
+  0, 7, 8, 15, 16, 23, 31, 30,     33, 32, 40, 47, 48, 55, 56, 63,
+};
 
 void Model01LEDDriver::setCrgbAt(int8_t i, cRGB crgb) {
   if (i < 0) {
@@ -287,7 +291,7 @@ uint8_t Model01KeyScanner::previousPressedKeyswitchCount() {
 
 void Model01::setup() {
   KeyScanner::setup();
-  LEDDriver::setup();
+  Model01Hands::setup();
 
   TWBR = 12; // This is 400mhz, which is the fastest we can drive the ATTiny
 }

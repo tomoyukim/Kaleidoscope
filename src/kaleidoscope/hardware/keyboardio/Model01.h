@@ -36,20 +36,12 @@ namespace kaleidoscope {
 namespace hardware {
 namespace keyboardio {
 
-class Model01;
-
-struct Model01Hands {
-  static KeyboardioScanner leftHand;
-  static KeyboardioScanner rightHand;
-};
-
 struct Model01LEDDriverProps : public kaleidoscope::driver::leddriver::BaseProps {
   static constexpr LEDCountType led_count = 64;
 };
 
 class Model01LEDDriver : public kaleidoscope::driver::leddriver::Base<Model01LEDDriverProps> {
  public:
-  static void setup();
   static void syncLeds();
   static void setCrgbAt(int8_t i, cRGB crgb);
   static cRGB getCrgbAt(int8_t i);
