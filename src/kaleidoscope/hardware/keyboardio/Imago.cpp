@@ -65,14 +65,6 @@ static constexpr uint8_t key_led_map[5][16] PROGMEM = {
 };
 
 void ImagoLEDDriver::setup() {
-  digitalWrite(MOSI, HIGH);
-  digitalWrite(SS, HIGH);
-  uint8_t twi_uninitialized = 1;
-  if (twi_uninitialized--) {
-    twi_init();
-  }
-  TWBR = 10;
-
   setAllPwmTo(0xFF);
   selectRegister(LED_REGISTER_CONTROL);
   twiSend(LED_DRIVER_ADDR, 0x01, 0xFF); //global current
@@ -181,6 +173,18 @@ void ImagoLEDDriver::setAllPwmTo(uint8_t step) {
 
   }
   twi_writeTo(LED_DRIVER_ADDR, data, 0xAC, 1, 0);
+}
+
+void Imago::setup() {
+  digitalWrite(MOSI, HIGH);
+  digitalWrite(SS, HIGH);
+  uint8_t twi_uninitialized = 1;
+  if (twi_uninitialized--) {
+    twi_init();
+  }
+  TWBR = 10;
+
+  kaleidoscope::hardware::avr::AVRDevice<ImagoDeviceProps>::setup();
 }
 
 }

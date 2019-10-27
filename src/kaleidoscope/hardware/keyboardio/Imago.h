@@ -75,7 +75,10 @@ struct ImagoDeviceProps : kaleidoscope::hardware::avr::AVRDeviceProps {
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;
 };
 
-class Imago: public kaleidoscope::hardware::avr::AVRDevice<ImagoDeviceProps> {};
+class Imago: public kaleidoscope::hardware::avr::AVRDevice<ImagoDeviceProps> {
+ public:
+  void setup();
+};
 
 #define PER_KEY_DATA(dflt,                                              \
          R0C0, R0C1, R0C2, R0C3, R0C4, R0C5, R0C6, R0C7, R0C8, R0C9, R0C10, R0C11, R0C12, R0C13, R0C14, R0C15, \
