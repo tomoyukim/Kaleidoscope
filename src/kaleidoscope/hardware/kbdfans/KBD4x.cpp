@@ -21,7 +21,17 @@
 #include <avr/wdt.h>
 #include <avr/boot.h>
 
-ATMEGA_KEYSCANNER_IMPLEMENTATION(kbdfans::KBD4x);
+
+namespace kaleidoscope {
+namespace hardware {
+namespace kbdfans {
+
+ATMEGA_KEYSCANNER_IMPLEMENTATION();
+
+}
+}
+}
+
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

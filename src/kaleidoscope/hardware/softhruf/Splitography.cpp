@@ -27,7 +27,16 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-ATMEGA_KEYSCANNER_IMPLEMENTATION(softhruf::Splitography);
+namespace kaleidoscope {
+namespace hardware {
+namespace softhruf {
+
+ATMEGA_KEYSCANNER_IMPLEMENTATION();
+
+}
+}
+}
+
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

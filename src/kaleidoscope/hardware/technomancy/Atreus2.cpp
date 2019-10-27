@@ -21,7 +21,16 @@
 #include <Kaleidoscope.h>
 #include <avr/wdt.h>
 
-ATMEGA_KEYSCANNER_IMPLEMENTATION(technomancy::Atreus2);
+namespace kaleidoscope {
+namespace hardware {
+namespace technomancy {
+
+ATMEGA_KEYSCANNER_IMPLEMENTATION();
+
+}
+}
+}
+
 HARDWARE_IMPLEMENTATION KeyboardHardware;
 
 #endif

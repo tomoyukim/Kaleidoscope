@@ -39,20 +39,16 @@
   constexpr uint8_t BOARD::matrix_row_pins[matrix_rows];    \
   constexpr uint8_t BOARD::matrix_col_pins[matrix_columns];
 
-#define __SD(BOARD) \
-  kaleidoscope::hardware::BOARD::KeyScannerProps
-#define __KS(BOARD) \
-  kaleidoscope::hardware::BOARD::KeyScanner
-#define ATMEGA_KEYSCANNER_IMPLEMENTATION(BOARD)                                                      \
-  ATMEGA_KEYSCANNER_PROPS_IMPLEMENTATION(kaleidoscope::hardware::BOARD::KeyScannerProps) \
+#define ATMEGA_KEYSCANNER_IMPLEMENTATION()                                                      \
+  ATMEGA_KEYSCANNER_PROPS_IMPLEMENTATION(HARDWARE_IMPLEMENTATION::KeyScannerProps)     \
   template<>                                                                               \
-  volatile uint16_t __KS(BOARD)::previousKeyState_[__SD(BOARD)::matrix_rows] = {}; \
+  volatile uint16_t HARDWARE_IMPLEMENTATION::KeyScanner::previousKeyState_[HARDWARE_IMPLEMENTATION::KeyScannerProps::matrix_rows] = {}; \
   template<>                                                                               \
-  volatile uint16_t __KS(BOARD)::keyState_[__SD(BOARD)::matrix_rows] = {}; \
+  volatile uint16_t HARDWARE_IMPLEMENTATION::KeyScanner::keyState_[HARDWARE_IMPLEMENTATION::KeyScannerProps::matrix_rows] = {}; \
   template<>                                                                               \
-  uint16_t __KS(BOARD)::masks_[__SD(BOARD)::matrix_rows] = {};            \
+  uint16_t HARDWARE_IMPLEMENTATION::KeyScanner::masks_[HARDWARE_IMPLEMENTATION::KeyScannerProps::matrix_rows] = {};            \
   template<>                                                                               \
-  uint8_t __KS(BOARD)::debounce_matrix_[__SD(BOARD)::matrix_rows][__SD(BOARD)::matrix_columns] = {}; \
+  uint8_t HARDWARE_IMPLEMENTATION::KeyScanner::debounce_matrix_[HARDWARE_IMPLEMENTATION::KeyScannerProps::matrix_rows][HARDWARE_IMPLEMENTATION::KeyScannerProps::matrix_columns] = {}; \
                                                                                            \
   ISR(TIMER1_OVF_vect) {                                                                   \
     KeyboardHardware.readMatrix();                                                         \
