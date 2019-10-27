@@ -47,6 +47,9 @@ class Base {
   typename _LEDDriverProps::LEDCountType getLedIndex(uint8_t key_offset) {
     return -1;
   }
+
+ protected:
+  typedef _LEDDriverProps Props_;
 };
 
 }
