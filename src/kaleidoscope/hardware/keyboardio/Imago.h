@@ -22,45 +22,14 @@
 #include <Arduino.h>
 #define HARDWARE_IMPLEMENTATION kaleidoscope::hardware::keyboardio::Imago
 
-struct cRGB {
-  uint8_t b;
-  uint8_t g;
-  uint8_t r;
-};
-
-#define CRGB(r,g,b) (cRGB){b, g, r}
-
 #include "kaleidoscope/driver/keyscanner/ATMega.h"
-#include "kaleidoscope/driver/leddriver/Base.h"
+#include "kaleidoscope/driver/leddriver/IS31FL3741.h"
 #include "kaleidoscope/driver/bootloader/avr/Caterina.h"
 #include "kaleidoscope/hardware/avr/AVRDevice.h"
 
 namespace kaleidoscope {
 namespace hardware {
 namespace keyboardio {
-
-struct ImagoLEDDriverProps: public kaleidoscope::driver::leddriver::BaseProps {
-  static constexpr LEDCountType led_count = 78;
-};
-
-class ImagoLEDDriver : public kaleidoscope::driver::leddriver::Base<ImagoLEDDriverProps> {
- public:
-  static void setup();
-  static void syncLeds();
-  static void setCrgbAt(int8_t i, cRGB crgb);
-  static cRGB getCrgbAt(int8_t i);
-  static int8_t getLedIndex(uint8_t key_offset);
-
-  static cRGB led_data[117]; // 117 is the number of LEDs the chip drives
-  // until we clean stuff up a bit, it's easiest to just have the whole struct around
-
- private:
-  static bool isLEDChanged;
-  static void selectRegister(uint8_t);
-  static void unlockRegister();
-  static void setAllPwmTo(uint8_t);
-  static void twiSend(uint8_t addr, uint8_t Reg_Add, uint8_t Reg_Dat);
-};
 
 struct ImagoDeviceProps : kaleidoscope::hardware::avr::AVRDeviceProps {
   typedef struct ImagoKeyScannerProps : public kaleidoscope::driver::keyscanner::ATMegaProps {
@@ -70,8 +39,20 @@ struct ImagoDeviceProps : kaleidoscope::hardware::avr::AVRDeviceProps {
                             );
   } KeyScannerProps;
   typedef kaleidoscope::driver::keyscanner::ATMega<KeyScannerProps> KeyScanner;
-  typedef ImagoLEDDriverProps LEDDriverProps;
-  typedef ImagoLEDDriver LEDDriver;
+
+  typedef struct ImagoLEDDriverProps: public kaleidoscope::driver::leddriver::IS31FL3741Props {
+    static constexpr LEDCountType led_count = 78;
+    //static constexpr uint8_t NOLED = 254;
+    static constexpr uint8_t key_led_map[5][16] PROGMEM = {
+      { 104,    0,     1,    2,     3,    4,    5,     6,    7,     8,    9,   10,   11,   115,   12,   116},
+      {  91,   13, NOLED,   15,    16,   17,   18,    19,   20,    21,   22,   23,   24,   102,   15,   103},
+      {  78,   26,    27,   28,    29,   30,   31, NOLED,   33,    34,   35,   36,   37,   89,    38, NOLED},
+      {  65,   39,    40,   41,    42,   43,   44,    45,   46,    47,   48,   49,   50,   51, NOLED,    90},
+      {  52,   66,    53,   54, NOLED,   56,   57,    71,   59, NOLED,   61,   62,   63,   64, NOLED,    77}
+    };
+  } LEDDriverProps;
+  typedef kaleidoscope::driver::leddriver::IS31FL3741<ImagoLEDDriverProps> LEDDriver;
+
   typedef kaleidoscope::driver::bootloader::avr::Caterina BootLoader;
 };
 
@@ -94,7 +75,6 @@ class Imago: public kaleidoscope::hardware::avr::AVRDevice<ImagoDeviceProps> {
          R4C0, R4C1, R4C2, R4C3, XXX,  R4C5, R4C6, R4C7, R4C8, XXX,  R4C10, R4C11, R4C12, R4C13, XXX,   R4C15
 
 }
-
 }
 }
 
