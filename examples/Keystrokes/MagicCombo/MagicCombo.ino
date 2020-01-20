@@ -27,7 +27,10 @@ void kindOfMagic(uint8_t combo_index) {
   Macros.type(PSTR("It's a kind of magic!"));
 }
 
-USE_MAGIC_COMBOS([KIND_OF_MAGIC] = {.action = kindOfMagic, .keys = {R3C6, R3C9}});
+USE_MAGIC_COMBOS([KIND_OF_MAGIC] = {
+    .action = kindOfMagic,
+    .keys = {R2C1, R2C2} //{R3C6, R3C9}
+  });
 
 // *INDENT-OFF*
 KEYMAPS(

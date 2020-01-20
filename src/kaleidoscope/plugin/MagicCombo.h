@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-MagicCombo -- Magic combo framework
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2016, 2017, 2018, 2020  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -48,10 +48,20 @@ class MagicCombo : public kaleidoscope::Plugin {
 
   static uint16_t min_interval;
 
-  EventHandlerResult beforeReportingState();
+  //EventHandlerResult beforeReportingState();
+  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
 
  private:
   static uint16_t start_time_;
+  static uint8_t longest_partial_match_;
+  static uint16_t partial_match_start_time_;
+  static uint16_t partial_match_timeout_;
+
+  static bool checkPartialCombos();
+  static void replayPartialCombos();
+  static void updateComboState();
+  static bool isPartialComplete();
+  static void playComboActions();
 };
 
 namespace magiccombo {
