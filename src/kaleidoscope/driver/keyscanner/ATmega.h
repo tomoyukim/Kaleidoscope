@@ -35,8 +35,10 @@
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #define ATMEGA_KEYSCANNER_PROPS(ROW_PINS_, COL_PINS_)                   \
   KEYSCANNER_PROPS(NUM_ARGS(ROW_PINS_), NUM_ARGS(COL_PINS_));           \
-  static constexpr uint8_t matrix_row_pins[matrix_rows] =  ROW_PINS_;   \
-  static constexpr uint8_t matrix_col_pins[matrix_columns] =  COL_PINS_;
+  static constexpr uint8_t atmega_rows = NUM_ARGS(ROW_PINS_);           \
+  static constexpr uint8_t atmega_columns = NUM_ARGS(COL_PINS_);        \
+  static constexpr uint8_t matrix_row_pins[atmega_rows] =  ROW_PINS_;   \
+  static constexpr uint8_t matrix_col_pins[atmega_columns] = COL_PINS_;
 #else // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #define ATMEGA_KEYSCANNER_PROPS(ROW_PINS_, COL_PINS_)               \
   KEYSCANNER_PROPS(NUM_ARGS(ROW_PINS_), NUM_ARGS(COL_PINS_));
@@ -44,8 +46,8 @@
 
 #define ATMEGA_KEYSCANNER_BOILERPLATE                                                                   \
   KEYSCANNER_PROPS_BOILERPLATE(kaleidoscope::Device::KeyScannerProps);                                  \
-  constexpr uint8_t kaleidoscope::Device::KeyScannerProps::matrix_row_pins[matrix_rows];                \
-  constexpr uint8_t kaleidoscope::Device::KeyScannerProps::matrix_col_pins[matrix_columns];             \
+  constexpr uint8_t kaleidoscope::Device::KeyScannerProps::matrix_row_pins[atmega_rows];                \
+  constexpr uint8_t kaleidoscope::Device::KeyScannerProps::matrix_col_pins[atmega_columns];             \
   template<>                                                                                            \
   uint16_t kaleidoscope::Device::KeyScanner::previousKeyState_[kaleidoscope::Device::KeyScannerProps::matrix_rows] = {}; \
   template<>                                                                                            \
@@ -67,11 +69,13 @@ struct ATmegaProps: kaleidoscope::driver::keyscanner::BaseProps {
   static const uint8_t debounce = 3;
 
   /*
-   * The following two lines declare an empty array. Both of these must be
+   * The following four lines declare an empty array. All of them must be
    * shadowed by the descendant keyscanner description class.
    */
   static constexpr uint8_t matrix_row_pins[] = {};
   static constexpr uint8_t matrix_col_pins[] = {};
+  static constexpr uint8_t atmega_rows = 0;
+  static constexpr uint8_t atmega_columns = 0;
 };
 
 
@@ -91,15 +95,24 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
       sizeof(_KeyScannerProps::matrix_col_pins) > 0,
       "The key scanner description has an empty array of matrix column pins."
     );
+    static_assert(
+        sizeof(_KeyScannerProps::atmega_rows) > 0,
+        "The key scanner description has no rows set for the ATMega scanner."
+    );
+
+    static_assert(
+        sizeof(_KeyScannerProps::atmega_columns) > 0,
+        "The key scanner description has no columns set for the ATMega scanner."
+    );
 
     wdt_disable();
 
-    for (uint8_t i = 0; i < _KeyScannerProps::matrix_columns; i++) {
+    for (uint8_t i = 0; i < _KeyScannerProps::atmega_columns; i++) {
       DDR_INPUT(_KeyScannerProps::matrix_col_pins[i]);
       ENABLE_PULLUP(_KeyScannerProps::matrix_col_pins[i]);
     }
 
-    for (uint8_t i = 0; i < _KeyScannerProps::matrix_rows; i++) {
+    for (uint8_t i = 0; i < _KeyScannerProps::atmega_rows; i++) {
       DDR_OUTPUT(_KeyScannerProps::matrix_row_pins[i]);
       OUTPUT_HIGH(_KeyScannerProps::matrix_row_pins[i]);
     }
@@ -116,7 +129,7 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) readMatrix(void) {
-    for (uint8_t current_row = 0; current_row < _KeyScannerProps::matrix_rows; current_row++) {
+    for (uint8_t current_row = 0; current_row < _KeyScannerProps::atmega_rows; current_row++) {
       uint16_t mask, cols;
 
       mask = debounceMaskForRow(current_row);
@@ -138,8 +151,8 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
-    for (byte row = 0; row < _KeyScannerProps::matrix_rows; row++) {
-      for (byte col = 0; col < _KeyScannerProps::matrix_columns; col++) {
+    for (byte row = 0; row < _KeyScannerProps::atmega_rows; row++) {
+      for (byte col = 0; col < _KeyScannerProps::atmega_columns; col++) {
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
         if (keyState) {
@@ -221,7 +234,7 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   __attribute__((optimize("no-unroll-loops")))
   uint16_t readCols() {
     uint16_t results = 0x00 ;
-    for (uint8_t i = 0; i < _KeyScannerProps::matrix_columns; i++) {
+    for (uint8_t i = 0; i < _KeyScannerProps::atmega_columns; i++) {
       asm("NOP"); // We need to pause a beat before reading or we may read before the pin is hot
       results |= (!READ_PIN(_KeyScannerProps::matrix_col_pins[i]) << i);
     }
