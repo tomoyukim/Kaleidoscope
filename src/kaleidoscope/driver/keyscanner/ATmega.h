@@ -67,6 +67,7 @@ namespace keyscanner {
 
 struct ATmegaProps: kaleidoscope::driver::keyscanner::BaseProps {
   static const uint8_t debounce = 3;
+  static const uint8_t atmega_row_offset = 0;
 
   /*
    * The following four lines declare an empty array. All of them must be
@@ -129,16 +130,18 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) readMatrix(void) {
+    const uint8_t row_offset = _KeyScannerProps::atmega_row_offset;
+
     for (uint8_t current_row = 0; current_row < _KeyScannerProps::atmega_rows; current_row++) {
       uint16_t mask, cols;
 
-      mask = debounceMaskForRow(current_row);
+      mask = debounceMaskForRow(current_row + row_offset);
 
       OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
-      cols = (readCols() & mask) | (keyState_[current_row] & ~mask);
+      cols = (readCols() & mask) | (keyState_[current_row + row_offset] & ~mask);
       OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
-      debounceRow(cols ^ keyState_[current_row], current_row);
-      keyState_[current_row] = cols;
+      debounceRow(cols ^ keyState_[current_row + row_offset], current_row + row_offset);
+      keyState_[current_row + row_offset] = cols;
     }
   }
 
@@ -151,7 +154,7 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
-    for (byte row = 0; row < _KeyScannerProps::atmega_rows; row++) {
+    for (byte row = row_offset; row < _KeyScannerProps::atmega_rows + row_offset; row++) {
       for (byte col = 0; col < _KeyScannerProps::atmega_columns; col++) {
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
