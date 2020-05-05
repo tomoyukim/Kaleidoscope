@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * kaleidoscope::driver::keyscanner::ATmega -- AVR ATmega-based keyscanner component
- * Copyright (C) 2018-2019  Keyboard.io, Inc
+ * Copyright (C) 2018-2020  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
