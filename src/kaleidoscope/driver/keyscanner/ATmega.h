@@ -218,7 +218,7 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
 
   bool do_scan_;
 
- private:
+ protected:
   typedef _KeyScannerProps KeyScannerProps_;
   static uint16_t previousKeyState_[_KeyScannerProps::matrix_rows];
   static uint16_t keyState_[_KeyScannerProps::matrix_rows];
