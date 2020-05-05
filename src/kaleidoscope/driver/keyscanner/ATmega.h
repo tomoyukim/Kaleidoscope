@@ -154,6 +154,8 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
+    const uint8_t row_offset = _KeyScannerProps::atmega_row_offset;
+
     for (byte row = row_offset; row < _KeyScannerProps::atmega_rows + row_offset; row++) {
       for (byte col = 0; col < _KeyScannerProps::atmega_columns; col++) {
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
