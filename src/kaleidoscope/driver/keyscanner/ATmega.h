@@ -129,19 +129,23 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
     TIMSK1 = _BV(TOIE1);
   }
 
-  void __attribute__((optimize(3))) readMatrix(void) {
+  void __attribute__((optimize(3))) readRow(uint8_t current_row) {
     const uint8_t row_offset = _KeyScannerProps::atmega_row_offset;
+    uint16_t mask, cols;
+
+    mask = debounceMaskForRow(current_row + row_offset);
+
+    OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
+    cols = (readCols() & mask) | (keyState_[current_row + row_offset] & ~mask);
+    OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
+    debounceRow(cols ^ keyState_[current_row + row_offset], current_row + row_offset);
+    keyState_[current_row + row_offset] = cols;
+  }
+
+  void __attribute__((optimize(3))) readMatrix(void) {
 
     for (uint8_t current_row = 0; current_row < _KeyScannerProps::atmega_rows; current_row++) {
-      uint16_t mask, cols;
-
-      mask = debounceMaskForRow(current_row + row_offset);
-
-      OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
-      cols = (readCols() & mask) | (keyState_[current_row + row_offset] & ~mask);
-      OUTPUT_TOGGLE(_KeyScannerProps::matrix_row_pins[current_row]);
-      debounceRow(cols ^ keyState_[current_row + row_offset], current_row + row_offset);
-      keyState_[current_row + row_offset] = cols;
+      readRow(current_row);
     }
   }
 
@@ -154,10 +158,8 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
-    const uint8_t row_offset = _KeyScannerProps::atmega_row_offset;
-
-    for (byte row = row_offset; row < _KeyScannerProps::atmega_rows + row_offset; row++) {
-      for (byte col = 0; col < _KeyScannerProps::atmega_columns; col++) {
+    for (byte row = 0; row < _KeyScannerProps::matrix_rows; row++) {
+      for (byte col = 0; col < _KeyScannerProps::matrix_columns; col++) {
         uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
                            (bitRead(keyState_[row], col) << 1);
         if (keyState) {
