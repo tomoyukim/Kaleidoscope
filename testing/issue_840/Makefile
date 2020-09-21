@@ -27,7 +27,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 		-L"${COMMON_LIB_DIR}" \
 		-lcommon \
 		"${LIB_DIR}/${LIB_FILE}" \
-		-L"$(PWD)/../googletest/lib" \
+		-L"$(PWD)/../googletest/build/lib" \
 		-lgtest \
 		-lgmock \
 		-lm \
@@ -60,4 +60,3 @@ clean: FORCE
 	rm -rf "${BIN_DIR}" "${LIB_DIR}" "${OBJ_DIR}"
 
 .PHONY: FORCE
-

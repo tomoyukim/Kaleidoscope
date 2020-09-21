@@ -17,7 +17,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 	@echo "link"
 	mkdir -p "${BIN_DIR}" "${LIB_DIR}"
 	env LIBONLY=yes LOCAL_CFLAGS='"-I$(PWD)"' OUTPUT_PATH="$(PWD)/$(LIB_DIR)" VERBOSE=1 $(MAKE) -f delegate.mk
-	g++ -o "${BIN_DIR}/${BIN_FILE}" -lpthread -g -w -lm -lXtst -lX11 ${TEST_OBJS} "${LIB_DIR}/${LIB_FILE}" -L"$(PWD)/../googletest/lib" -lgtest -lgmock
+	g++ -o "${BIN_DIR}/${BIN_FILE}" -lpthread -g -w -lm -lXtst -lX11 ${TEST_OBJS} "${LIB_DIR}/${LIB_FILE}" -L"$(PWD)/../googletest/build/lib" -lgtest -lgmock
 
 ${OBJ_DIR}/%.o: %.cpp
 	@echo "compile $@"
@@ -45,4 +45,3 @@ clean:
 	rm -rf "${BIN_DIR}" "${LIB_DIR}" "${OBJ_DIR}"
 
 .PHONY: FORCE
-
