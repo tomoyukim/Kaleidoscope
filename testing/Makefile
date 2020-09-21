@@ -4,7 +4,10 @@ TEST_DIRS=$(shell dirname $(wildcard */Makefile))
 DIRS=googletest/build hello-simulator kaleidoscope common issue_840
 CLEANDIRS = $(DIRS:%=clean-%)
 
-.PHONY: subdirs $(CLEANDIRS)
+.PHONY: subdirs $(CLEANDIRS) cmake-clean
+
+cmake-clean: clean
+	rm -rf googletest/build
 
 clean: googletest/build/Makefile $(CLEANDIRS)
 	rm -rf "$(LIB_DIR)"
