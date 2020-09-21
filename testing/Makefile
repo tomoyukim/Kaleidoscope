@@ -6,7 +6,8 @@ CLEANDIRS = $(DIRS:%=clean-%)
 
 .PHONY: subdirs $(CLEANDIRS) cmake-clean
 
-cmake-clean: clean
+cmake-clean:
+	-${MAKE} clean
 	rm -rf googletest/build
 
 clean: googletest/build/Makefile $(CLEANDIRS)
