@@ -1,4 +1,4 @@
-LIB_DIR?=${PWD}/lib
+LIB_DIR?=$(shell pwd)/lib
 TEST_DIRS=$(shell dirname $(wildcard */Makefile))
 
 DIRS=googletest/build hello-simulator kaleidoscope common issue_840
