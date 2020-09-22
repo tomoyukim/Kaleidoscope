@@ -14,29 +14,41 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "test/common/setup-googletest.h"
 
-#include <cstddef>
-
-#include "testing/common/SimHarness.h"
-#include "testing/common/State.h"
-
-// Out of order due to macro conflicts.
-#include "testing/common/fix-macros.h"
-#include "gtest/gtest.h"
-#include <memory>
+SETUP_GOOGLETEST();
 
 namespace kaleidoscope {
 namespace testing {
+namespace {
 
-class VirtualDeviceTest : public ::testing::Test {
- protected:
-  void SetUp();
+using ::testing::IsEmpty;
 
-  std::unique_ptr<State> RunCycle();
+class KeyboardReports : public VirtualDeviceTest {};
 
-  SimHarness sim_;
-};
+TEST_F(KeyboardReports, KeysActiveWhenPressed) {
+  sim_.Press(2, 1); // A
+  auto state = RunCycle();
 
+  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
+  EXPECT_THAT(
+      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
+      Contains(Key_A));
+
+  sim_.Release(2, 1);  // A
+  state = RunCycle();
+
+  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
+  EXPECT_THAT(
+      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
+      IsEmpty());
+
+  state = RunCycle();
+
+  // 2 cycles after releasing A
+  EXPECT_EQ(state->HIDReports()->Keyboard().size(), 0);
+}
+
+}  // namespace
 }  // namespace testing
 }  // namespace kaleidoscope

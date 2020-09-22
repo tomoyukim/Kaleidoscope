@@ -14,7 +14,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/setup-googletest.h"
+#include "test/common/setup-googletest.h"
 
 SETUP_GOOGLETEST();
 
@@ -58,30 +58,30 @@ TEST_F(Issue840, HasNotRegressed) {
 // TEST_F(Issue840, Reproduces) {
 //   sim_.Press(2, 1); // Press System_PowerDown
 //   auto state = RunCycle();
-// 
+//
 //   ASSERT_EQ(state->SystemControlReports().size(), 1);
 //   EXPECT_THAT(state->SystemControlReports(0), Contains(System_PowerDown));
-// 
+//
 //   sim_.Press(3, 5); // Press System_Sleep
 //   state = RunCycle();
-// 
+//
 //   ASSERT_EQ(state->SystemControlReports().size(), 1);
 //   EXPECT_THAT(state->SystemControlReports(0), Contains(System_Sleep));
-// 
+//
 //   sim_.Release(2, 1);  // Release System_PowerDown
 //   state = RunCycle();
-// 
+//
 //   ASSERT_EQ(state->SystemControlReports().size(), 1);
 //   EXPECT_THAT(state->SystemControlReports(0), IsNull());
-// 
+//
 //   sim_.Release(3, 5);  // Release System_Sleep
 //   state = RunCycle();
-// 
+//
 //   ASSERT_EQ(state->SystemControlReports().size(), 1);
 //   EXPECT_THAT(state->SystemControlReports(0), IsNull());
-// 
+//
 //   state = RunCycle();
-// 
+//
 //   EXPECT_EQ(state->SystemControlReports().size(), 0);
 // }
 

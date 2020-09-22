@@ -14,41 +14,25 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/setup-googletest.h"
+#include "test/common/SystemControlReport.h"
 
-SETUP_GOOGLETEST();
+#include <cstring>
 
 namespace kaleidoscope {
 namespace testing {
-namespace {
 
-using ::testing::IsEmpty;
-
-class KeyboardReports : public VirtualDeviceTest {};
-
-TEST_F(KeyboardReports, KeysActiveWhenPressed) {
-  sim_.Press(2, 1); // A
-  auto state = RunCycle();
-
-  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
-  EXPECT_THAT(
-      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
-      Contains(Key_A));
-
-  sim_.Release(2, 1);  // A
-  state = RunCycle();
-
-  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
-  EXPECT_THAT(
-      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
-      IsEmpty());
-
-  state = RunCycle();
-
-  // 2 cycles after releasing A
-  EXPECT_EQ(state->HIDReports()->Keyboard().size(), 0);
+SystemControlReport::SystemControlReport(const void* data) {
+  const ReportData& report_data =
+    *static_cast<const ReportData*>(data);
+  memcpy(&report_data_, &report_data, sizeof(report_data_));
+  if (report_data_.key != 0) {
+    this->push_back(report_data_.key);
+  }
 }
 
-}  // namespace
+uint8_t SystemControlReport::Key() const {
+  return report_data_.key;
+}
+
 }  // namespace testing
 }  // namespace kaleidoscope

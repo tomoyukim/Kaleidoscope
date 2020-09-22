@@ -14,24 +14,26 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/SystemControlReport.h"
+#include "test/common/ConsumerControlReport.h"
 
 #include <cstring>
 
 namespace kaleidoscope {
 namespace testing {
 
-SystemControlReport::SystemControlReport(const void* data) {
+ConsumerControlReport::ConsumerControlReport(const void *data) {
   const ReportData& report_data =
     *static_cast<const ReportData*>(data);
   memcpy(&report_data_, &report_data, sizeof(report_data_));
-  if (report_data_.key != 0) {
-    this->push_back(report_data_.key);
-  }
 }
 
-uint8_t SystemControlReport::Key() const {
-  return report_data_.key;
+std::vector<uint16_t> ConsumerControlReport::Keys() const {
+  std::vector<uint16_t> keys;
+  if (report_data_.key1) keys.push_back(report_data_.key1);
+  if (report_data_.key2) keys.push_back(report_data_.key2);
+  if (report_data_.key3) keys.push_back(report_data_.key3);
+  if (report_data_.key4) keys.push_back(report_data_.key4);
+  return keys;
 }
 
 }  // namespace testing

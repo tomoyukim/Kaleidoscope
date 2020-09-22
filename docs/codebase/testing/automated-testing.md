@@ -27,7 +27,7 @@ docs](https://github.com/google/googletest/tree/master/googletest/docs) and
 1. Write your test case.
 
 The final include in any test file should be `#include
-"testing/common/setup-googletest"` which should be followed by the macro
+"test/common/setup-googletest"` which should be followed by the macro
 invocation `SETUP_GOOGLETEST()`. This will take care of including headers
 commonly used in tests in addtion to gtest and gmock headers.
 

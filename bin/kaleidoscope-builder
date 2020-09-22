@@ -512,7 +512,7 @@ decompile () {
 clean () {
     rm -rf -- "${OUTPUT_PATH}"
     kaleidoscope_dir="$(dirname "$0")/.."
-    (cd "${kaleidoscope_dir}/testing/googletest" && cmake . && make clean)
+    (cd "${kaleidoscope_dir}/test/googletest" && cmake . && make clean)
 }
 
 reset_device() {
@@ -578,7 +578,7 @@ EOF
 
 build_gtest_gmock() {
     kaleidoscope_dir="$(dirname "$0")/.."
-    (cd "${kaleidoscope_dir}/testing/googletest" && cmake . && make)
+    (cd "${kaleidoscope_dir}/test/googletest" && cmake . && make)
 }
 
 run_simulator_tests() {
