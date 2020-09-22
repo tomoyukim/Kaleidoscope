@@ -1,7 +1,7 @@
 LIB_DIR?=$(shell pwd)/lib
-TEST_DIRS=$(shell dirname $(wildcard */Makefile))
+TEST_DIRS=$(shell dirname $(wildcard tests/*/Makefile))
 
-DIRS=googletest/build hello-simulator kaleidoscope common issue_840
+DIRS=googletest/build common ${TEST_DIRS}
 CLEANDIRS = $(DIRS:%=clean-%)
 
 .PHONY: subdirs $(CLEANDIRS) cmake-clean
@@ -13,7 +13,7 @@ cmake-clean:
 clean: googletest/build/Makefile $(CLEANDIRS)
 	rm -rf "$(LIB_DIR)"
 
-$(CLEANDIRS): 
+$(CLEANDIRS):
 	cd $(@:clean-%=%) && $(MAKE) clean
 
 all: ${TEST_DIRS}
@@ -25,16 +25,13 @@ googletest: googletest/build/Makefile
 googletest/build/Makefile:
 	install -d googletest/build && cd googletest/build && cmake ..
 
-common: 
+common:
 	cd common && LIB_DIR="${LIB_DIR}" $(MAKE)
-
-hello-simulator:
-	@:
 
 Makefile:
 	@:
 
-%: common googletest 
+%: common googletest
 	cd "$@" && $(MAKE)
 
-.PHONY: googletest build-libs common
+.PHONY: googletest common
