@@ -512,7 +512,7 @@ decompile () {
 clean () {
     rm -rf -- "${OUTPUT_PATH}"
     kaleidoscope_dir="$(dirname "$0")/.."
-    (cd "${kaleidoscope_dir}/test/googletest" && cmake . && make clean)
+    (cd "${kaleidoscope_dir}/testing/googletest" && cmake . && make clean)
 }
 
 reset_device() {
@@ -578,30 +578,21 @@ EOF
 
 build_gtest_gmock() {
     kaleidoscope_dir="$(dirname "$0")/.."
-    (cd "${kaleidoscope_dir}/test/googletest" && cmake . && make)
+    (cd "${kaleidoscope_dir}/testing/googletest" && cmake . && make)
 }
 
-run_simulator_tests() {
-    (cd "${BOARD_HARDWARE_PATH}/keyboardio" && make prepare-virtual)
-    kaleidoscope_dir="$(dirname "$0")/.."
-    cd "${kaleidoscope_dir}/test/simulator"
-    ${MAKE:-make}
-}
-
-run_simulator_googletest() {
+run_tests() {
     (cd "${BOARD_HARDWARE_PATH}/keyboardio" && make prepare-virtual)
     build_gtest_gmock
     kaleidoscope_dir="$(dirname "$0")/.."
-    cd "${kaleidoscope_dir}/testing"
+    cd "${kaleidoscope_dir}/tests"
     ${MAKE:-make}
 }
 
-docker_simulator_tests() {
-    docker build -t kaleidoscope/simulator test
-    docker run --rm -it \
-           -v "${BOARD_HARDWARE_PATH}/keyboardio:/kaleidoscope/hardware/keyboardio" \
-           -v "$(pwd):/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope" \
-           kaleidoscope/simulator
+docker_tests() {
+    kaleidoscope_dir="$(dirname "$0")/.."
+    cd "${kaleidoscope_dir}"
+    bin/run-docker make -C tests all
 }
 
 usage () {

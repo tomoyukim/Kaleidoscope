@@ -14,24 +14,21 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "kaleidoscope/key_defs.h"
-#include "test/common/SystemControlReport.h"
-
-// Out of order because `fix-macros.h` clears the preprocessor environment for
-// gtest and gmock.
-#include "test/common/fix-macros.h"
-#include "gmock/gmock.h"
+#include "testing/common/State.h"
 
 namespace kaleidoscope {
 namespace testing {
 
-MATCHER_P(Contains, key, negation ? "does not contain" : "contains") {
-  return arg.Key() == key.getKeyCode();
+// static
+std::unique_ptr<State> State::Snapshot() {
+  auto state = std::make_unique<State>();
+  state->hid_state_ = internal::HIDStateBuilder::Snapshot();
+  return state;
 }
 
-auto Contains(Key key) { return ::testing::Contains(key.getKeyCode()); }
+const HIDState* State::HIDReports() const {
+  return hid_state_.get();
+}
 
 }  // namespace testing
 }  // namespace kaleidoscope

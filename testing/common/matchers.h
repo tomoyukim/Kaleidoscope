@@ -16,28 +16,22 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <vector>
+#include "kaleidoscope/key_defs.h"
+#include "testing/common/SystemControlReport.h"
 
-#include "test/common/HIDState.h"
-
-// Out of order due to macro conflicts.
-#include "test/common/fix-macros.h"
-#include <memory>
+// Out of order because `fix-macros.h` clears the preprocessor environment for
+// gtest and gmock.
+#include "testing/common/fix-macros.h"
+#include "gmock/gmock.h"
 
 namespace kaleidoscope {
 namespace testing {
 
-class State {
- public:
-  static std::unique_ptr<State> Snapshot();
+MATCHER_P(Contains, key, negation ? "does not contain" : "contains") {
+  return arg.Key() == key.getKeyCode();
+}
 
-  const HIDState* HIDReports() const;
-
- private:
-  std::unique_ptr<HIDState> hid_state_;
-};
+auto Contains(Key key) { return ::testing::Contains(key.getKeyCode()); }
 
 }  // namespace testing
 }  // namespace kaleidoscope

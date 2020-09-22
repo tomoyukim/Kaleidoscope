@@ -14,21 +14,30 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "test/common/State.h"
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+#include "testing/common/HIDState.h"
+
+// Out of order due to macro conflicts.
+#include "testing/common/fix-macros.h"
+#include <memory>
 
 namespace kaleidoscope {
 namespace testing {
 
-// static
-std::unique_ptr<State> State::Snapshot() {
-  auto state = std::make_unique<State>();
-  state->hid_state_ = internal::HIDStateBuilder::Snapshot();
-  return state;
-}
+class State {
+ public:
+  static std::unique_ptr<State> Snapshot();
 
-const HIDState* State::HIDReports() const {
-  return hid_state_.get();
-}
+  const HIDState* HIDReports() const;
+
+ private:
+  std::unique_ptr<HIDState> hid_state_;
+};
 
 }  // namespace testing
 }  // namespace kaleidoscope

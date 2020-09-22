@@ -18,7 +18,7 @@ run: ${BIN_DIR}/${BIN_FILE}
 ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 	@echo "link"
 	mkdir -p "${BIN_DIR}" "${LIB_DIR}"
-	env LIBONLY=yes LOCAL_CFLAGS='"-I$(PWD)"' OUTPUT_PATH="$(PWD)/$(LIB_DIR)" VERBOSE=1 $(MAKE) -f ../../makefiles/delegate.mk
+	env LIBONLY=yes LOCAL_CFLAGS='"-I$(PWD)"' OUTPUT_PATH="$(PWD)/$(LIB_DIR)" VERBOSE=1 $(MAKE) -f ../../testing/makefiles/delegate.mk
 	g++ -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
@@ -27,7 +27,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 		-L"${COMMON_LIB_DIR}" \
 		-lcommon \
 		"${LIB_DIR}/${LIB_FILE}" \
-		-L"$(PWD)/../../googletest/build/lib" \
+		-L"$(PWD)/../../testing/googletest/build/lib" \
 		-lgtest \
 		-lgmock \
 		-lm \
@@ -43,8 +43,8 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 		-I${PWD}/../../../../../virtual/cores/arduino \
 		-I${PWD}/../../../Kaleidoscope-HIDAdaptor-KeyboardioHID/src \
 		-I${PWD}/../../../KeyboardioHID/src \
-		-I${PWD}/../../googletest/googlemock/include \
-		-I${PWD}/../../googletest/googletest/include \
+		-I${PWD}/../../testing/googletest/googlemock/include \
+		-I${PWD}/../../testing/googletest/googletest/include \
 		-DARDUINO=10607 \
 		-DARDUINO_ARCH_VIRTUAL \
 		-DARDUINO_AVR_MODEL01 \

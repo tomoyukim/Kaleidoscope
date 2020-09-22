@@ -21,8 +21,8 @@ ${OBJ_DIR}/%.o: %.cpp $(wildcard *.h)
 		-I${PWD}/../../../../../virtual/cores/arduino \
 		-I${PWD}/../../../Kaleidoscope-HIDAdaptor-KeyboardioHID/src \
 		-I${PWD}/../../../KeyboardioHID/src \
-		-I${PWD}/../../test/googletest/googlemock/include \
-		-I${PWD}/../../test/googletest/googletest/include \
+		-I${PWD}/../../testing/googletest/googlemock/include \
+		-I${PWD}/../../testing/googletest/googletest/include \
 		-DARDUINO=10607 \
 		-DARDUINO_ARCH_VIRTUAL \
 		-DARDUINO_AVR_MODEL01 \

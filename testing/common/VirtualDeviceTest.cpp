@@ -14,41 +14,22 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "test/common/setup-googletest.h"
+#include "testing/common/VirtualDeviceTest.h"
 
-SETUP_GOOGLETEST();
+#include "HIDReportObserver.h"
+#include "testing/common/HIDState.h"
 
 namespace kaleidoscope {
 namespace testing {
-namespace {
 
-using ::testing::IsEmpty;
-
-class KeyboardReports : public VirtualDeviceTest {};
-
-TEST_F(KeyboardReports, KeysActiveWhenPressed) {
-  sim_.Press(2, 1); // A
-  auto state = RunCycle();
-
-  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
-  EXPECT_THAT(
-      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
-      Contains(Key_A));
-
-  sim_.Release(2, 1);  // A
-  state = RunCycle();
-
-  ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
-  EXPECT_THAT(
-      state->HIDReports()->Keyboard(0).ActiveKeycodes(),
-      IsEmpty());
-
-  state = RunCycle();
-
-  // 2 cycles after releasing A
-  EXPECT_EQ(state->HIDReports()->Keyboard().size(), 0);
+void VirtualDeviceTest::SetUp() {
+  HIDReportObserver::resetHook(&internal::HIDStateBuilder::ProcessHidReport);
 }
 
-}  // namespace
+std::unique_ptr<State> VirtualDeviceTest::RunCycle() {
+  sim_.RunCycle();
+  return State::Snapshot();
+}
+
 }  // namespace testing
 }  // namespace kaleidoscope

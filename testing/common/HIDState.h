@@ -16,13 +16,13 @@
 
 #pragma once
 
-#include "test/common/AbsoluteMouseReport.h"
-#include "test/common/ConsumerControlReport.h"
-#include "test/common/KeyboardReport.h"
-#include "test/common/SystemControlReport.h"
+#include "testing/common/AbsoluteMouseReport.h"
+#include "testing/common/ConsumerControlReport.h"
+#include "testing/common/KeyboardReport.h"
+#include "testing/common/SystemControlReport.h"
 
 // Out of order due to macro conflicts.
-#include "test/common/fix-macros.h"
+#include "testing/common/fix-macros.h"
 #include <memory>
 
 namespace kaleidoscope {

@@ -14,22 +14,29 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "test/common/VirtualDeviceTest.h"
+#pragma once
 
-#include "HIDReportObserver.h"
-#include "test/common/HIDState.h"
+#include <cstddef>
+
+#include "testing/common/SimHarness.h"
+#include "testing/common/State.h"
+
+// Out of order due to macro conflicts.
+#include "testing/common/fix-macros.h"
+#include "gtest/gtest.h"
+#include <memory>
 
 namespace kaleidoscope {
 namespace testing {
 
-void VirtualDeviceTest::SetUp() {
-  HIDReportObserver::resetHook(&internal::HIDStateBuilder::ProcessHidReport);
-}
+class VirtualDeviceTest : public ::testing::Test {
+ protected:
+  void SetUp();
 
-std::unique_ptr<State> VirtualDeviceTest::RunCycle() {
-  sim_.RunCycle();
-  return State::Snapshot();
-}
+  std::unique_ptr<State> RunCycle();
+
+  SimHarness sim_;
+};
 
 }  // namespace testing
 }  // namespace kaleidoscope
