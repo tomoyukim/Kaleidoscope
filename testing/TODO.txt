@@ -1,16 +1,5 @@
 Build System
 ============
-Desired (currently missing) behavior
-- Support for docker as done for `make docker-simulator-tests`
-  - I tried this, but wasn't able to get cmake (for googletest) to play well with Docker
-Undesired
-- Duplication of compiler flags across Makefiles under this directory
-  - Intended, but definitely shouldn't be in handwritten copies
-- Other duplication across Makefiles
-  - Intended, but already drifing; also, shouldn't be in manual copies
-- Duplication of delegate.mk
-  - Intended, to support invoking kaleidoscope-builder, but definitely shouldn't be manually copied
-
 Directory structure
 - Tests (e.g. testing/hello-simulator, testing/kaleidoscope, testing/issue_840) should be moved into a directory
   separate from test infrastructure, maybe just tests/
