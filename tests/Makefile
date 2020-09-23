@@ -7,14 +7,14 @@ libcommon_a	:= ${top_dir}/_build/lib/libcommon.a
 TESTS			?= $(shell find . -name 'sketch.ino' -exec dirname {} \;)
 .PHONY: clean cmake-clean all googletest
 
+all: ${TESTS}
+
 cmake-clean:
 	-${MAKE} clean
 	rm -rf ../testing/googletest/build
 
 clean: ../testing/googletest/build/Makefile
 	rm -rf "${build_dir}"
-
-all: ${TESTS}
 
 googletest: ../testing/googletest/build/Makefile
 	cd ../testing/googletest/build && $(MAKE)
