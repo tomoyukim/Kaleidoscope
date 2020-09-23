@@ -12,7 +12,7 @@ SKETCH_FILE=$(wildcard *.ino)
 BIN_FILE=$(subst .ino,,$(SKETCH_FILE))
 LIB_FILE=${BIN_FILE}-latest.a
 
-TEST_FILES=$(wildcard $(SRC_DIR)/*_test.cpp)
+TEST_FILES=$(wildcard $(SRC_DIR)/*.cpp)
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
 
 all: run
