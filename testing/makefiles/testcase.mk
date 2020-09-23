@@ -24,7 +24,12 @@ run: ${BIN_DIR}/${BIN_FILE}
 ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS}
 	@echo "link"
 	install -d "${BIN_DIR}" "${LIB_DIR}"
-	env LIBONLY=yes LOCAL_CFLAGS='"-I$(shell pwd)"' OUTPUT_PATH="${LIB_DIR}" VERBOSE=1 $(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk
+	env LIBONLY=yes \
+		  LOCAL_CFLAGS='"-I$(shell pwd)"' \
+		  OUTPUT_PATH="${LIB_DIR}" \
+			VERBOSE=1 \
+			ARCH=virtual DEFAULT_SKETCH=sketch \
+		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk
 	g++ -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
