@@ -14,25 +14,30 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/SystemControlReport.h"
+#pragma once
 
-#include <cstring>
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+#include "testing/HIDState.h"
+
+// Out of order due to macro conflicts.
+#include "testing/fix-macros.h"
+#include <memory>
 
 namespace kaleidoscope {
 namespace testing {
 
-SystemControlReport::SystemControlReport(const void* data) {
-  const ReportData& report_data =
-    *static_cast<const ReportData*>(data);
-  memcpy(&report_data_, &report_data, sizeof(report_data_));
-  if (report_data_.key != 0) {
-    this->push_back(report_data_.key);
-  }
-}
+class State {
+ public:
+  static std::unique_ptr<State> Snapshot();
 
-uint8_t SystemControlReport::Key() const {
-  return report_data_.key;
-}
+  const HIDState* HIDReports() const;
+
+ private:
+  std::unique_ptr<HIDState> hid_state_;
+};
 
 }  // namespace testing
 }  // namespace kaleidoscope

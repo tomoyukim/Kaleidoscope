@@ -4,8 +4,8 @@ build_dir := ${top_dir}/_build
 LIB_DIR := ${build_dir}/lib
 OBJ_DIR := ${build_dir}/obj
 
-CXX_FILES := $(wildcard ${top_dir}/testing/common/*.cpp)
-H_FILES		:= $(wildcard ${top_dir}/testing/common/*.h)
+CXX_FILES := $(wildcard ${top_dir}/testing/*.cpp)
+H_FILES		:= $(wildcard ${top_dir}/testing/*.h)
 BARE_CXX_FILES := $(foreach path,${CXX_FILES},$(notdir ${path}))
 OBJ_FILES	:= $(patsubst %.cpp,${OBJ_DIR}/%.o,$(BARE_CXX_FILES))
 LIB_FILE	:= libcommon.a
@@ -18,7 +18,7 @@ ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
 	@install -d "${LIB_DIR}"
 	ar rcs "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
 
-${OBJ_DIR}/%.o: ${top_dir}/testing/common/%.cpp ${H_FILES}
+${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 	@echo "compile $@"
 	@install -d "${OBJ_DIR}"
 	g++ -o "$@" -c \

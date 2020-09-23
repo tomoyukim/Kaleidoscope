@@ -15,9 +15,9 @@
  */
 
 #include "Kaleidoscope.h"
-#include "testing/common/SimHarness.h"
+#include "testing/SimHarness.h"
 
-#include "testing/common/fix-macros.h"
+#include "testing/fix-macros.h"
 #include <iostream>
 
 namespace kaleidoscope {

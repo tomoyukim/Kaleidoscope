@@ -14,21 +14,26 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/VirtualDeviceTest.h"
+#include "testing/ConsumerControlReport.h"
 
-#include "HIDReportObserver.h"
-#include "testing/common/HIDState.h"
+#include <cstring>
 
 namespace kaleidoscope {
 namespace testing {
 
-void VirtualDeviceTest::SetUp() {
-  HIDReportObserver::resetHook(&internal::HIDStateBuilder::ProcessHidReport);
+ConsumerControlReport::ConsumerControlReport(const void *data) {
+  const ReportData& report_data =
+    *static_cast<const ReportData*>(data);
+  memcpy(&report_data_, &report_data, sizeof(report_data_));
 }
 
-std::unique_ptr<State> VirtualDeviceTest::RunCycle() {
-  sim_.RunCycle();
-  return State::Snapshot();
+std::vector<uint16_t> ConsumerControlReport::Keys() const {
+  std::vector<uint16_t> keys;
+  if (report_data_.key1) keys.push_back(report_data_.key1);
+  if (report_data_.key2) keys.push_back(report_data_.key2);
+  if (report_data_.key3) keys.push_back(report_data_.key3);
+  if (report_data_.key4) keys.push_back(report_data_.key4);
+  return keys;
 }
 
 }  // namespace testing

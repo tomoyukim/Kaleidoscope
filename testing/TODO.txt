@@ -1,7 +1,6 @@
 Build System
 ============
 Directory structure
-- Test infracture (now in testing/common/) should be moved into testing/ after the actual tests are moved out
 - Test infrastructure should be able to be hierarchically organized
 
 Future Work

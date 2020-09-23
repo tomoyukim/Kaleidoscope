@@ -14,29 +14,27 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// NOTE: This should always be the last header file included in test source files.
+
 #pragma once
 
-#include <cstddef>
+#include "kaleidoscope/key_defs_keyboard.h"
+#include "Kaleidoscope.h"
 
-#include "testing/common/SimHarness.h"
-#include "testing/common/State.h"
-
-// Out of order due to macro conflicts.
-#include "testing/common/fix-macros.h"
+// Out of order because `fix-macros.h` clears the preprocessor environment for
+// gtest and gmock.
+#include "testing/fix-macros.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include <memory>
 
-namespace kaleidoscope {
-namespace testing {
+#include "testing/matchers.h"
+#include "testing/VirtualDeviceTest.h"
 
-class VirtualDeviceTest : public ::testing::Test {
- protected:
-  void SetUp();
-
-  std::unique_ptr<State> RunCycle();
-
-  SimHarness sim_;
-};
-
-}  // namespace testing
-}  // namespace kaleidoscope
+#define SETUP_GOOGLETEST() \
+  void executeTestFunction() { \
+    setup(); /* setup Kaleidoscope */ \
+    /* Turn off virtual_io's input. */ \
+    Kaleidoscope.device().keyScanner().setEnableReadMatrix(false); \
+    testing::InitGoogleTest(); \
+    RUN_ALL_TESTS(); \
+  }

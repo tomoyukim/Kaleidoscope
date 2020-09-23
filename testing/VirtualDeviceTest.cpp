@@ -14,27 +14,21 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/KeyboardReport.h"
+#include "testing/VirtualDeviceTest.h"
 
-#include <cstring>
+#include "HIDReportObserver.h"
+#include "testing/HIDState.h"
 
 namespace kaleidoscope {
 namespace testing {
 
-KeyboardReport::KeyboardReport(const void* data) {
-  const ReportData& report_data =
-    *static_cast<const ReportData*>(data);
-  memcpy(&report_data_, &report_data, sizeof(report_data_));
+void VirtualDeviceTest::SetUp() {
+  HIDReportObserver::resetHook(&internal::HIDStateBuilder::ProcessHidReport);
 }
 
-std::vector<uint8_t> KeyboardReport::ActiveKeycodes() const {
-  std::vector<uint8_t> active_keys;
-  for (uint8_t i = 0; i < HID_LAST_KEY; ++i) {
-    uint8_t bit = 1 << (uint8_t(i) % 8);
-    uint8_t key_code = report_data_.keys[i/8] & bit;
-    if (key_code) active_keys.push_back(i);
-  }
-  return active_keys;
+std::unique_ptr<State> VirtualDeviceTest::RunCycle() {
+  sim_.RunCycle();
+  return State::Snapshot();
 }
 
 }  // namespace testing

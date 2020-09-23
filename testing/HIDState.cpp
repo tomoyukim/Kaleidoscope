@@ -14,11 +14,11 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/HIDState.h"
+#include "testing/HIDState.h"
 
 #include "HID-Settings.h"
 
-#include "testing/common/fix-macros.h"
+#include "testing/fix-macros.h"
 
 // TODO(epan): Add proper logging.
 #include <iostream>

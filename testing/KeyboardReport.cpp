@@ -14,24 +14,28 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "testing/KeyboardReport.h"
 
-#include "kaleidoscope/key_defs.h"
-#include "testing/common/SystemControlReport.h"
-
-// Out of order because `fix-macros.h` clears the preprocessor environment for
-// gtest and gmock.
-#include "testing/common/fix-macros.h"
-#include "gmock/gmock.h"
+#include <cstring>
 
 namespace kaleidoscope {
 namespace testing {
 
-MATCHER_P(Contains, key, negation ? "does not contain" : "contains") {
-  return arg.Key() == key.getKeyCode();
+KeyboardReport::KeyboardReport(const void* data) {
+  const ReportData& report_data =
+    *static_cast<const ReportData*>(data);
+  memcpy(&report_data_, &report_data, sizeof(report_data_));
 }
 
-auto Contains(Key key) { return ::testing::Contains(key.getKeyCode()); }
+std::vector<uint8_t> KeyboardReport::ActiveKeycodes() const {
+  std::vector<uint8_t> active_keys;
+  for (uint8_t i = 0; i < HID_LAST_KEY; ++i) {
+    uint8_t bit = 1 << (uint8_t(i) % 8);
+    uint8_t key_code = report_data_.keys[i/8] & bit;
+    if (key_code) active_keys.push_back(i);
+  }
+  return active_keys;
+}
 
 }  // namespace testing
 }  // namespace kaleidoscope

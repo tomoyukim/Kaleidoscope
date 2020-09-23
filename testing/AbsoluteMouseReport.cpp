@@ -14,7 +14,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/AbsoluteMouseReport.h"
+#include "testing/AbsoluteMouseReport.h"
 
 #include <cstring>
 

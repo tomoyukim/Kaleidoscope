@@ -14,7 +14,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "testing/common/setup-googletest.h"
+#include "testing/setup-googletest.h"
 
 SETUP_GOOGLETEST();
 
