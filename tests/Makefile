@@ -1,23 +1,20 @@
-LIB_DIR?=$(shell pwd)/lib
-TEST_DIRS=$(shell dirname $(wildcard */Makefile))
+top_dir		:= $(abspath $(dir $(lastword ${MAKEFILE_LIST}))..)
+build_dir := ${top_dir}/_build
+LIB_DIR		:= ${build_dir}/lib
 
-DIRS=../testing/googletest/build ../testing/common ${TEST_DIRS}
-CLEANDIRS = $(DIRS:%=clean-%)
+libcommon_a	:= ${top_dir}/_build/lib/libcommon.a
 
-.PHONY: subdirs $(CLEANDIRS) cmake-clean
+TESTS			?= $(shell find . -name 'sketch.ino' -exec dirname {} \;)
+.PHONY: clean cmake-clean all googletest
 
 cmake-clean:
 	-${MAKE} clean
 	rm -rf ../testing/googletest/build
 
-clean: ../testing/googletest/build/Makefile $(CLEANDIRS)
-	rm -rf "$(LIB_DIR)"
+clean: ../testing/googletest/build/Makefile
+	rm -rf "${build_dir}"
 
-$(CLEANDIRS):
-	cd $(@:clean-%=%) && $(MAKE) clean
-
-all: ${TEST_DIRS}
-	@echo TEST_DIRS="${TEST_DIRS}"
+all: ${TESTS}
 
 googletest: ../testing/googletest/build/Makefile
 	cd ../testing/googletest/build && $(MAKE)
@@ -25,13 +22,11 @@ googletest: ../testing/googletest/build/Makefile
 ../testing/googletest/build/Makefile:
 	install -d ../testing/googletest/build && cd ../testing/googletest/build && cmake ..
 
-common:
-	cd common && LIB_DIR="${LIB_DIR}" $(MAKE)
+${libcommon_a}:
+	${MAKE} -f ${top_dir}/testing/makefiles/libcommon.mk -C ${top_dir}/testing/common
 
 Makefile:
 	@:
 
-%: common googletest
-	cd "$@" && $(MAKE)
-
-.PHONY: googletest common
+%: ${libcommon_a} googletest
+	${MAKE} -f ${top_dir}/testing/makefiles/testcase.mk -C $@ top_dir=${top_dir} testcase=$@

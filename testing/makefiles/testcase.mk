@@ -1,8 +1,12 @@
-BIN_DIR=bin
-COMMON_LIB_DIR ?= $(shell pwd)/../../lib
-LIB_DIR=lib
-OBJ_DIR=obj
-SRC_DIR=test
+build_dir := ${top_dir}/_build/${testcase}
+
+LIB_DIR := ${build_dir}/lib
+OBJ_DIR := ${build_dir}/obj
+BIN_DIR	:= ${build_dir}/bin
+
+COMMON_LIB_DIR	:= ${top_dir}/_build/lib
+
+SRC_DIR	:= test
 
 SKETCH_FILE=$(wildcard *.ino)
 BIN_FILE=$(subst .ino,,$(SKETCH_FILE))
@@ -11,14 +15,16 @@ LIB_FILE=${BIN_FILE}-latest.a
 TEST_FILES=$(wildcard $(SRC_DIR)/*_test.cpp)
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
 
+all: run
+
 run: ${BIN_DIR}/${BIN_FILE}
 	@echo "run"
-	"./${BIN_DIR}/${BIN_FILE}" -t -q
+	"${BIN_DIR}/${BIN_FILE}" -t -q
 
-${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
+${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS}
 	@echo "link"
-	mkdir -p "${BIN_DIR}" "${LIB_DIR}"
-	env LIBONLY=yes LOCAL_CFLAGS='"-I$(PWD)"' OUTPUT_PATH="$(PWD)/$(LIB_DIR)" VERBOSE=1 $(MAKE) -f ../../testing/makefiles/delegate.mk
+	install -d "${BIN_DIR}" "${LIB_DIR}"
+	env LIBONLY=yes LOCAL_CFLAGS='"-I$(shell pwd)"' OUTPUT_PATH="${LIB_DIR}" VERBOSE=1 $(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk
 	g++ -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
@@ -27,7 +33,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 		-L"${COMMON_LIB_DIR}" \
 		-lcommon \
 		"${LIB_DIR}/${LIB_FILE}" \
-		-L"$(PWD)/../../testing/googletest/build/lib" \
+		-L"${top_dir}/testing/googletest/build/lib" \
 		-lgtest \
 		-lgmock \
 		-lm \
@@ -36,15 +42,15 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} FORCE
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
-	mkdir -p "${OBJ_DIR}"
+	install -d "${OBJ_DIR}"
 	g++ -o "$@" -c \
-		-I${PWD}/../.. \
-		-I${PWD}/../../src \
-		-I${PWD}/../../../../../virtual/cores/arduino \
-		-I${PWD}/../../../Kaleidoscope-HIDAdaptor-KeyboardioHID/src \
-		-I${PWD}/../../../KeyboardioHID/src \
-		-I${PWD}/../../testing/googletest/googlemock/include \
-		-I${PWD}/../../testing/googletest/googletest/include \
+		-I${top_dir} \
+		-I${top_dir}/src \
+		-I${top_dir}/../../../virtual/cores/arduino \
+		-I${top_dir}/../Kaleidoscope-HIDAdaptor-KeyboardioHID/src \
+		-I${top_dir}/../KeyboardioHID/src \
+		-I${top_dir}/testing/googletest/googlemock/include \
+		-I${top_dir}/testing/googletest/googletest/include \
 		-DARDUINO=10607 \
 		-DARDUINO_ARCH_VIRTUAL \
 		-DARDUINO_AVR_MODEL01 \
@@ -56,7 +62,7 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 		'-DUSB_PRODUCT="Model 01"' \
 		$<
 
-clean: FORCE
-	rm -rf "${BIN_DIR}" "${LIB_DIR}" "${OBJ_DIR}"
+clean:
+	rm -rf "${build_dir}"
 
-.PHONY: FORCE
+.PHONY: clean run all
