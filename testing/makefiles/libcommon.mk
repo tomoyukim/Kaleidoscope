@@ -28,6 +28,7 @@ ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 	@echo "compile $@"
 	@install -d "${OBJ_DIR}"
 	g++ -o "$@" -c \
+		-ggdb3 \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \

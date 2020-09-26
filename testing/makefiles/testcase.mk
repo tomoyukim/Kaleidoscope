@@ -38,7 +38,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS}
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk
 	g++ -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
-		-g \
+		-ggdb3 \
 		-w \
 		${TEST_OBJS} \
 		-L"${COMMON_LIB_DIR}" \
@@ -54,6 +54,7 @@ ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
 	install -d "${OBJ_DIR}"
 	g++ -o "$@" -c \
+		-ggdb3 \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
