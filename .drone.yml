@@ -1,0 +1,42 @@
+pipeline:
+  dco:
+    group: meta
+    image: algernon/drone-plugin-dco
+
+  signature-check:
+    group: meta
+    image: algernon/drone-plugin-signature-check
+    keys: [ 10E65DC045EABEFCC5193A26AC1E90BAC433F68F ]
+    when:
+      event: tag
+
+  cache-restore:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - lib
+    volumes:
+      - /tmp/cache/Kaleidoscope:/cache
+
+  bootstrap:
+    image: algernon/drone-language:arduino
+    commands:
+      - git clone --depth 1 --recurse-submodules https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git hardware/keyboardio
+      - rm -rf hardware/keyboardio/avr/libraries/Kaleidoscope
+      - ln -s $(pwd) hardware/keyboardio/avr/libraries/Kaleidoscope
+
+  cache-rebuild:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - lib
+    volumes:
+      - /tmp/cache/Kaleidoscope:/cache
+
+  build:
+    group: test
+    image: algernon/drone-language:arduino
+    commands:
+      - (cd hardware/keyboardio && make prepare-virtual)
+      - make -C tests all BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino"
+      - make travis-test BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino"
