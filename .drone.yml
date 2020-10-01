@@ -38,5 +38,4 @@ pipeline:
     image: algernon/drone-language:arduino
     commands:
       - (cd hardware/keyboardio && make prepare-virtual)
-      - make -C tests all BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino"
       - make travis-test BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino"
