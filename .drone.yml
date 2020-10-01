@@ -14,7 +14,7 @@ steps:
       event: tag
     depends_on: [ clone ]
 
-  - name bootstrap
+  - name: bootstrap
     image: algernon/drone-language:arduino
     commands:
       - git clone --depth 1 --recurse-submodules https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git hardware/keyboardio
