@@ -24,6 +24,7 @@ pipeline:
       - git clone --depth 1 --recurse-submodules https://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio.git hardware/keyboardio
       - rm -rf hardware/keyboardio/avr/libraries/Kaleidoscope
       - ln -s $(pwd) hardware/keyboardio/avr/libraries/Kaleidoscope
+      - (cd hardware/keyboardio && make prepare-virtual)
 
   cache-rebuild:
     image: drillster/drone-volume-cache
@@ -33,10 +34,14 @@ pipeline:
     volumes:
       - /tmp/cache/Kaleidoscope:/cache
 
-  build:
+  build-examples:
     group: test
     image: algernon/drone-language:arduino
     commands:
-      - (cd hardware/keyboardio && make prepare-virtual)
-      - make -C tests all BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino" TRAVIS_ARDUINO_PATH="/usr/local/arduino"
       - make travis-test BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino" TRAVIS_ARDUINO_PATH="/usr/local/arduino"
+
+  build-tests:
+    group: test
+    image: algernon/drone-language:arduino
+    commands:
+      - make -C tests all BOARD_HARDWARE_PATH=$(pwd)/hardware ARDUINO_PATH="/usr/local/arduino" TRAVIS_ARDUINO_PATH="/usr/local/arduino"
