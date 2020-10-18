@@ -23,9 +23,6 @@ before_install:
 
 install:
   - cd $TRAVIS_BUILD_DIR
-  - make install-arduino-cli
-  - make configure-arduino-cli
-  - make install-arduino-core-avr
   - git clone --depth 1 --recurse-submodules=build-tools --recurse-submodules=toolchain --recurse-submodules=avr/libraries/ --jobs 16 --shallow-submodules git://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio ../hardware/keyboardio
 ## We delete the Bundle's version of Kaleidoscope, and symlink ourselves in.
 ## This makes sure we're using the current version of the library.
@@ -36,6 +33,9 @@ install:
   - export ARDUINO_PATH=$TRAVIS_BUILD_DIR/arduino-1.8.13
   - make adjust-git-timestamps
   - wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
+  - make install-arduino-cli
+  - make configure-arduino-cli
+  - make install-arduino-core-avr
   - make prepare-ccache
 jobs:
   include:
