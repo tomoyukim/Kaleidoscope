@@ -492,16 +492,9 @@ decompile () {
 }
 
 clean () {
-    find_sketch
-    build_paths
-    rm -rf -- "${OUTPUT_PATH}"
-    rm -rf -- "${BUILD_PATH}"
-    kaleidoscope_dir="$(dirname "$0")/.."
-    if [ -d "${kaleidoscope_dir}/testing/googletest/build" ]; then
-         ( cd "${kaleidoscope_dir}/testing/googletest/build" &&
-         cmake .. &&
-         make clean)
-    fi
+    if [ -d "$OUTPUT_PATH" ]; then
+      rm -rf -- "${OUTPUT_PATH}"
+   fi
 }
 
 reset_device() {

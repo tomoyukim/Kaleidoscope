@@ -151,6 +151,10 @@ smoke-sketches: $(SMOKE_SKETCHES)
 
 .PHONY: force
 
+clean: 
+	rm -rf -- "testing/googletest/build"
+	rm -rf -- "_build"
+	@BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
 
 $(SMOKE_SKETCHES): force
 	@BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@ compile
