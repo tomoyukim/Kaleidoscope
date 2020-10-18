@@ -684,7 +684,7 @@ fi
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
 
-SYSTEM_ARDUINO_CLI="$(which arduino-cli || true )"
+SYSTEM_ARDUINO_CLI="$(command -v arduino-cli || true )"
 
 if [ "x${SYSTEM_ARDUINO_CLI}" == "x" ]; then
 	$VERBOSE && echo "Using our own arduino-cli"
