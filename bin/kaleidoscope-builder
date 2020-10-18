@@ -594,9 +594,6 @@ usage () {
 		  flash
 		    Flashes the firmware using avrdude.
 
-		  build-all
-		    Build all Sketches we can find.
-
 		EOF
 }
 
