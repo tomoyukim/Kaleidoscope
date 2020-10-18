@@ -505,7 +505,6 @@ do_compile_with_cli() {
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
 		--build-path=${BUILD_PATH} \
 		--output-dir=${OUTPUT_PATH} \
-	 	--verbose  \
 	        "${SKETCH_FILE_PATH}"
 }
 
