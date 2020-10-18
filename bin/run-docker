@@ -28,7 +28,7 @@ XFER_DIR="$(pwd)/.docker_xfer"
 mkdir -p "${XFER_DIR}"
 
 tar  -cf "${XFER_DIR}/kaleidoscope.tar"  \
-	--exclude .docker_xfer	--exclude .git --exclude _build --exclude testing/googletest/build  \
+	--exclude bin/arduino-cli --exclude .docker_xfer --exclude .git --exclude _build --exclude testing/googletest/build  \
 	.
 
 (cd "${BOARD_HARDWARE_PATH}/keyboardio" && tar  -cf "${XFER_DIR}/bundle.tar" \

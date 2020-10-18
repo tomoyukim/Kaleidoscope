@@ -25,6 +25,52 @@ absolute_filename() {
 
 
 
+install_arduino_cli() {	
+	# todo cd to kaleidoscope dir
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+}
+
+compile_arduino_cli() {
+	run_arduino_cli compile --fqbn keyboardio:avr:keyboardio_atreus --libraries "${KALEIDOSCOPE_DIR}/.." examples/Devices/Keyboardio/Atreus --verbose --show-properties
+}
+
+configure_arduino_cli() {
+	if [ -z "${ARDUINO_CLI}" ]; then
+		install_arduino_cli
+	fi
+	if [ -z "${ARDUINO_CLI_CONFIG}" ]; then
+		install_arduino_cli_config		
+	fi
+	install_arduino_core_kaleidoscope
+}
+
+install_arduino_cli_config() {
+	run_arduino_cli config init	
+}
+
+install_arduino_core_kaleidoscope() {
+	install_arduino_core_avr
+
+	install_arduino_core "keyboardio:avr"
+}
+
+install_arduino_core_avr() {
+	install_arduino_core "arduino:avr"
+}
+
+install_arduino_core() {
+	run_arduino_cli core install "$1"
+}
+
+
+run_arduino_cli() {
+	ARDUINO_DIRECTORIES_USER=${ARDUINO_DIRECTORIES_USER} \
+	ARDUINO_DIRECTORIES_DATA=${ARDUINO_DIRECTORIES_DATA} \
+	ARDUINO_DIRECTORIES_DOWNLOADS=${ARDUINO_DIRECTORIES_DOWNLOADS} \
+	ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS=${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE} \
+	"${ARDUINO_CLI}" "$@"  
+}
+
 build_version () {
     : "${LIB_PROPERTIES_PATH:="../.."}"
     GIT_VERSION="$(cd "${SKETCH_DIR}"; if [ -d .git ]; then echo -n '-g' && git describe --abbrev=4 --dirty --always; fi)"
@@ -633,12 +679,20 @@ fi
 ##
 ##  - if there is only one argument, that's a command
 
-KALEIDOSCOPE_DIR="$(cd "$(dirname "$0")"/..; pwd)"
+: "${KALEIDOSCOPE_DIR:=$(cd "$(dirname "$0")"/..; pwd)}"
 # shellcheck disable=SC2034
-KALEIDOSCOPE_BIN_DIR="${KALEIDOSCOPE_DIR}/bin/"
+: "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
+: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
 
+: "${ARDUINO_CONTENT:=${KALEIDOSCOPE_DIR}/.arduino}"
+: "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
+: "${ARDUINO_DIRECTORIES_DOWNLOADS:=${ARDUINO_CONTENT}/downloads}"
+: "${ARDUINO_DIRECTORIES_USER:=${ARDUINO_CONTENT}/user}"
 
+: "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
+
+: "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
 
 # shellcheck disable=SC2155
 export SOURCEDIR="$(pwd)"
