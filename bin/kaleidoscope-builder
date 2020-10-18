@@ -37,7 +37,6 @@ configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI_CONFIG}" ]; then
 		install_arduino_cli_config		
 	fi
-	install_arduino_core_kaleidoscope
 }
 
 install_arduino_cli_config() {
