@@ -414,12 +414,6 @@ do_compile () {
         local_LIBS="-libraries \"${ARDUINO_LOCAL_LIB_PATH}/libraries\""
     fi
 
-    ARDUINO_PACKAGES=""
-    if [ -d "${ARDUINO_PACKAGE_PATH}" ]; then
-        # shellcheck disable=SC2089
-        # We want literal backslashes here, not arrays.
-	      ARDUINO_PACKAGES="-hardware \"${ARDUINO_PACKAGE_PATH}\""
-    fi
 
     SAVED_BOARD="${BOARD}"
     SAVED_FQBN="${FQBN}"
@@ -462,44 +456,19 @@ do_compile () {
     FQBN="${SAVED_FQBN}"
 }
 
-do_compile_with_builder() {
 
-    # SC2091: We do not care if quotes or backslashes are not respected.
-    # SC2086: We want word splitting.
-    # shellcheck disable=SC2086,SC2090
-    "${ARDUINO_BUILDER}" \
-        -compile \
-	      ${ARDUINO_PACKAGES} \
-	      -hardware "${ARDUINO_PATH}/hardware" \
-	      -hardware "${BOARD_HARDWARE_PATH}" \
-	      ${ARDUINO_TOOLS_FLAG:+"${ARDUINO_TOOLS_FLAG}"} ${ARDUINO_TOOLS_PARAM:+"${ARDUINO_TOOLS_PARAM}"} \
-	      -tools "${ARDUINO_BUILDER_TOOLS_PATH}" \
-	      -fqbn "${FQBN}" \
-        -libraries "." \
-        -libraries "${KALEIDOSCOPE_DIR}" \
-	      -libraries "${BOARD_HARDWARE_PATH}/.." \
-        ${local_LIBS} \
-	      ${EXTRA_BUILDER_ARGS} \
-	      -build-cache "${CORE_CACHE_PATH}" \
-	      -build-path "${BUILD_PATH}" \
-	      -ide-version "${ARDUINO_IDE_VERSION}" \
-	      -built-in-libraries "${ARDUINO_PATH}/libraries" \
-	      -prefs "compiler.cpp.extra_flags=$(printf "%q", "${LOCAL_CFLAGS}")" \
-	      -prefs compiler.path="${COMPILER_PATH}" \
-	      -prefs compiler.c.cmd="${_CMD_CC}" \
-	      -prefs compiler.cpp.cmd="${_CMD_CXX}" \
-              -prefs compiler.ar.cmd="${_CMD_AR}" \
-              -prefs compiler.c.elf.cmd="${_CMD_CXX}" \
-	      $CCACHE_ENABLE \
-	      -warnings all \
-        ${ARDUINO_VERBOSE} \
-	      ${ARDUINO_AVR_GCC_PREFIX_PARAM} \
-	      "${SKETCH_FILE_PATH}"
+dump_arduino_prefs() {
+    if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
+            _ARDUINO_PREFS=$(run_arduino_cli  --fqbn "${FQBN}" compile --show-properties  "${SKETCH_FILE_PATH}")
+    fi
+    echo "$_ARDUINO_PREFS"
 }
 
 
-
 do_compile_with_cli() {
+	      #-build-cache "${CORE_CACHE_PATH}" \
+	      #$CCACHE_ENABLE \
+	      #${ARDUINO_AVR_GCC_PREFIX_PARAM} \
 	run_arduino_cli compile \
 		--fqbn "${FQBN}" \
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
@@ -511,6 +480,7 @@ do_compile_with_cli() {
               --build-properties "compiler.ar.cmd=${_CMD_AR}" \
               --build-properties "compiler.c.elf.cmd=${_CMD_CXX}" \
 	      --build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}"\
+	      --warnings all \
 	        "${SKETCH_FILE_PATH}"
 }
 
