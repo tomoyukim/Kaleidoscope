@@ -484,7 +484,7 @@ do_compile_with_builder() {
 	      -build-path "${BUILD_PATH}" \
 	      -ide-version "${ARDUINO_IDE_VERSION}" \
 	      -built-in-libraries "${ARDUINO_PATH}/libraries" \
-	      -prefs "compiler.cpp.extra_flags=$(printf "%q", "${ARDUINO_CFLAGS} ${LOCAL_CFLAGS}")" \
+	      -prefs "compiler.cpp.extra_flags=$(printf "%q", "${LOCAL_CFLAGS}")" \
 	      -prefs compiler.path="${COMPILER_PATH}" \
 	      -prefs compiler.c.cmd="${_CMD_CC}" \
 	      -prefs compiler.cpp.cmd="${_CMD_CXX}" \
@@ -505,7 +505,7 @@ do_compile_with_cli() {
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
-	      --build-properties "compiler.cpp.extra_flags=$(printf "%q", "${ARDUINO_CFLAGS} ${LOCAL_CFLAGS}")" \
+	      --build-properties "compiler.cpp.extra_flags=$(printf "%q", ${LOCAL_CFLAGS})" \
 	      --build-properties compiler.path="${COMPILER_PATH}" \
 	      --build-properties "compiler.c.cmd=${_CMD_CC}" \
 	      --build-properties "compiler.cpp.cmd=${_CMD_CXX}" \
