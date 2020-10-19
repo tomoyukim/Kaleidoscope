@@ -52,7 +52,7 @@ compile-sketch:
 	@echo "link"
 	install -d "${BIN_DIR}" "${LIB_DIR}"
 	env LIBONLY=yes \
-		  LOCAL_CFLAGS='"-I$(shell pwd)"' \
+		  LOCAL_CFLAGS="'-I$(shell pwd)'" \
 		  OUTPUT_PATH="${LIB_DIR}" \
 			VERBOSE=${VERBOSE} \
 			ARCH=virtual DEFAULT_SKETCH=sketch \
