@@ -28,9 +28,15 @@ XFER_DIR="$(pwd)/.docker_xfer"
 mkdir -p "${XFER_DIR}"
 
 tar  -cf "${XFER_DIR}/kaleidoscope.tar"  \
-	--exclude bin/arduino-cli --exclude .docker_xfer --exclude .git --exclude _build --exclude testing/googletest/build  \
+	--exclude .arduino/data \
+	--exclude bin/arduino-cli \
+	--exclude .docker_xfer \
+	--exclude .git \
+	--exclude _build \
+	--exclude testing/googletest/build  \
 	.
 
+echo "The bundle is coming from ${BOARD_HARDWARE_PATH}/keyboardio"
 (cd "${BOARD_HARDWARE_PATH}/keyboardio" && tar  -cf "${XFER_DIR}/bundle.tar" \
 	--exclude .git --exclude avr/libraries/Kaleidoscope .)
 
@@ -44,6 +50,7 @@ docker run --rm $DOCKER_RUN_INTERACTIVE_OPTS \
        --mount type=volume,source=kaleidoscope-persist,destination=/kaleidoscope-persist,consistency=delegated \
        --mount type=volume,source=kaleidoscope-googletest-build,destination=/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/testing/googletest/build,consistency=delegated \
        --mount type=volume,source=kaleidoscope-build,destination=/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/_build,consistency=delegated \
+       --env ARDUINO_DIRECTORIES_USER=/kaleidoscope \
        kaleidoscope/docker "$*"
 
 

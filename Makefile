@@ -90,7 +90,7 @@ prepare-virtual:
 	$(MAKE) -C $(BOARD_HARDWARE_PATH)/keyboardio prepare-virtual
 
 
-simulator-tests: prepare-virtual
+simulator-tests: install-arduino-cli configure-arduino-cli install-arduino-core-avr prepare-virtual
 	$(MAKE) -C tests all
 
 docker-simulator-tests:
