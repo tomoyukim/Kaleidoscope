@@ -466,9 +466,9 @@ do_compile_with_cli() {
 
 
 	if [ $CCACHE_ENABLED ]; then 
-	      COMPILER_PATH_PROP="--build-properties \"compiler.path=${CCACHE_WRAPPER_PATH}/\""
+	      COMPILER_PATH_PROP="${CCACHE_WRAPPER_PATH}/"
 	else
-	      COMPILER_PATH_PROP="--build-properties \"compiler.path=${COMPILER_PATH}\""
+	      COMPILER_PATH_PROP="${COMPILER_PATH}"
 	fi
 
 	run_arduino_cli compile \
@@ -476,7 +476,7 @@ do_compile_with_cli() {
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
-	      "${COMPILER_PATH_PROP}" \
+	      --build-properties "compiler.path=${COMPILER_PATH_PROP}" \
 	      --build-properties "compiler.c.cmd=${_CMD_CC}" \
 	      --build-properties "compiler.cpp.cmd=${_CMD_CXX}" \
               --build-properties "compiler.ar.cmd=${_CMD_AR}" \
