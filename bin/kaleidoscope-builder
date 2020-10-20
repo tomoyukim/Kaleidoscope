@@ -450,6 +450,13 @@ do_compile () {
     FQBN="${SAVED_FQBN}"
 }
 
+get_arduino_pref() {
+        pref=$1
+        # Strip the preference name. And then strip leading and trailing quotations
+        MESSAGE=$(dump_arduino_prefs | grep --max-count=1 ${pref}= | sed -e s/^.*${pref}=// -e 's/^"//' -e 's/"$//')
+        echo $MESSAGE
+}
+
 
 dump_arduino_prefs() {
     if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
