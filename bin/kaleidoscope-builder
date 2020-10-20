@@ -195,6 +195,13 @@ find_sketch () {
 }
 
 
+find_device_vid_pid() {
+    : ${VID:=$(get_arduino_pref 'build.vid')}
+    : ${SKETCH_PID:=$(get_arduino_pref 'build.pid')}
+    : ${BOOTLOADER_PID:=$(get_arduino_pref 'bootloader.pid')}
+    : ${BOOTLOADER_VID:=$(get_arduino_pref 'bootloader.vid')}
+}
+
 
 prompt_before_flashing () {
     flashing_instructions=$(get_arduino_pref 'build.flashing_instructions')
