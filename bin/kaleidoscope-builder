@@ -409,12 +409,6 @@ do_compile () {
     # shellcheck disable=SC2154
     ${compile_HOOKS}
 
-    if [ -d "${ARDUINO_LOCAL_LIB_PATH}/libraries" ]; then
-        # shellcheck disable=SC2089
-        # We want literal backslashes here, not arrays.
-        local_LIBS="-libraries \"${ARDUINO_LOCAL_LIB_PATH}/libraries\""
-    fi
-
 
     SAVED_BOARD="${BOARD}"
     SAVED_FQBN="${FQBN}"
@@ -483,7 +477,7 @@ do_compile_with_cli() {
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
-	      ${COMPILER_PATH_PROP} \
+	      "${COMPILER_PATH_PROP}" \
 	      --build-properties "compiler.c.cmd=${_CMD_CC}" \
 	      --build-properties "compiler.cpp.cmd=${_CMD_CXX}" \
               --build-properties "compiler.ar.cmd=${_CMD_AR}" \
