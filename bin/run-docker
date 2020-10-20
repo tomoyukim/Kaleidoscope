@@ -13,14 +13,11 @@ fi
 
 
 if [ "${uname_S}" = "Darwin" ]; then
-    ARDUINO_LOCAL_LIB_PATH="${ARDUINO_LOCAL_LIB_PATH:-${HOME}/Documents/Arduino}"
     # This stops macos from copying resource forks into thigns like tar
     export COPYFILE_DISABLE=true
 else
     ARDUINO_LOCAL_LIB_PATH="${ARDUINO_LOCAL_LIB_PATH:-${HOME}/Arduino}"
 fi
-
-BOARD_HARDWARE_PATH="${BOARD_HARDWARE_PATH:-${ARDUINO_LOCAL_LIB_PATH}/hardware}"
 
 echo "Preparing Kaleidoscope and the bundle..."
 
