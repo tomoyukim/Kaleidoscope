@@ -517,16 +517,6 @@ build_all () {
 }
 
 
-compile_all () {
-    plugins="$(find_all_sketches)"
-
-    for plugin in ${plugins}; do
-        export SKETCH="${plugin}"
-        $0 "${plugin}" compile
-    done
-}
-
-
 size () {
     compile
 
