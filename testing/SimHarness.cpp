@@ -31,6 +31,12 @@ void SimHarness::RunCycles(size_t n) {
   for (size_t i = 0; i < n; ++i) RunCycle();
 }
 
+void SimHarness::Press(KeyAddr addr) {
+  Kaleidoscope.device().keyScanner().setKeystate(
+      addr,
+      kaleidoscope::Device::Props::KeyScanner::KeyState::Pressed);
+}
+
 void SimHarness::Press(uint8_t row, uint8_t col) {
   Kaleidoscope.device().keyScanner().setKeystate(
     KeyAddr{row, col},

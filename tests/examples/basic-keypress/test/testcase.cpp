@@ -16,6 +16,9 @@
 
 #include "testing/setup-googletest.h"
 
+#include "Kaleidoscope.h"
+#include "testing/fix-macros.h"
+
 SETUP_GOOGLETEST();
 
 namespace kaleidoscope {
@@ -27,7 +30,8 @@ using ::testing::IsEmpty;
 class KeyboardReports : public VirtualDeviceTest {};
 
 TEST_F(KeyboardReports, KeysActiveWhenPressed) {
-  sim_.Press(2, 1); // A
+  KeyAddr addr{2,1};
+  sim_.Press(addr); // A
   auto state = RunCycle();
 
   ASSERT_EQ(state->HIDReports()->Keyboard().size(), 1);
