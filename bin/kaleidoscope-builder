@@ -23,6 +23,39 @@ absolute_filename() {
     echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
 
+read_conf_files() {
+
+for conf_file in \
+    "${HOME}/.kaleidoscope-builder.conf" \
+    "$(pwd)/.kaleidoscope-builder.conf" \
+    "$(pwd)/kaleidoscope-builder.conf" \
+    "${KALEIDOSCOPE_DIR}/etc/kaleidoscope-builder.conf"; do
+    if [ -e "${conf_file}" ]; then
+        # shellcheck disable=SC1090
+        . "${conf_file}"
+    fi
+
+done
+}
+configure_arduino_cli_env() {
+
+SYSTEM_ARDUINO_CLI="$(command -v arduino-cli || true )"
+
+if [ -z "${SYSTEM_ARDUINO_CLI}" ]; then
+	: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
+else
+	: "${ARDUINO_CLI:=${SYSTEM_ARDUINO_CLI}}"
+fi
+
+
+
+: "${ARDUINO_CONTENT:=${KALEIDOSCOPE_DIR}/.arduino}"
+: "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
+: "${ARDUINO_DIRECTORIES_DOWNLOADS:=${ARDUINO_CONTENT}/downloads}"
+: "${ARDUINO_DIRECTORIES_USER:=${ARDUINO_CONTENT}/user}"
+: "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
+: "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
+}
 
 
 install_arduino_cli() {	
@@ -673,47 +706,14 @@ if [ -n "${BOARD_HARDWARE_PATH}" ]; then
 	ARDUINO_DIRECTORIES_USER="${BOARD_HARDWARE_PATH}/../"
 fi
 
-## Parse the command-line
-##  - anything that has a =, is an env var
-##  - from the remaining stuff, the first one is the Library/Sketch
-##  - everything else are commands
-##
-##  - if there is only one argument, that's a command
 
 : "${KALEIDOSCOPE_DIR:=$(cd "$(dirname "$0")"/..; pwd)}"
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
+configure_arduino_cli_env
 
-SYSTEM_ARDUINO_CLI="$(command -v arduino-cli || true )"
-
-if [ -z "${SYSTEM_ARDUINO_CLI}" ]; then
-	: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
-else
-	: "${ARDUINO_CLI:=${SYSTEM_ARDUINO_CLI}}"
-fi
-
-
-
-: "${ARDUINO_CONTENT:=${KALEIDOSCOPE_DIR}/.arduino}"
-: "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
-: "${ARDUINO_DIRECTORIES_DOWNLOADS:=${ARDUINO_CONTENT}/downloads}"
-: "${ARDUINO_DIRECTORIES_USER:=${ARDUINO_CONTENT}/user}"
-: "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
-: "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
-
-
-for conf_file in \
-    "${HOME}/.kaleidoscope-builder.conf" \
-    "$(pwd)/.kaleidoscope-builder.conf" \
-    "$(pwd)/kaleidoscope-builder.conf" \
-    "${KALEIDOSCOPE_DIR}/etc/kaleidoscope-builder.conf"; do
-    if [ -e "${conf_file}" ]; then
-        # shellcheck disable=SC1090
-        . "${conf_file}"
-    fi
-
-done
+read_conf_files
 
 # shellcheck disable=SC1090
 
