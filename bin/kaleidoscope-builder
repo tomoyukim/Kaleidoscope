@@ -394,7 +394,6 @@ hex_with_bootloader () {
 
     awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" > "${HEX_FILE_WITH_BOOTLOADER_PATH}"
     echo "Using ${BOOTLOADER_PATH}"
-    ${MD5} "${BOOTLOADER_PATH}"
     cat "${BOOTLOADER_PATH}" >> "${HEX_FILE_WITH_BOOTLOADER_PATH}"
     ln -sf -- "${OUTPUT_FILE_PREFIX}-with-bootloader.hex" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest-with-bootloader.hex"
     cat <<- EOF
