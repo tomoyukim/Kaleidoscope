@@ -309,13 +309,12 @@ flash_over_usb () {
 
     FLASH_CMD=$(${AVRDUDE} \
 		-C "${AVRDUDE_CONF}" \
-		-p"${MCU}" \
+		-p"$(get_arduino_pref 'build.mcu')" \
  		-cavr109 \
 		-D \
 		-P "${DEVICE_PORT_BOOTLOADER}" \
 		-b57600 \
 		"-Uflash:w:${HEX_FILE_PATH}:i")
-
     if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
 	${FLASH_CMD} 2>&1 |grep -v ^avrdude | grep -v '^$' |grep -v '^ ' | grep -vi programmer
     	return "${PIPESTATUS[0]}"
@@ -341,7 +340,7 @@ program() {
 flash_with_programmer() {
     ${AVRDUDE} -v \
 	       -C "${AVRDUDE_CONF}" \
-	       -p"${MCU}" \
+	       -p"$(get_arduino_pref 'build.mcu')" \
 	       -cusbtiny \
 	       -D \
 	       -B 1 \
