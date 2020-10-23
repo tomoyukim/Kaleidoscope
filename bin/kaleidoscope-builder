@@ -205,21 +205,18 @@ firmware_size () {
 
 
 find_sketch () {
-    if [ -z "${SKETCH}" ]; then
-        echo "SKETCH needs to be set before including this file!" >&2
-        exit 1
-    fi
-  
-    SKETCH_DIR="${SKETCH}"
-    SKETCH_BASE_NAME=$(basename "$SKETCH")
+    SKETCH_DIR="${SKETCH:-$(absolute_filename $(pwd))}"
+    SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
     SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
 
-    for path in "${SKETCH_DIR}" \
-                    "src" \
-		    "."; do
-        if [ -f "${path}/${SKETCH_FILE_NAME}" ]; then
-      	    SKETCH_DIR="${path}"
-      	    SKETCH_FILE_PATH=$(absolute_filename "${SKETCH_DIR}/${SKETCH_FILE_NAME}")
+    # Arduino sketches are usually a file inside directory Foo named Foo.ino, so try that as a fallback
+    for dir in  \
+		    "${SKETCH_DIR}" \
+                    "src/" \
+		    ".";  do
+        if [ -f "${dir}/${SKETCH_FILE_NAME}" ]; then
+      	    SKETCH_DIR="${dir}"
+      	    SKETCH_FILE_PATH=$(absolute_filename "${dir}/${SKETCH_FILE_NAME}")
             return
         fi
     done
