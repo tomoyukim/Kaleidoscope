@@ -722,6 +722,15 @@ else
     ARDUINO_VERBOSE="--quiet"
 fi
 
+
+## Parse the command-line
+##  - anything that has a =, is an env var
+##  - from the remaining stuff, the first one is the Library/Sketch
+##  - everything else are commands
+##
+##  - if there is only one argument, that's a command
+
+
 cmds=""
 
 ## Export vars
