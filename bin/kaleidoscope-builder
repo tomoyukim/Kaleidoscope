@@ -464,7 +464,6 @@ do_compile () {
     _CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
     _CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
 
-    #do_compile_with_builder
     do_compile_with_cli
 
     if [ -z "${LIBONLY}" ]; then
@@ -503,8 +502,6 @@ dump_arduino_prefs() {
 
 do_compile_with_cli() {
 	      #-build-cache "${CORE_CACHE_PATH}" \
-	      #$CCACHE_ENABLE \
-
 
 	if [ $CCACHE_ENABLED ]; then 
 	      COMPILER_PATH_PROP="${CCACHE_WRAPPER_PATH}/"
