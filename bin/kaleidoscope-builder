@@ -476,7 +476,6 @@ dump_arduino_prefs() {
 do_compile_with_cli() {
 	      #-build-cache "${CORE_CACHE_PATH}" \
 	      #$CCACHE_ENABLE \
-	      #${ARDUINO_AVR_GCC_PREFIX_PARAM} \
 
 
 	if [ $CCACHE_ENABLED ]; then 
