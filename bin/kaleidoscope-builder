@@ -687,11 +687,9 @@ fi
 
 SYSTEM_ARDUINO_CLI="$(command -v arduino-cli || true )"
 
-if [ "x${SYSTEM_ARDUINO_CLI}" == "x" ]; then
-	 echo "Using our own arduino-cli"
+if [ -z "${SYSTEM_ARDUINO_CLI}" ]; then
 	: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
 else
-	 echo "Using system arduino-cli from ${SYSTEM_ARDUINO_CLI}" 
 	: "${ARDUINO_CLI:=${SYSTEM_ARDUINO_CLI}}"
 fi
 
@@ -701,9 +699,7 @@ fi
 : "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
 : "${ARDUINO_DIRECTORIES_DOWNLOADS:=${ARDUINO_CONTENT}/downloads}"
 : "${ARDUINO_DIRECTORIES_USER:=${ARDUINO_CONTENT}/user}"
-
 : "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
-
 : "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
 
 # shellcheck disable=SC2155
