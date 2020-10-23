@@ -378,9 +378,7 @@ flash_with_programmer() {
 }
 
 find_bootloader_path() {
-    BOOTLOADER_FILE=$( get_arduino_pref 'bootloader.file' )
-    : "${BOOTLOADER_FILE:=caterina/Caterina.hex}"
-    : "${BOOTLOADER_PATH:=${BOARD_HARDWARE_PATH}/keyboardio/avr/bootloaders/${BOOTLOADER_FILE}}"
+    : "${BOOTLOADER_PATH:=$( get_arduino_pref 'runtime.platform.path' )/bootloaders/$( get_arduino_pref 'bootloader.file' )}"
 }
 
 
