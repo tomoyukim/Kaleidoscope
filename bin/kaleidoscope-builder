@@ -336,7 +336,6 @@ check_bootloader_port_and_flash () {
 }
 
 flash_over_usb () {
-
     FLASH_CMD=$(${AVRDUDE} \
 		-C "${AVRDUDE_CONF}" \
 		-p"$(get_arduino_pref 'build.mcu')" \
