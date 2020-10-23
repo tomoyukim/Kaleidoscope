@@ -666,6 +666,13 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+
+# Temporary migration for old makefiles
+# I'm not thrilled about how we default to system Arduino dirs. 
+if [ -n "${BOARD_HARDWARE_PATH}" ]; then
+	ARDUINO_DIRECTORIES_USER="${BOARD_HARDWARE_PATH}/../"
+fi
+
 ## Parse the command-line
 ##  - anything that has a =, is an env var
 ##  - from the remaining stuff, the first one is the Library/Sketch
