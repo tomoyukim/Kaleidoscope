@@ -293,7 +293,7 @@ check_bootloader_port_and_flash () {
     if ! flash_over_usb; then
         sleep 2
         if  ! flash_over_usb; then
-            if [ "${ARDUINO_VERBOSE}" != "-verbose" ]; then
+            if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
                 echo "Something went wrong."
     	        echo "You might want to try flashing again with the VERBOSE environment variable set"
             fi
@@ -316,7 +316,7 @@ flash_over_usb () {
 		-b57600 \
 		"-Uflash:w:${HEX_FILE_PATH}:i")
 
-    if [ "${ARDUINO_VERBOSE}" != "-verbose" ]; then
+    if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
 	${FLASH_CMD} 2>&1 |grep -v ^avrdude | grep -v '^$' |grep -v '^ ' | grep -vi programmer
     	return "${PIPESTATUS[0]}"
     else
@@ -449,7 +449,7 @@ do_compile () {
       ln -sf "${OUTPUT_FILE_PREFIX}.a" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.a"
     fi
 
-    if [ "${ARDUINO_VERBOSE}" = "-verbose" ]; then
+    if [ "${ARDUINO_VERBOSE}" == "--verbose" ]; then
       echo "Build artifacts can be found in ${BUILD_PATH}";
     fi
 
@@ -722,9 +722,9 @@ done
 # shellcheck disable=SC1090
 
 if [ -n "${VERBOSE}" ] && [[ "${VERBOSE}" -gt 0 ]]; then
-    ARDUINO_VERBOSE="-verbose"
+    ARDUINO_VERBOSE="--verbose"
 else
-    ARDUINO_VERBOSE="-quiet"
+    ARDUINO_VERBOSE="--quiet"
 fi
 
 cmds=""
