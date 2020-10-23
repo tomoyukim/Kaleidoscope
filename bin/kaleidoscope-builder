@@ -424,11 +424,8 @@ do_compile () {
         # shellcheck disable=SC1090
         FQBN="$(. "${SKETCH_DIR}"/.kaleidoscope-builder.conf && echo "${FQBN}")"
         if [ -n "${BOARD}" ]; then
-            if [ -z "${ARCH}" ]; then
-               FQBN="keyboardio:avr:${BOARD}"
-            else
-               FQBN="keyboardio:${ARCH}:${BOARD}"
-            fi
+            : "${ARCH:=avr}"
+            FQBN="keyboardio:${ARCH}:${BOARD}"
         fi
     fi
 
