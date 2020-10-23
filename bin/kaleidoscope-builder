@@ -541,8 +541,8 @@ find_all_sketches () {
 build_all () {
     plugins="$(find_all_sketches)"
 
-    for plugin in ${plugins}; do
-        export SKETCH="${plugin}"
+    for sketch in ${plugins}; do
+        export SKETCH="${sketch}"
         $0 "${plugin}" build
     done
 }
