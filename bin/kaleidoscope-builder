@@ -702,14 +702,11 @@ fi
 : "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
 : "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
 
-# shellcheck disable=SC2155
-export SOURCEDIR="$(pwd)"
-
 
 for conf_file in \
     "${HOME}/.kaleidoscope-builder.conf" \
-    "${SOURCEDIR}/.kaleidoscope-builder.conf" \
-    "${SOURCEDIR}/kaleidoscope-builder.conf" \
+    "$(pwd)/.kaleidoscope-builder.conf" \
+    "$(pwd)/kaleidoscope-builder.conf" \
     "${KALEIDOSCOPE_DIR}/etc/kaleidoscope-builder.conf"; do
     if [ -e "${conf_file}" ]; then
         # shellcheck disable=SC1090
