@@ -350,7 +350,6 @@ program() {
 }
 
 flash_with_programmer() {
-	set_executable_paths
 	${AVRDUDE_CMD}
 	       -cusbtiny \
 	       -B 1 \
@@ -358,7 +357,6 @@ flash_with_programmer() {
 }
 
 flash_over_usb () {
-    set_executable_paths
     FLASH_CMD=$( ${AVRDUDE_CMD}
  		-cavr109 \
 		-P "${DEVICE_PORT_BOOTLOADER}" \
@@ -399,6 +397,7 @@ build () {
 
 
 prepare_ccache () {
+    find_sketch
     build_paths
     enable_ccache
 }
@@ -600,6 +599,8 @@ decompile () {
 }
 
 clean () {
+    find_sketch
+    build_paths
     if [ -d "$OUTPUT_PATH" ]; then
       rm -rf -- "${OUTPUT_PATH}"
    fi
