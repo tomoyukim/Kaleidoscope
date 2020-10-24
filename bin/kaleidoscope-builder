@@ -141,7 +141,7 @@ set_executable_paths() {
 
 	# Allow the compiler path to be empty for virtual builds
 	# should use compiler.path instead of appending bin, but we don't have substitution het
-	: "${COMPILER_PATH=$(get_arduino_pref 'runtime.tools.avr-gcc.path')/bin}"
+	: "${COMPILER_PATH=$(_arduino_prop 'runtime.tools.avr-gcc.path')/bin}"
 
 	COMPILER_SUFFIX=""
 
@@ -263,14 +263,14 @@ find_sketch() {
 }
 
 find_device_vid_pid() {
-	: "${VID:=$(get_arduino_pref 'build.vid')}"
-	: "${SKETCH_PID:=$(get_arduino_pref 'build.pid')}"
-	: "${BOOTLOADER_PID:=$(get_arduino_pref 'bootloader.pid')}"
-	: "${BOOTLOADER_VID:=$(get_arduino_pref 'bootloader.vid')}"
+	: "${VID:=$(_arduino_prop 'build.vid')}"
+	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
+	: "${BOOTLOADER_PID:=$(_arduino_prop 'bootloader.pid')}"
+	: "${BOOTLOADER_VID:=$(_arduino_prop 'bootloader.vid')}"
 }
 
 prompt_before_flashing() {
-	flashing_instructions=$(get_arduino_pref 'build.flashing_instructions')
+	flashing_instructions=$(_arduino_prop 'build.flashing_instructions')
 
 	if [ "x${flashing_instructions}x" = "xx" ]; then
 		flashing_instructions="If your keyboard needs you to do something to put it in flashing mode, do that now."
@@ -321,7 +321,7 @@ flash() {
 hex_with_bootloader() {
 	compile
 
-	: "${BOOTLOADER_PATH:=$(get_arduino_pref 'runtime.platform.path')/bootloaders/$(get_arduino_pref 'bootloader.file')}"
+	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 
 	awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" >"${HEX_FILE_WITH_BOOTLOADER_PATH}"
 	echo "Using ${BOOTLOADER_PATH}"
@@ -401,14 +401,14 @@ compile() {
 	FQBN="${SAVED_FQBN}"
 }
 
-get_arduino_pref() {
+_arduino_prop() {
 	pref=$1
 	# Strip the preference name. And then strip leading and trailing quotations
-	MESSAGE=$(dump_arduino_prefs | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//')
+	MESSAGE=$(_arduino_props | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//')
 	echo "$MESSAGE"
 }
 
-dump_arduino_prefs() {
+_arduino_props() {
 	if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
 		_ARDUINO_PREFS=$(run_arduino_cli --fqbn "${FQBN}" compile --show-properties "${SKETCH_FILE_PATH}")
 	fi
