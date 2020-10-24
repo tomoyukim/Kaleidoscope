@@ -298,7 +298,6 @@ flash() {
 		# This is defined in the (optional) user config.
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
-	fi
 
 	find_device_port
 	run_arduino_cli upload \
@@ -306,24 +305,17 @@ flash() {
 		--port "${DEVICE_PORT}" \
 		--verbose
 
+	fi
+	run_arduino_cli upload \
+                --fqbn "${FQBN}" \
+		--port "${DEVICE_PORT_BOOTLOADER}" \
+		--verbose
 
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
 	${postFlash_HOOKS}
 }
 
-
-flash_from_bootloader() {
-	compile "$@"
-	prompt_before_flashing
-	find_bootloader_ports
-	run_arduino_cli upload \
-                --fqbn "${FQBN}" \
-		--port "${DEVICE_PORT_BOOTLOADER}" \
-		--verbose
-
-	return 0
-}
 
 hex_with_bootloader() {
 	compile
@@ -621,9 +613,6 @@ usage() {
 
 		  disassemble
 		    Decompile the sketch.
-
-		  reset-device
-		    Reset the device.
 
 		  flash
 		    Flashes the firmware using avrdude.
