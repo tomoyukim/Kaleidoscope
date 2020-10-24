@@ -13,7 +13,6 @@ env:
   global:
   - LC_ALL: C
   - CCACHE_WRAPPER_PATH: /tmp/kaleidoscope-ccache
-  - ARDUINO_DOWNLOAD_URL: https://downloads.arduino.cc/arduino-1.8.13-linux64.tar.xz
 git:
   quiet: true
   depth: false
@@ -31,7 +30,6 @@ install:
   - export ARDUINO_PATH=$TRAVIS_BUILD_DIR/arduino-1.8.13
   - export KALEIDOSCOPE_BUILDER_DIR=$TRAVIS_BUILD_DIR/bin
   - make adjust-git-timestamps
-  - #wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
   - make install-arduino-cli
   - make configure-arduino-cli
   - make install-arduino-core-avr
