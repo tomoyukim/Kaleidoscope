@@ -428,6 +428,39 @@ compile () {
 }
 
 
+
+set_executable_paths () {
+######
+###### Executable paths
+######
+
+# Allow the compiler path to be empty for virtual builds
+# should use compiler.path instead of appending bin, but we don't have substitution het
+: "${COMPILER_PATH=$(get_arduino_pref 'runtime.tools.avr-gcc.path')/bin}"
+
+COMPILER_SUFFIX=""
+
+C_COMPILER_BASENAME=$(basename ${CC:-gcc})
+CXX_COMPILER_BASENAME=$(basename ${CXX:-g++})
+AR_BASENAME=$(basename ${AR:-ar})
+OBJCOPY_BASENAME=$(basename ${OBJCOPY:-objcopy})
+
+# Allow the compiler prefix to be empty for virtual builds
+COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
+: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
+: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
+: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
+: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
+: "${AVR_AR:=${COMPILER_PATH}/${COMPILER_PREFIX}ar}"
+
+# TO DO should use tools.avrdude.cmd.path and tools.avrdude.config.path instead of hardcoding
+: "${AVRDUDE:=$(get_arduino_pref 'runtime.tools.avrdude.path')/bin/avrdude}"
+: "${AVRDUDE_CONF:=$(get_arduino_pref 'runtime.tools.avrdude.path')/etc/avrdude.conf}"
+AVRDUDE_CMD="${AVRDUDE} -v-C "${AVRDUDE_CONF}" -D -p\"$(get_arduino_pref 'build.mcu')\""
+
+}
+
+
 do_compile () {
     prepare_ccache
 
@@ -551,6 +584,7 @@ build_all () {
 size () {
     compile
 
+    : "${AVR_SIZE_FLAGS:=-C --mcu=$(get_arduino_pref 'build.mcu')}"
     echo "- Size: ${ELF_FILE_PATH}"
     # shellcheck disable=SC2086
     firmware_size "${AVR_SIZE}" ${AVR_SIZE_FLAGS} "${ELF_FILE_PATH}"
@@ -700,9 +734,9 @@ fi
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
-configure_arduino_cli_env
-
 read_conf_files
+configure_arduino_cli_env
+set_executable_paths
 
 # shellcheck disable=SC1090
 
