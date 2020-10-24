@@ -285,20 +285,6 @@ prompt_before_flashing() {
 	read
 }
 
-reset_device_cmd() {
-	if [ -z ${NO_RESET} ]; then
-		if [ "${uname_S}" = "Darwin" ]; then
-			/bin/stty -f ${DEVICE_PORT} 1200
-		elif [ "${uname_S}" = "FreeBSD" ]; then
-			/bin/stty -f ${DEVICE_PORT} 1200
-
-		elif [ "${uname_O}" = "Cygwin" ]; then
-			cmd /c mode ${DEVICE_COM_PORT} baud=1200
-		else
-			stty -F ${DEVICE_PORT} 1200 hupcl
-		fi
-	fi
-}
 
 flash() {
 	compile "$@"
@@ -312,113 +298,31 @@ flash() {
 		# This is defined in the (optional) user config.
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
-
-		# If we're -not- doing a manual reset, then try to do it automatically
-		if [ -z "${MANUAL_RESET}" ]; then
-			reset_device
-			sleep 2
-			find_bootloader_ports
-			# Otherwise, poll for a bootloader port.
-		else
-			wait_for_bootloader_port
-		fi
-
 	fi
 
-	check_bootloader_port_and_flash
+	find_device_port
+	run_arduino_cli upload \
+                --fqbn "${FQBN}" \
+		--port "${DEVICE_PORT}" \
+		--verbose
+
 
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
 	${postFlash_HOOKS}
 }
 
-wait_for_bootloader_port() {
-	declare -i tries
-	tries=15
-
-	while [ "$tries" -gt 0 ] && [ -z "${DEVICE_PORT_BOOTLOADER}" ]; do
-		sleep 1
-		printf "."
-		find_bootloader_ports
-		# the variable annotations do appear to be necessary
-		# shellcheck disable=SC2004
-		tries=$(($tries - 1))
-	done
-
-	if [ "$tries" -gt 0 ]; then
-		echo "Found."
-	else
-		echo "Timed out."
-	fi
-}
-
-check_bootloader_port() {
-	if [ -z "${DEVICE_PORT_BOOTLOADER}" ]; then
-		echo "Unable to detect a keyboard in bootloader mode."
-		echo "You may need to hold a key or hit a reset button."
-		echo "Please check your keyboard's documentation"
-		return 1
-	fi
-
-}
-
-check_bootloader_port_and_flash() {
-
-	if ! check_bootloader_port; then
-		return 1
-	fi
-
-	echo "Flashing your keyboard:"
-
-	# If the flash fails, try a second time
-	if ! flash_over_usb; then
-		sleep 2
-		if ! flash_over_usb; then
-			if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
-				echo "Something went wrong."
-				echo "You might want to try flashing again with the VERBOSE environment variable set"
-			fi
-
-			return 1
-		fi
-	fi
-	echo "Keyboard flashed successfully!"
-	return 0
-}
 
 flash_from_bootloader() {
 	compile "$@"
 	prompt_before_flashing
 	find_bootloader_ports
-	check_bootloader_port_and_flash
-}
+	run_arduino_cli upload \
+                --fqbn "${FQBN}" \
+		--port "${DEVICE_PORT_BOOTLOADER}" \
+		--verbose
 
-program() {
-	compile "$@"
-	prompt_before_flashing
-	flash_with_programmer
-}
-
-flash_with_programmer() {
-	${AVRDUDE_CMD} \
-		-cusbtiny \
-		-B 1 \
-		"-Uflash:w:${HEX_FILE_PATH}:i"
-}
-
-flash_over_usb() {
-	FLASH_CMD=$(${AVRDUDE_CMD} \
-		-cavr109 \
-		-P "${DEVICE_PORT_BOOTLOADER}" \
-		-b57600 \
-		"-Uflash:w:${HEX_FILE_PATH}:i")
-	if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
-		${FLASH_CMD} 2>&1 | grep -v ^avrdude | grep -v '^$' | grep -v '^ ' | grep -vi programmer
-		return "${PIPESTATUS[0]}"
-	else
-		${FLASH_CMD}
-		return $?
-	fi
+	return 0
 }
 
 hex_with_bootloader() {
@@ -646,12 +550,6 @@ clean() {
 	fi
 }
 
-reset_device() {
-	find_device_port
-	check_device_port
-	reset_device_cmd
-}
-
 find_bootloader_ports() {
 	if [ -n "${DEVICE_PORT_BOOTLOADER}" ]; then
 		echo "DEVICE_PORT_BOOTLOADER=\"${DEVICE_PORT_BOOTLOADER}\" predefined."
@@ -700,60 +598,6 @@ find_device_port() {
 	fi
 }
 
-check_device_port() {
-	if [ -z "$DEVICE_PORT" ]; then
-		cat <<EOF >&2
-
-I couldn't autodetect the keyboard's serial port.
-
-If you see this message and your keyboard is connected to your computer,
-it may mean that our serial port detection logic is buggy or incomplete.
-In that case, please report this issue at:
-	 https://github.com/keyboardio/Kaleidoscope
-EOF
-		exit 1
-	elif echo "$DEVICE_PORT" | grep -q '[[:space:]]'; then
-		cat <<EOF >&2
-Unexpected whitespace found in detected serial port:
-
-    $DEVICE_PORT
-
-If you see this message, it means that our serial port
-detection logic is buggy or incomplete.
-
-Please report this issue at:
-	 https://github.com/keyboardio/Kaleidoscope
-EOF
-		exit 1
-	fi
-
-	if ! [ -w "$DEVICE_PORT" ]; then
-		cat <<EOF >&2
-
-In order to update your keyboard's firmware you need to have permission
-to write to its serial port $DEVICE_PORT.
-
-It appears that you do not have this permission:
-
-  $(ls -l "$DEVICE_PORT")
-
-This may be because you're not in the correct unix group:
-
-  $(stat -c %G "$DEVICE_PORT").
-
-You are currently in the following groups:
-
-  $(id -Gn)
-
-Please ensure you have followed the instructions on setting up your
-account to be in the right group:
-
-https://github.com/keyboardio/Kaleidoscope/wiki/Install-Arduino-support-on-Linux
-
-EOF
-		exit 1
-	fi
-}
 
 usage() {
 	cat <<-EOF
