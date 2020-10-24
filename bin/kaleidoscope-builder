@@ -134,6 +134,29 @@ run_arduino_cli() {
 		"${ARDUINO_CLI}" "$@"
 }
 
+set_executable_paths() {
+	######
+	###### Executable paths
+	######
+
+	# Allow the compiler path to be empty for virtual builds
+	# should use compiler.path instead of appending bin, but we don't have substitution het
+	: "${COMPILER_PATH=$(get_arduino_pref 'runtime.tools.avr-gcc.path')/bin}"
+
+	COMPILER_SUFFIX=""
+
+	C_COMPILER_BASENAME=$(basename "${CC:-gcc}")
+	CXX_COMPILER_BASENAME=$(basename "${CXX:-g++}")
+	AR_BASENAME=$(basename "${AR:-ar}")
+
+	# Allow the compiler prefix to be empty for virtual builds
+	COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
+	: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
+	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
+	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
+	: "${AVR_AR:=${COMPILER_PATH}/${COMPILER_PREFIX}ar}"
+}
+
 build_version() {
 	: "${LIB_PROPERTIES_PATH:="../.."}"
 	GIT_VERSION="$(
@@ -320,42 +343,6 @@ compile() {
 	build_paths
 	build_filenames
 	enable_ccache
-	# If the hex file is older than the sketch file, or the hex file does not exist
-	# then rebuild. This is not as correct as letting make check our dependencies
-	# But it's less broken for most user use cases
-	# TODO(anyone): Make this suck less
-	if [ "${HEX_FILE_PATH}" -ot "${SKETCH_FILE_PATH}" ]; then
-		do_compile "$@"
-	else
-		echo "${HEX_FILE_PATH} did not need to be rebuilt"
-	fi
-
-}
-
-set_executable_paths() {
-	######
-	###### Executable paths
-	######
-
-	# Allow the compiler path to be empty for virtual builds
-	# should use compiler.path instead of appending bin, but we don't have substitution het
-	: "${COMPILER_PATH=$(get_arduino_pref 'runtime.tools.avr-gcc.path')/bin}"
-
-	COMPILER_SUFFIX=""
-
-	C_COMPILER_BASENAME=$(basename "${CC:-gcc}")
-	CXX_COMPILER_BASENAME=$(basename "${CXX:-g++}")
-	AR_BASENAME=$(basename "${AR:-ar}")
-
-	# Allow the compiler prefix to be empty for virtual builds
-	COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
-	: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
-	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
-	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
-	: "${AVR_AR:=${COMPILER_PATH}/${COMPILER_PREFIX}ar}"
-}
-
-do_compile() {
 
 	install -d "${OUTPUT_PATH}"
 
@@ -451,8 +438,7 @@ build_all() {
 	plugins="$(find_all_sketches)"
 
 	for sketch in ${plugins}; do
-		export SKETCH="${sketch}"
-		$0 "${sketch}" build
+		$0 "${sketch}" compile
 	done
 }
 
