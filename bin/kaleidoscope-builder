@@ -415,34 +415,6 @@ _arduino_props() {
 	echo "$_ARDUINO_PREFS"
 }
 
-find_all_sketches() {
-	for sketch_name in ./*.ino \
-		$([ -d examples ] && find examples -name '*.ino') \
-		src/*.ino; do
-		if [ -d "$(dirname "${sketch_name}")" ] || [ -f "${sketch_name}" ]; then
-			p="$(basename "${sketch_name}" .ino)"
-			if [ "${p}" != '*' ]; then
-				case "${sketch_name}" in
-				examples/*/${p}/${p}.ino)
-					echo "${sketch_name}" | sed -e "s,examples/,," | sed -e "s,/${p}\\.ino,,"
-					;;
-				*)
-					echo "${p}"
-					;;
-				esac
-			fi
-		fi
-	done | sort
-}
-
-build_all() {
-	plugins="$(find_all_sketches)"
-
-	for sketch in ${plugins}; do
-		$0 "${sketch}" compile
-	done
-}
-
 size_map() {
 	compile
 
