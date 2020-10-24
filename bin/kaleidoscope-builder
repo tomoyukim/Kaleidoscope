@@ -779,10 +779,6 @@ fi
 SKETCH="$1"
 shift
 
-if [ "${SKETCH}" = "default" ]; then
-    SKETCH="${DEFAULT_SKETCH}"
-fi
-
 cmds=""
 
 # shellcheck disable=2034
