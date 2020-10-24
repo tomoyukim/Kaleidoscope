@@ -403,6 +403,7 @@ prepare_ccache () {
 }
 compile () {
     find_sketch
+    set_executable_paths
     build_version
     build_paths
     build_filenames
@@ -476,9 +477,6 @@ do_compile () {
         fi
     fi
 
-    _CMD_CXX="${CXX:-${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
-    _CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
-    _CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
 
     do_compile_with_cli
 
@@ -525,6 +523,9 @@ do_compile_with_cli() {
 	      COMPILER_PATH_PROP="${COMPILER_PATH}"
 	fi
 
+    _CMD_CXX="${CXX:-${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
+    _CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
+    _CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
 	run_arduino_cli compile \
 		--fqbn "${FQBN}" \
 		--libraries "${KALEIDOSCOPE_DIR}/.."  \
@@ -728,7 +729,6 @@ fi
 
 read_conf_files
 configure_arduino_cli_env
-set_executable_paths
 
 # shellcheck disable=SC1090
 
