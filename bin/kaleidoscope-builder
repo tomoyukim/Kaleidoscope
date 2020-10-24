@@ -455,10 +455,6 @@ disassemble() {
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
-decompile() {
-	disassemble
-}
-
 clean() {
 	find_sketch
 	build_paths
