@@ -31,11 +31,10 @@ install:
   - export ARDUINO_PATH=$TRAVIS_BUILD_DIR/arduino-1.8.13
   - export KALEIDOSCOPE_BUILDER_DIR=$TRAVIS_BUILD_DIR/bin
   - make adjust-git-timestamps
-  - wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
+  - #wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
   - make install-arduino-cli
   - make configure-arduino-cli
   - make install-arduino-core-avr
-  - make prepare-ccache
 jobs:
   include:
     - env: TEST_CMD="make -j 2 smoke-sketches"
@@ -55,5 +54,4 @@ cache:
   apt: true
   ccache: true
   directories:
-    - .download-cache
     - .kaleidoscope-build-cache
