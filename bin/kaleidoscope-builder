@@ -335,23 +335,6 @@ check_bootloader_port_and_flash () {
     return 0
 }
 
-flash_over_usb () {
-    FLASH_CMD=$(${AVRDUDE} \
-		-C "${AVRDUDE_CONF}" \
-		-p"$(get_arduino_pref 'build.mcu')" \
- 		-cavr109 \
-		-D \
-		-P "${DEVICE_PORT_BOOTLOADER}" \
-		-b57600 \
-		"-Uflash:w:${HEX_FILE_PATH}:i")
-    if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
-	${FLASH_CMD} 2>&1 |grep -v ^avrdude | grep -v '^$' |grep -v '^ ' | grep -vi programmer
-    	return "${PIPESTATUS[0]}"
-    else
-        ${FLASH_CMD}
-	return $?
-    fi
-}
 
 flash_from_bootloader() {
     compile "$@"
@@ -367,19 +350,28 @@ program() {
 }
 
 flash_with_programmer() {
-    ${AVRDUDE} -v \
-	       -C "${AVRDUDE_CONF}" \
-	       -p"$(get_arduino_pref 'build.mcu')" \
+	set_executable_paths
+	${AVRDUDE_CMD}
 	       -cusbtiny \
-	       -D \
 	       -B 1 \
 	       "-Uflash:w:${HEX_FILE_PATH}:i"
 }
 
-find_bootloader_path() {
-    : "${BOOTLOADER_PATH:=$( get_arduino_pref 'runtime.platform.path' )/bootloaders/$( get_arduino_pref 'bootloader.file' )}"
+flash_over_usb () {
+    set_executable_paths
+    FLASH_CMD=$( ${AVRDUDE_CMD}
+ 		-cavr109 \
+		-P "${DEVICE_PORT_BOOTLOADER}" \
+		-b57600 \
+		"-Uflash:w:${HEX_FILE_PATH}:i")
+    if [ "${ARDUINO_VERBOSE}" != "--verbose" ]; then
+	${FLASH_CMD} 2>&1 |grep -v ^avrdude | grep -v '^$' |grep -v '^ ' | grep -vi programmer
+    	return "${PIPESTATUS[0]}"
+    else
+        ${FLASH_CMD}
+	return $?
+    fi
 }
-
 
 hex_with_bootloader () {
     compile
