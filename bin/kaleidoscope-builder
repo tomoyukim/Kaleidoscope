@@ -29,6 +29,40 @@ uname_S=$(uname -s 2>/dev/null || echo not)
 uname_O=$(uname -o 2>/dev/null || echo not)
 }
 
+
+adjust_for_virtual_build() {
+        if [ "${uname_S}" = "FreeBSD" ]; then
+                : "${COMPILER_PATH:=/usr/local/bin/}"
+        else
+                : "${COMPILER_PATH:=/usr/bin/}"
+        fi
+
+        COMPILER_PREFIX=""
+}
+
+adjust_for_cygwin() {
+        # The Windows arduino-builder.exe doesn't understand being told to exec against Cygwin symlinks
+        CCACHE_NOT_SUPPORTED=1
+
+        # It's important that all of these be underneath /cygdrive/c so they can be converted to Windows paths that the
+        # Windows Arduino binaries can understand.
+        : "${TMPDIR:=/cygdrive/c/Users/${USER}/AppData/Local/Temp}"
+
+        # We need to prevent Windows executables from being passed parameters that are absolute paths, since they won't
+        # be interpretable when of the form /cygdrive/c/foo. To work around this, we set the common path root variables
+        # to use relative paths instead of absolute paths, since those have mostly platform-agnostic behavior.
+        #
+        # Note that this trick requires that all of these paths exist on the same drive letter as the current directory,
+        # since otherwise even the relative paths would include Cygwin-specific components. So...
+        if [[ $(realpath --relative-base=/cygdrive/c .) == /* ]]; then
+                echo "kaleidoscope-builder's Cygwin support is currently limited to running from within /cygdrive/c"
+                exit 1
+        fi
+
+        TMPDIR="$(realpath --relative-to=./ ${TMPDIR})"
+}
+
+
 absolute_filename() {
 	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
@@ -39,7 +73,6 @@ read_conf_files() {
 		"${HOME}/.kaleidoscope-builder.conf" \
 		"$(pwd)/.kaleidoscope-builder.conf" \
 		"$(pwd)/kaleidoscope-builder.conf" \
-		"${KALEIDOSCOPE_DIR}/etc/kaleidoscope-builder.conf"; do
 		if [ -e "${conf_file}" ]; then
 			# shellcheck disable=SC1090
 			. "${conf_file}"
@@ -800,6 +833,29 @@ if [ -n "${VERBOSE}" ] && [[ "${VERBOSE}" -gt 0 ]]; then
 else
 	ARDUINO_VERBOSE="--quiet"
 fi
+
+
+
+
+: "${BOARD:=model01}"
+
+if [[ -z "${ARCH}" && -n "${FQBN}" ]]; then
+        ARCH=$(echo "${FQBN}" | sed -n -e 's/^[^:]\+:\([^:]\+\).*/\1/p')
+fi
+
+: "${ARCH:=avr}"
+: "${FQBN:=keyboardio:${ARCH}:${BOARD}}"
+
+if [ "${ARCH}" = "virtual" ]; then
+        adjust_for_virtual_build
+fi
+
+if [ "${uname_O}" = "Cygwin" ]; then
+        adjust_for_cygwin
+fi
+
+
+
 
 ## Parse the command-line
 ##  - anything that has a =, is an env var
