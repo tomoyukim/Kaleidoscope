@@ -155,6 +155,7 @@ set_executable_paths() {
 	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
 	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
 	: "${AVR_AR:=${COMPILER_PATH}/${COMPILER_PREFIX}ar}"
+	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
 }
 
 build_version() {
@@ -222,6 +223,10 @@ enable_ccache() {
 
 			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}ar" ]; then
 				ln -s "${AVR_AR}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}ar"
+			fi
+			
+			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size" ]; then
+				ln -s "${AVR_SIZE}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size"
 			fi
 
 		fi
