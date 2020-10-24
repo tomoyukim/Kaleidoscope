@@ -224,9 +224,6 @@ enable_ccache() {
 				ln -s "${AVR_AR}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}ar"
 			fi
 
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size" ]; then
-				ln -s "${AVR_SIZE}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size"
-			fi
 		fi
 
 		export CCACHE_PATH=${COMPILER_PATH}/
