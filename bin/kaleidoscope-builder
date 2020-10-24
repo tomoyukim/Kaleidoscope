@@ -256,6 +256,21 @@ prompt_before_flashing() {
 	read
 }
 
+reset_device_cmd() {
+        if [ -z ${NO_RESET} ]; then
+                if [ "${uname_S}" = "Darwin" ]; then
+                        /bin/stty -f ${DEVICE_PORT} 1200
+                elif [ "${uname_S}" = "FreeBSD" ]; then
+                        /bin/stty -f ${DEVICE_PORT} 1200
+
+                elif [ "${uname_O}" = "Cygwin" ]; then
+                        cmd /c mode ${DEVICE_COM_PORT} baud=1200
+                else
+                        stty -F ${DEVICE_PORT} 1200 hupcl
+                fi
+        fi
+}
+
 flash() {
 	compile "$@"
 
