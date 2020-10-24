@@ -376,7 +376,7 @@ flash_over_usb () {
 hex_with_bootloader () {
     compile
 
-    find_bootloader_path
+    : "${BOOTLOADER_PATH:=$( get_arduino_pref 'runtime.platform.path' )/bootloaders/$( get_arduino_pref 'bootloader.file' )}"
 
     awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" > "${HEX_FILE_WITH_BOOTLOADER_PATH}"
     echo "Using ${BOOTLOADER_PATH}"
