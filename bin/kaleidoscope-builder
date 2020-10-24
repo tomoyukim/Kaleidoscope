@@ -205,7 +205,7 @@ firmware_size () {
 
 
 find_sketch () {
-    SKETCH_DIR="${SKETCH:-$(absolute_filename $(pwd))}"
+    SKETCH_DIR="${SKETCH:-$(absolute_filename "$(pwd)")}"
     SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
     SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
 
@@ -350,14 +350,14 @@ program() {
 }
 
 flash_with_programmer() {
-	${AVRDUDE_CMD}
+	${AVRDUDE_CMD} \
 	       -cusbtiny \
 	       -B 1 \
 	       "-Uflash:w:${HEX_FILE_PATH}:i"
 }
 
 flash_over_usb () {
-    FLASH_CMD=$( ${AVRDUDE_CMD}
+    FLASH_CMD=$( ${AVRDUDE_CMD} \
  		-cavr109 \
 		-P "${DEVICE_PORT_BOOTLOADER}" \
 		-b57600 \
@@ -431,10 +431,9 @@ set_executable_paths () {
 
 COMPILER_SUFFIX=""
 
-C_COMPILER_BASENAME=$(basename ${CC:-gcc})
-CXX_COMPILER_BASENAME=$(basename ${CXX:-g++})
-AR_BASENAME=$(basename ${AR:-ar})
-OBJCOPY_BASENAME=$(basename ${OBJCOPY:-objcopy})
+C_COMPILER_BASENAME=$(basename "${CC:-gcc}")
+CXX_COMPILER_BASENAME=$(basename "${CXX:-g++}")
+AR_BASENAME=$(basename "${AR:-ar}")
 
 # Allow the compiler prefix to be empty for virtual builds
 COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
@@ -447,7 +446,7 @@ COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
 # TO DO should use tools.avrdude.cmd.path and tools.avrdude.config.path instead of hardcoding
 : "${AVRDUDE:=$(get_arduino_pref 'runtime.tools.avrdude.path')/bin/avrdude}"
 : "${AVRDUDE_CONF:=$(get_arduino_pref 'runtime.tools.avrdude.path')/etc/avrdude.conf}"
-AVRDUDE_CMD="${AVRDUDE} -v-C "${AVRDUDE_CONF}" -D -p\"$(get_arduino_pref 'build.mcu')\""
+AVRDUDE_CMD="${AVRDUDE} -v-C \"${AVRDUDE_CONF}\" -D -p\"$(get_arduino_pref 'build.mcu')\""
 
 }
 
@@ -504,7 +503,7 @@ do_compile () {
 get_arduino_pref() {
         pref=$1
         # Strip the preference name. And then strip leading and trailing quotations
-        MESSAGE=$(dump_arduino_prefs | grep --max-count=1 "${pref}=" | sed -e s/^.*${pref}=// -e 's/^"//' -e 's/"$//')
+        MESSAGE=$(dump_arduino_prefs | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//')
         echo "$MESSAGE"
 }
 
@@ -543,15 +542,15 @@ do_compile_with_cli() {
 
 
 find_all_sketches () {
-    for plugin in ./*.ino \
+    for sketch_name in ./*.ino \
   	              $([ -d examples ] && find examples -name '*.ino') \
                   src/*.ino; do
-        if [ -d "$(dirname "${plugin}")" ] || [ -f "${plugin}" ]; then
-            p="$(basename "${plugin}" .ino)"
+        if [ -d "$(dirname "${sketch_name}")" ] || [ -f "${sketch_name}" ]; then
+            p="$(basename "${sketch_name}" .ino)"
             if [ "${p}" != '*' ]; then
-                case "${plugin}" in
+                case "${sketch_name}" in
                     examples/*/${p}/${p}.ino)
-                        echo "${plugin}" | sed -e "s,examples/,," | sed -e "s,/${p}\\.ino,,"
+                        echo "${sketch_name}" | sed -e "s,examples/,," | sed -e "s,/${p}\\.ino,,"
                         ;;
                     *)
                         echo "${p}"
@@ -567,7 +566,7 @@ build_all () {
 
     for sketch in ${plugins}; do
         export SKETCH="${sketch}"
-        $0 "${plugin}" build
+        $0 "${sketch}" build
     done
 }
 
