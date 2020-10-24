@@ -212,35 +212,6 @@ enable_ccache() {
 	fi
 }
 
-firmware_size() {
-	if [ "${ARCH}" = "virtual" ]; then
-		echo "[Size not computed for virtual build]"
-		return
-	fi
-
-	: "${MAX_PROG_SIZE:=$(get_arduino_pref 'upload.maximum_size')}"
-
-	## This is a terrible hack, please don't hurt me. - algernon
-
-	set +e
-	raw_output=$("$@" 2>/dev/null)
-	rc=$?
-	set -e
-
-	if [ $rc -eq 0 ]; then
-		output="$(echo "${raw_output}" | grep "\\(Program\\|Data\\):" | sed -e 's,^,  - ,' && echo)"
-
-		PROGSIZE="$(echo "${output}" | grep "Program:" | cut -d: -f2 | awk '{print $1}')"
-
-		PERCENT="$(echo "${PROGSIZE}" "${MAX_PROG_SIZE}" | awk "{ printf \"%02.01f\", \$1 / \$2 * 100 }")"
-
-		# we want the sed there, doing with shell builtins would be worse.
-		# shellcheck disable=SC2001 disable=SC1117
-		echo "${output}" | sed -e "s/\(Program:.*\)(\([0-9\.]*%\) Full)/\1(${PERCENT}% Full)/"
-	else
-		echo "Unable to determine image size."
-	fi
-}
 
 find_sketch() {
 	SKETCH_DIR="${SKETCH:-$(absolute_filename "$(pwd)")}"
@@ -338,7 +309,6 @@ hex_with_bootloader() {
 
 build() {
 	compile "$@"
-	size "$@"
 }
 
 prepare_ccache() {
@@ -381,7 +351,6 @@ set_executable_paths() {
 
 	# Allow the compiler prefix to be empty for virtual builds
 	COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
-	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
 	: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
 	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
 	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
@@ -502,16 +471,6 @@ build_all() {
 	done
 }
 
-size() {
-	compile
-
-	: "${AVR_SIZE_FLAGS:=-C --mcu=$(get_arduino_pref 'build.mcu')}"
-	echo "- Size: ${ELF_FILE_PATH}"
-	# shellcheck disable=SC2086
-	firmware_size "${AVR_SIZE}" ${AVR_SIZE_FLAGS} "${ELF_FILE_PATH}"
-	echo
-}
-
 size_map() {
 	compile
 
@@ -598,12 +557,6 @@ usage() {
 
 		  compile
 		    Compiles the sketch.
-
-		  size
-		    Reports the size of the compiled sketch.
-
-		  build
-		    Runs compile and report-size.
 
 		  clean
 		    Cleans up the output directory.
