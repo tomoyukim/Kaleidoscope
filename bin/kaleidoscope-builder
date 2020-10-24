@@ -19,6 +19,16 @@ set -e
 ###### Build and output configuration
 ######
 
+
+identify_os() {
+
+
+## Platform-specific overrides
+# Shamelessly stolen from git's Makefile
+uname_S=$(uname -s 2>/dev/null || echo not)
+uname_O=$(uname -o 2>/dev/null || echo not)
+}
+
 absolute_filename() {
 	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
@@ -713,6 +723,7 @@ fi
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
+identify_os
 read_conf_files
 configure_arduino_cli_env
 
