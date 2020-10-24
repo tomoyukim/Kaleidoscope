@@ -289,6 +289,7 @@ prompt_before_flashing() {
 flash() {
 	compile "$@"
 
+	find_device_vid_pid
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
 	find_bootloader_ports
@@ -472,7 +473,6 @@ find_bootloader_ports() {
 		return
 	fi
 
-	find_device_vid_pid
 	: "${BOOTLOADER_VID:=${VID}}"
 	if [ "${uname_S}" = "Darwin" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
@@ -497,7 +497,6 @@ find_device_port() {
 		return
 	fi
 
-	find_device_vid_pid
 	if [ "${uname_S}" = "Darwin" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
 		DEVICE_PORT="$(perl ${DEVICE_PORT_PROBER} ${VID} ${SKETCH_PID})"
