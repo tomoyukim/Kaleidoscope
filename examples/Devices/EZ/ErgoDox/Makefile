@@ -43,6 +43,7 @@ endif
 BOARD_HARDWARE_PATH = $(ARDUINO_INSTALLED_ENV)
 KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR ?= build-tools/makefiles/
 KALEIDOSCOPE_BUILDER_DIR ?= $(ARDUINO_INSTALLED_ENV)/libraries/Kaleidoscope/bin/
+KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_INSTALLED_ENV)/libraries/Kaleidoscope/etc/
 
 
 
@@ -51,5 +52,6 @@ endif
 
 BOARD_HARDWARE_PATH ?= $(SKETCHBOOK_DIR)/hardware
 KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR ?= keyboardio/avr/build-tools/makefiles/
+KALEIDOSCOPE_ETC_DIR ?= $(BOARD_HARDWARE_PATH)/keyboardio/avr/libraries/Kaleidoscope/etc/
 
-include $(BOARD_HARDWARE_PATH)/$(KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR)/sketch-arduino-cli.mk
+include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
