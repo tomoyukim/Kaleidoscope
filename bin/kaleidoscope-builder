@@ -175,8 +175,27 @@ build_paths() {
 	: "${CCACHE_WRAPPER_PATH:=${KALEIDOSCOPE_TEMP_PATH}/ccache/bin}"
 	: "${CORE_CACHE_PATH:=${KALEIDOSCOPE_TEMP_PATH}/arduino-cores}"
 
+
+	: "${LIB_PROPERTIES_PATH:="../.."}"
+	GIT_VERSION="$(
+		cd "${SKETCH_DIR}"
+		if [ -d .git ]; then echo -n '-g' && git describe --abbrev=4 --dirty --always; fi
+	)"
+	LIB_VERSION="$(
+		cd "${SKETCH_DIR}"
+		(grep version= "${LIB_PROPERTIES_PATH}/library.properties" 2>/dev/null || echo version=0.0.0) | cut -d= -f2
+	)${GIT_VERSION}"
+
+
+	: "${OUTPUT_FILE_PREFIX:=${SKETCH_BASE_NAME}-${LIB_VERSION}}"
+	: "${HEX_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.hex}"
+	: "${HEX_FILE_WITH_BOOTLOADER_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}-with-bootloader.hex}"
+	: "${ELF_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.elf}"
+	: "${LIB_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.a}"
+
 	mkdir -p "$CORE_CACHE_PATH"
 	mkdir -p "$BUILD_PATH"
+
 }
 
 
@@ -240,8 +259,14 @@ find_sketch() {
 			return
 		fi
 	done
-	echo "I couldn't find your sketch (.ino file)" >&2
-	exit 1
+	SKETCH_NOT_FOUND=1
+}
+
+ensure_sketch_found() {
+	if [ -n "${SKETCH_NOT_FOUND}" ]; then
+		echo "I couldn't find your sketch (.ino file)" >&2
+		exit 1
+	fi
 }
 
 
@@ -263,7 +288,8 @@ prompt_before_flashing() {
 
 
 flash() {
-	compile "$@"
+	find_sketch
+	build_paths
 
 	: "${VID:=$(_arduino_prop 'build.vid')}"
 	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
@@ -297,7 +323,8 @@ flash() {
 
 
 hex_with_bootloader() {
-	compile
+	find_sketch
+	build_paths
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 
@@ -317,26 +344,10 @@ hex_with_bootloader() {
 
 compile() {
 	find_sketch
-	set_executable_paths
+	ensure_sketch_found
 	build_paths
+	set_executable_paths
 	enable_ccache
-
-	: "${LIB_PROPERTIES_PATH:="../.."}"
-	GIT_VERSION="$(
-		cd "${SKETCH_DIR}"
-		if [ -d .git ]; then echo -n '-g' && git describe --abbrev=4 --dirty --always; fi
-	)"
-	LIB_VERSION="$(
-		cd "${SKETCH_DIR}"
-		(grep version= "${LIB_PROPERTIES_PATH}/library.properties" 2>/dev/null || echo version=0.0.0) | cut -d= -f2
-	)${GIT_VERSION}"
-
-
-	: "${OUTPUT_FILE_PREFIX:=${SKETCH_BASE_NAME}-${LIB_VERSION}}"
-	: "${HEX_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.hex}"
-	: "${HEX_FILE_WITH_BOOTLOADER_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}-with-bootloader.hex}"
-	: "${ELF_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.elf}"
-	: "${LIB_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.a}"
 
 	install -d "${OUTPUT_PATH}"
 
@@ -409,14 +420,16 @@ _arduino_props() {
 }
 
 size_map() {
-	compile
-
+	find_sketch
+	build_paths
+	set_executable_paths
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
 
 disassemble() {
-	compile
-
+	find_sketch
+	build_paths
+	set_executable_paths
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
@@ -590,6 +603,7 @@ fi
 
 SKETCH="$1"
 shift
+
 
 cmds=""
 

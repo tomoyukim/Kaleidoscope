@@ -9,8 +9,12 @@ all:
 decompile: disassemble
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
-xbuild: compile
-	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
+disassemble: compile
+
+size-map: compile
+
+flash: compile
+
 
 %:
 	@BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@
