@@ -52,7 +52,7 @@ endif
 
 BOARD_HARDWARE_PATH ?= $(SKETCHBOOK_DIR)/hardware
 KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR ?= keyboardio/build-tools/makefiles/
-KALEIDOSCOPE_ETC_DIR ?= keyboardio/avr/libraries/Kaleidoscope/etc/
+KALEIDOSCOPE_ETC_DIR ?= $(BOARD_HARDWARE_PATH)/keyboardio/avr/libraries/Kaleidoscope/etc/
 
 # If Kaleidoscope's Arduino libraries cannot be found, e.g. because 
 # they reside outside of SKETCHBOOK_DIR, we fall back to assuming that 
