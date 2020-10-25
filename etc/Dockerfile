@@ -10,7 +10,9 @@ RUN ccache --set-config=cache_dir=/kaleidoscope-persist/ccache/cache
 
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | \
   sh
-RUN /bin/arduino-cli core install arduino:avr
+RUN ARDUINO_DIRECTORIES_DATA=/arduino-cli/data /bin/arduino-cli config init
+RUN ARDUINO_DIRECTORIES_DATA=/arduino-cli/data /bin/arduino-cli update
+RUN ARDUINO_DIRECTORIES_DATA=/arduino-cli/data /bin/arduino-cli core install arduino:avr
 
 
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint

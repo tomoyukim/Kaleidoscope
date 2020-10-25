@@ -16,5 +16,5 @@ ln -s /kaleidoscope/hardware/keyboardio/virtual/libraries/Kaleidoscope \
       /kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope
 
 cd /kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope
-
+export ARDUINO_DIRECTORIES_DATA=/arduino-cli/data
 /bin/bash -c "$*"
