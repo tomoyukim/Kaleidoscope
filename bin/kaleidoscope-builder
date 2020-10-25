@@ -20,7 +20,6 @@ set -e
 ######
 
 identify_os() {
-
 	## Platform-specific overrides
 	# Shamelessly stolen from git's Makefile
 	uname_S=$(uname -s 2>/dev/null || echo not)
@@ -270,6 +269,7 @@ flash() {
 	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
 	: "${BOOTLOADER_PID:=$(_arduino_prop 'bootloader.pid')}"
 	: "${BOOTLOADER_VID:=$(_arduino_prop 'bootloader.vid')}"
+	: "${BOOTLOADER_VID:=${VID}}"
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
@@ -281,18 +281,15 @@ flash() {
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
 
-	find_device_port
-	run_arduino_cli upload \
-                --fqbn "${FQBN}" \
-		--port "${DEVICE_PORT}" \
-		--verbose
-
+		find_device_port
+		port="${DEVICE_PORT}"
+	else	
+		port="${DEVICE_PORT_BOOTLOADER}"
 	fi
 	run_arduino_cli upload \
                 --fqbn "${FQBN}" \
-		--port "${DEVICE_PORT_BOOTLOADER}" \
-		--verbose
-
+		--port "${port}" \
+		"${ARDUINO_VERBOSE}"
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
 	${postFlash_HOOKS}
@@ -321,6 +318,8 @@ hex_with_bootloader() {
 compile() {
 	find_sketch
 	set_executable_paths
+	build_paths
+	enable_ccache
 
 	: "${LIB_PROPERTIES_PATH:="../.."}"
 	GIT_VERSION="$(
@@ -333,8 +332,6 @@ compile() {
 	)${GIT_VERSION}"
 
 
-	build_paths
-	enable_ccache
 	: "${OUTPUT_FILE_PREFIX:=${SKETCH_BASE_NAME}-${LIB_VERSION}}"
 	: "${HEX_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.hex}"
 	: "${HEX_FILE_WITH_BOOTLOADER_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}-with-bootloader.hex}"
@@ -437,7 +434,6 @@ find_bootloader_ports() {
 		return
 	fi
 
-	: "${BOOTLOADER_VID:=${VID}}"
 	if [ "${uname_S}" = "Darwin" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
 		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}")"
@@ -447,9 +443,7 @@ find_bootloader_ports() {
 	elif [ "${uname_S}" = "FreeBSD" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-freebsd"
 		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}")"
-
 	else
-
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-linux-udev"
 		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}")"
 	fi
