@@ -71,7 +71,7 @@ $(info *************************************************************************
 $(info )
 endif
 
-include $(BOARD_HARDWARE_PATH)/$(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
+include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
 
 # Set up an argument for passing to the simulator tests in docker
 # but if the var isn't set, don't even pass the definition
