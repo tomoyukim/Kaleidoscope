@@ -8,15 +8,9 @@ RUN apt-get -qq update && \
 RUN ccache --set-config=cache_dir=/kaleidoscope-persist/ccache/cache
 
 
-ENV ARDUINO_VERSION "1.8.13"
-
-WORKDIR /usr/local
-RUN curl https://downloads.arduino.cc/arduino-${ARDUINO_VERSION}-linux64.tar.xz | \
-  xzcat | tar xf - && \
-  ln -s arduino-${ARDUINO_VERSION} arduino
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | \
   sh
-RUN /usr/local/bin/arduino-cli core install arduino:avr
+RUN /bin/arduino-cli core install arduino:avr
 
 
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint
