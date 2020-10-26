@@ -50,10 +50,10 @@ _read_conf_files() {
 
 	done
 }
-configure_arduino_cli_env() {
+_configure_arduino_cli_env() {
 	system_arduino_cli="$(command -v arduino-cli || true)"
 
-	if [ -z "${SYSTEM_ARDUINO_CLI}" ]; then
+	if [ -z "${system_arduino_cli}" ]; then
 		: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
 	else
 		: "${ARDUINO_CLI:=${system_arduino_cli}}"
@@ -73,7 +73,7 @@ install_arduino_cli() {
 	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 }
 
-_configure_arduino_cli() {
+configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
 		install_arduino_cli
 	fi
@@ -227,7 +227,7 @@ flash() {
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
-	_find_bootloader_ports
+	_find_bootloader_port
 	if [ -z "${DEVICE_PORT_BOOTLOADER}" ]; then
 		prompt_before_flashing
 
@@ -313,7 +313,7 @@ compile() {
 		--build-properties "compiler.ar.cmd=${_CMD_AR}" \
 		--build-properties "compiler.c.elf.cmd=${_CMD_CXX}" \
 		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
-		${ARDUINO_VERBOSE} \
+		"${ARDUINO_VERBOSE}" \
 		--warnings all \
 		"${SKETCH_FILE_PATH}"
 
@@ -374,29 +374,12 @@ clean() {
 	fi
 }
 
-_find_bootloader_ports() {
+_find_bootloader_port() {
 	if [ -n "${DEVICE_PORT_BOOTLOADER}" ]; then
 		echo "DEVICE_PORT_BOOTLOADER=\"${DEVICE_PORT_BOOTLOADER}\" predefined."
 		return
 	fi
-
-	: "${BOOTLOADER_PID:=$(_arduino_prop 'bootloader.pid')}"
-	: "${BOOTLOADER_VID:=$(_arduino_prop 'bootloader.vid')}"
-	: "${BOOTLOADER_VID:=$(_arduino_prop 'build.vid')}"
-
-	if [ "${uname_S}" = "Darwin" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
-		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}")"
-	elif [ "${uname_O}" = "Cygwin" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-windows.ps1"
-		DEVICE_PORT_BOOTLOADER="$(powershell -noprofile -executionpolicy bypass "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}" -Format COM)"
-	elif [ "${uname_S}" = "FreeBSD" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-freebsd"
-		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}")"
-	else
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-linux-udev"
-		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}")"
-	fi
+	DEVICE_PORT_BOOTLOADER=_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'bootloader.pid' ||  _arduino_prop 'build.pid')"
 }
 
 _find_device_port() {
@@ -405,22 +388,25 @@ _find_device_port() {
 		return
 	fi
 
-	: "${VID:=$(_arduino_prop 'build.vid')}"
-	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
+	DEVICE_PORT=_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'build.pid')"
+}
 
+_probe_port() {
+	vendor_id=$1
+	product_id=$2
 	if [ "${uname_S}" = "Darwin" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
-		DEVICE_PORT="$(perl "${DEVICE_PORT_PROBER}" "${VID}" "${SKETCH_PID}")"
+		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
+		perl "${port_prober}" "${vendor_id}" "${product_id}"
 	elif [ "${uname_O}" = "Cygwin" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-windows.ps1"
-		DEVICE_PORT="$(powershell -noprofile -executionpolicy bypass "${DEVICE_PORT_PROBER}" "${VID}" "${SKETCH_PID}" -Format Cygwin)"
-		#DEVICE_COM_PORT="$(powershell -noprofile -executionpolicy bypass "${DEVICE_PORT_PROBER}" "${VID}" "${SKETCH_PID}" -Format COM)"
+		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-windows.ps1"
+		powershell -noprofile -executionpolicy bypass "${port_prober}" "${vendor_id}" "${product_id}" -Format Cygwin
+		#DEVICE_COM_PORT="$(powershell -noprofile -executionpolicy bypass "${port_prober}" "${vendor_id}" "${product_id}" -Format COM)"
 	elif [ "${uname_S}" = "FreeBSD" ]; then
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-freebsd"
-		DEVICE_PORT="$(perl "${DEVICE_PORT_PROBER}")"
+		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-freebsd"
+		perl "${port_prober}"
 	else
-		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-linux-udev"
-		DEVICE_PORT="$(perl "${DEVICE_PORT_PROBER}" "${VID}" "${SKETCH_PID}")"
+		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-linux-udev"
+		perl "${port_prober}" "${vendor_id}" "${product_id}"
 	fi
 }
 
