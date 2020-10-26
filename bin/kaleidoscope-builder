@@ -227,18 +227,15 @@ flash() {
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
-	_find_bootloader_port
-	if [ -z "${DEVICE_PORT_BOOTLOADER}" ]; then
+	port="${DEVICE_PORT_BOOTLOADER:$(_find_bootloader_port)}"
+	if [ -z "${port}" ]; then
 		prompt_before_flashing
 
 		# This is defined in the (optional) user config.
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
 
-		_find_device_port
-		port="${DEVICE_PORT}"
-	else	
-		port="${DEVICE_PORT_BOOTLOADER}"
+		port="${DEVICE_PORT:$(_find_device_port)}"
 	fi
 	run_arduino_cli upload \
                 --fqbn "${FQBN}" \
@@ -379,7 +376,7 @@ _find_bootloader_port() {
 		echo "DEVICE_PORT_BOOTLOADER=\"${DEVICE_PORT_BOOTLOADER}\" predefined."
 		return
 	fi
-	DEVICE_PORT_BOOTLOADER=_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'bootloader.pid' ||  _arduino_prop 'build.pid')"
+	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'bootloader.pid' ||  _arduino_prop 'build.pid')"
 }
 
 _find_device_port() {
@@ -388,7 +385,7 @@ _find_device_port() {
 		return
 	fi
 
-	DEVICE_PORT=_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'build.pid')"
+	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'build.pid')"
 }
 
 _probe_port() {
