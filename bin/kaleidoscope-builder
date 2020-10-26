@@ -227,7 +227,7 @@ flash() {
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
-	find_bootloader_ports
+	_find_bootloader_ports
 	if [ -z "${DEVICE_PORT_BOOTLOADER}" ]; then
 		prompt_before_flashing
 
@@ -235,7 +235,7 @@ flash() {
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
 
-		find_device_port
+		_find_device_port
 		port="${DEVICE_PORT}"
 	else	
 		port="${DEVICE_PORT_BOOTLOADER}"
@@ -374,7 +374,7 @@ clean() {
 	fi
 }
 
-find_bootloader_ports() {
+_find_bootloader_ports() {
 	if [ -n "${DEVICE_PORT_BOOTLOADER}" ]; then
 		echo "DEVICE_PORT_BOOTLOADER=\"${DEVICE_PORT_BOOTLOADER}\" predefined."
 		return
@@ -399,7 +399,7 @@ find_bootloader_ports() {
 	fi
 }
 
-find_device_port() {
+_find_device_port() {
 	if [ -n "${DEVICE_PORT}" ]; then
 		echo "DEVICE_PORT=\"${DEVICE_PORT}\" predefined."
 		return
