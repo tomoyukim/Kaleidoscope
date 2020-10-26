@@ -36,27 +36,6 @@ adjust_for_virtual_build() {
 	COMPILER_PREFIX=""
 }
 
-adjust_for_cygwin() {
-	# The Windows arduino-builder.exe doesn't understand being told to exec against Cygwin symlinks
-	CCACHE_NOT_SUPPORTED=1
-
-	# It's important that all of these be underneath /cygdrive/c so they can be converted to Windows paths that the
-	# Windows Arduino binaries can understand.
-	: "${TMPDIR:=/cygdrive/c/Users/${USER}/AppData/Local/Temp}"
-
-	# We need to prevent Windows executables from being passed parameters that are absolute paths, since they won't
-	# be interpretable when of the form /cygdrive/c/foo. To work around this, we set the common path root variables
-	# to use relative paths instead of absolute paths, since those have mostly platform-agnostic behavior.
-	#
-	# Note that this trick requires that all of these paths exist on the same drive letter as the current directory,
-	# since otherwise even the relative paths would include Cygwin-specific components. So...
-	if [[ $(realpath --relative-base=/cygdrive/c .) == /* ]]; then
-		echo "kaleidoscope-builder's Cygwin support is currently limited to running from within /cygdrive/c"
-		exit 1
-	fi
-
-	TMPDIR="$(realpath --relative-to=./ "${TMPDIR}")"
-}
 
 absolute_filename() {
 	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
@@ -153,7 +132,6 @@ set_executable_paths() {
 	: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
 	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
 	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
-	: "${AVR_AR:=${COMPILER_PATH}/${COMPILER_PREFIX}ar}"
 	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
 }
 
@@ -172,8 +150,6 @@ build_paths() {
 	: "${BUILD_PATH:=${KALEIDOSCOPE_BUILD_PATH}/${SKETCH_BUILD_DIR}}"
 	: "${OUTPUT_PATH:=${KALEIDOSCOPE_OUTPUT_PATH}/${SKETCH_OUTPUT_DIR}}"
 
-	: "${CCACHE_WRAPPER_PATH:=${KALEIDOSCOPE_TEMP_PATH}/ccache/bin}"
-	: "${CORE_CACHE_PATH:=${KALEIDOSCOPE_TEMP_PATH}/arduino-cores}"
 
 
 	: "${LIB_PROPERTIES_PATH:="../.."}"
@@ -193,54 +169,11 @@ build_paths() {
 	: "${ELF_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.elf}"
 	: "${LIB_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.a}"
 
-	mkdir -p "$CORE_CACHE_PATH"
 	mkdir -p "$BUILD_PATH"
 
 }
 
 
-enable_ccache() {
-	if [ -z "${CCACHE_NOT_SUPPORTED}" ] && [ "$(command -v ccache)" ]; then
-		if ! [ -d "$CCACHE_WRAPPER_PATH" ]; then
-			mkdir -p "$CCACHE_WRAPPER_PATH"
-
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}${C_COMPILER_BASENAME}" ]; then
-				ln -s "$(command -v ccache)" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}${C_COMPILER_BASENAME}"
-			fi
-
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}" ]; then
-				ln -s "$(command -v ccache)" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}"
-			fi
-
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}nm" ]; then
-				ln -s "${AVR_NM}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}nm"
-			fi
-
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}objcopy" ]; then
-				ln -s "${AVR_OBJCOPY}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}objcopy"
-			fi
-
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}ar" ]; then
-				ln -s "${AVR_AR}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}ar"
-			fi
-			
-			if ! [ -h "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size" ]; then
-				ln -s "${AVR_SIZE}" "${CCACHE_WRAPPER_PATH}/${COMPILER_PREFIX}size"
-			fi
-
-		fi
-
-		export CCACHE_PATH=${COMPILER_PATH}/
-		CCACHE_ENABLED=1
-
-	fi
-	if [ $CCACHE_ENABLED ]; then
-		COMPILER_PATH_PROP="${CCACHE_WRAPPER_PATH}/"
-	else
-		COMPILER_PATH_PROP="${COMPILER_PATH}"
-	fi
-
-}
 
 
 find_sketch() {
@@ -291,11 +224,6 @@ flash() {
 	find_sketch
 	build_paths
 
-	: "${VID:=$(_arduino_prop 'build.vid')}"
-	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
-	: "${BOOTLOADER_PID:=$(_arduino_prop 'bootloader.pid')}"
-	: "${BOOTLOADER_VID:=$(_arduino_prop 'bootloader.vid')}"
-	: "${BOOTLOADER_VID:=${VID}}"
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
@@ -347,7 +275,6 @@ compile() {
 	ensure_sketch_found
 	build_paths
 	set_executable_paths
-	enable_ccache
 
 	install -d "${OUTPUT_PATH}"
 
@@ -378,7 +305,6 @@ compile() {
 		--libraries "${KALEIDOSCOPE_DIR}/.." \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
-		--build-properties "compiler.path=${COMPILER_PATH_PROP}" \
 		--build-properties "compiler.c.cmd=${_CMD_CC}" \
 		--build-properties "compiler.cpp.cmd=${_CMD_CXX}" \
 		--build-properties "compiler.ar.cmd=${_CMD_AR}" \
@@ -448,6 +374,10 @@ find_bootloader_ports() {
 		return
 	fi
 
+	: "${BOOTLOADER_PID:=$(_arduino_prop 'bootloader.pid')}"
+	: "${BOOTLOADER_VID:=$(_arduino_prop 'bootloader.vid')}"
+	: "${BOOTLOADER_VID:=$(_arduino_prop 'build.vid')}"
+
 	if [ "${uname_S}" = "Darwin" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
 		DEVICE_PORT_BOOTLOADER="$(perl "${DEVICE_PORT_PROBER}" "${BOOTLOADER_VID}" "${BOOTLOADER_PID}")"
@@ -468,6 +398,9 @@ find_device_port() {
 		echo "DEVICE_PORT=\"${DEVICE_PORT}\" predefined."
 		return
 	fi
+
+	: "${VID:=$(_arduino_prop 'build.vid')}"
+	: "${SKETCH_PID:=$(_arduino_prop 'build.pid')}"
 
 	if [ "${uname_S}" = "Darwin" ]; then
 		DEVICE_PORT_PROBER="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
@@ -560,10 +493,6 @@ fi
 
 if [ "${ARCH}" = "virtual" ]; then
 	adjust_for_virtual_build
-fi
-
-if [ "${uname_O}" = "Cygwin" ]; then
-	adjust_for_cygwin
 fi
 
 ## Parse the command-line
