@@ -108,7 +108,7 @@ run_arduino_cli() {
 		"${ARDUINO_CLI}" "$@"
 }
 
-set_executable_paths() {
+_set_executable_paths() {
 	######
 	###### Executable paths
 	######
@@ -273,7 +273,7 @@ compile() {
 	find_sketch
 	ensure_sketch_found
 	build_paths
-	set_executable_paths
+	_set_executable_paths
 
 	install -d "${OUTPUT_PATH}"
 
@@ -350,14 +350,14 @@ _arduino_props() {
 size_map() {
 	find_sketch
 	build_paths
-	set_executable_paths
+	_set_executable_paths
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
 
 disassemble() {
 	find_sketch
 	build_paths
-	set_executable_paths
+	_set_executable_paths
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
