@@ -513,24 +513,16 @@ done
 # shellcheck disable=SC2086
 set -- ${cmds}
 
+if [ $# -eq 2 ]; then 
+	SKETCH="$1"
+	shift
+fi
 if [ $# -eq 1 ]; then
 	cmd="$(echo "$1" | tr '-' '_')"
 	${cmd}
 	exit $?
+else
+	"You passed more than two arguments to $0"
+	help
+	exit -1
 fi
-
-SKETCH="$1"
-shift
-
-
-cmds=""
-
-# shellcheck disable=2034
-for i in $(seq 1 $#); do
-	cmds="${cmds} $(echo "$1" | tr '-' '_')"
-	shift
-done
-
-for cmd in ${cmds}; do
-	${cmd}
-done
