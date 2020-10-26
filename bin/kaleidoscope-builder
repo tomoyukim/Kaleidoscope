@@ -19,7 +19,7 @@ set -e
 ###### Build and output configuration
 ######
 
-identify_os() {
+_identify_os() {
 	## Platform-specific overrides
 	# Shamelessly stolen from git's Makefile
 	uname_S=$(uname -s 2>/dev/null || echo not)
@@ -38,7 +38,7 @@ adjust_for_virtual_build() {
 
 
 
-read_conf_files() {
+_read_conf_files() {
 	for conf_file in \
 		"${HOME}/.kaleidoscope-builder.conf" \
 		"$(pwd)/.kaleidoscope-builder.conf" \
@@ -73,7 +73,7 @@ install_arduino_cli() {
 	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 }
 
-configure_arduino_cli() {
+_configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
 		install_arduino_cli
 	fi
@@ -471,9 +471,9 @@ fi
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
-identify_os
-read_conf_files
-configure_arduino_cli_env
+_identify_os
+_read_conf_files
+_configure_arduino_cli_env
 
 # shellcheck disable=SC1090
 
