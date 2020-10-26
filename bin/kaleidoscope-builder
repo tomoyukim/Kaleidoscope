@@ -335,8 +335,7 @@ compile() {
 _arduino_prop() {
 	pref=$1
 	# Strip the preference name. And then strip leading and trailing quotations
-	MESSAGE=$(_arduino_props | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//')
-	echo "$MESSAGE"
+	_arduino_props | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//'
 }
 
 _arduino_props() {
