@@ -384,6 +384,7 @@ compile() {
 		--build-properties "compiler.ar.cmd=${_CMD_AR}" \
 		--build-properties "compiler.c.elf.cmd=${_CMD_CXX}" \
 		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
+		${ARDUINO_VERBOSE} \
 		--warnings all \
 		"${SKETCH_FILE_PATH}"
 
