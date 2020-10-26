@@ -37,12 +37,8 @@ adjust_for_virtual_build() {
 }
 
 
-absolute_filename() {
-	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
-}
 
 read_conf_files() {
-
 	for conf_file in \
 		"${HOME}/.kaleidoscope-builder.conf" \
 		"$(pwd)/.kaleidoscope-builder.conf" \
@@ -55,14 +51,14 @@ read_conf_files() {
 	done
 }
 configure_arduino_cli_env() {
-
-	SYSTEM_ARDUINO_CLI="$(command -v arduino-cli || true)"
+	system_arduino_cli="$(command -v arduino-cli || true)"
 
 	if [ -z "${SYSTEM_ARDUINO_CLI}" ]; then
 		: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
 	else
-		: "${ARDUINO_CLI:=${SYSTEM_ARDUINO_CLI}}"
+		: "${ARDUINO_CLI:=${system_arduino_cli}}"
 	fi
+
 
 	: "${ARDUINO_CONTENT:=${KALEIDOSCOPE_DIR}/.arduino}"
 	: "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
@@ -176,8 +172,11 @@ build_paths() {
 
 
 
+_absolute_filename() {
+	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
 find_sketch() {
-	SKETCH_DIR="${SKETCH:-$(absolute_filename "$(pwd)")}"
+	SKETCH_DIR="${SKETCH:-$(_absolute_filename "$(pwd)")}"
 	SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
 	SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
 
@@ -188,7 +187,7 @@ find_sketch() {
 		"."; do
 		if [ -f "${dir}/${SKETCH_FILE_NAME}" ]; then
 			SKETCH_DIR="${dir}"
-			SKETCH_FILE_PATH=$(absolute_filename "${dir}/${SKETCH_FILE_NAME}")
+			SKETCH_FILE_PATH=$(_absolute_filename "${dir}/${SKETCH_FILE_NAME}")
 			return
 		fi
 	done
