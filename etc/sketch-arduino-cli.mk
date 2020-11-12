@@ -1,4 +1,7 @@
-KALEIDOSCOPE_BUILDER_DIR ?= $(BOARD_HARDWARE_PATH)/keyboardio/avr/libraries/Kaleidoscope/bin/
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
+
+KALEIDOSCOPE_BUILDER_DIR ?= $(abspath $(mkfile_dir)/../bin)
 
 .DEFAULT_GOAL := compile
 
@@ -17,5 +20,5 @@ flash: compile
 
 
 %:
-	@BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@
+	$(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@
 
