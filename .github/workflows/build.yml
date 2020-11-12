@@ -5,7 +5,7 @@ on: [push, pull_request]
 env: 
   KALEIDOSCOPE_ETC_DIR: $(GITHUB_WORKSPACE)/etc
   KALEIDOSCOPE_BUILDER_DIR: $(GITHUB_WORKSPACE)/bin
-  ARDUINO_DIRECTORIES_USER: $(GITHUB_WORKSPACE)/.arduino/user
+  ARDUINO_DIRECTORIES_USER: .arduino/user
   BOARD_HARDWARE_PATH: $(ARDUINO_DIRECTORIES_USER)/hardware
 jobs:
   smoke-sketches:
@@ -30,7 +30,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
-    - run: BOARD_HARDWARE_PATH=../hardware make simulator-tests
+    - run: make simulator-tests
   check-astyle:
     runs-on: ubuntu-latest
     steps:
