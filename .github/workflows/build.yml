@@ -31,7 +31,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
-    - run: make simulator-tests
+    - run: BOARD_HARDWARE_PATH=../hardware make simulator-tests
   check-astyle:
     runs-on: ubuntu-latest
     steps:
