@@ -180,7 +180,7 @@ _build_paths() {
 _absolute_filename() {
 	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
-find_sketch() {
+_find_sketch() {
 	SKETCH_DIR="${SKETCH:-$(_absolute_filename "$(pwd)")}"
 	SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
 	SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
@@ -199,7 +199,7 @@ find_sketch() {
 	SKETCH_NOT_FOUND=1
 }
 
-ensure_sketch_found() {
+_ensure_sketch_found() {
 	if [ -n "${SKETCH_NOT_FOUND}" ]; then
 		echo "I couldn't find your sketch (.ino file)" >&2
 		exit 1
@@ -225,8 +225,8 @@ prompt_before_flashing() {
 
 
 flash() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 
 
@@ -253,8 +253,8 @@ flash() {
 
 
 hex_with_bootloader() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
@@ -274,8 +274,8 @@ hex_with_bootloader() {
 }
 
 compile() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 	_set_executable_paths
 
@@ -338,24 +338,24 @@ compile() {
 }
 
 size_map() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 	_set_executable_paths
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
 
 disassemble() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 	_set_executable_paths
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
 clean() {
-	find_sketch
-	ensure_sketch_found
+	_find_sketch
+	_ensure_sketch_found
 	_build_paths
 	if [ -d "$OUTPUT_PATH" ]; then
 		rm -rf -- "${OUTPUT_PATH}"
