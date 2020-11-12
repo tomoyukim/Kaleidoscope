@@ -434,7 +434,7 @@ if [ -n "${BOARD_HARDWARE_PATH}" ]; then
 	ARDUINO_DIRECTORIES_USER="${BOARD_HARDWARE_PATH}/../"
 fi
 
-: "${KALEIDOSCOPE_DIR:=$( cd "$(dirname "$0")"/..  pwd)}"
+: "${KALEIDOSCOPE_DIR:=$( cd "$(dirname "$0")"/.. ;  pwd)}"
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
