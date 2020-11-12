@@ -16,7 +16,6 @@ jobs:
     - run: rm -rf ../hardware/keyboardio/avr/libraries/Kaleidoscope
     - run: ln -s $(pwd) ../hardware/keyboardio/avr/libraries/Kaleidoscope
     # - run: make adjust-git-timestamps
-    #- run: make adjust-git-timestamps
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
@@ -27,7 +26,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: git clone --quiet --depth 1 --recurse-submodules=build-tools --recurse-submodules=toolchain --recurse-submodules=avr/libraries/ --jobs 16 --shallow-submodules git://github.com/keyboardio/Kaleidoscope-Bundle-Keyboardio $HOME/Arduino/hardware/keyboardio
     - run: rm -rf $HOME/Arduino/hardware/keyboardio/avr/libraries/Kaleidoscope
-    - run: ln -s $(pwd) $HOME/Arduino/hardware/keyboardio/avr/libraries/Kaleidoscope
+    - run: ln -s $(pwd) ../hardware/keyboardio/avr/libraries/Kaleidoscope
     # - run: make adjust-git-timestamps
     - run: make install-arduino-cli
     - run: make configure-arduino-cli

@@ -511,4 +511,5 @@ else
 	"You passed more than two arguments to $0"
 	help
 	exit -1
+/
 fi
