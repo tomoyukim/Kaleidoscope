@@ -225,10 +225,7 @@ _prompt_before_flashing() {
 
 
 flash() {
-	_find_sketch
-	_ensure_sketch_found
-	_set_build_paths
-	_set_executable_paths
+	_set_up_environment
 
 
 	# Check to see if we can see a keyboard bootloader port.
@@ -254,10 +251,7 @@ flash() {
 
 
 hex_with_bootloader() {
-	_find_sketch
-	_ensure_sketch_found
-	_set_build_paths
-	_set_executable_paths
+	_set_up_environment
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 
@@ -276,10 +270,7 @@ hex_with_bootloader() {
 }
 
 compile() {
-	_find_sketch
-	_ensure_sketch_found
-	_set_build_paths
-	_set_executable_paths
+	_set_up_environment
 
 	install -d "${OUTPUT_PATH}"
 
@@ -340,29 +331,27 @@ compile() {
 }
 
 size_map() {
-	_find_sketch
-	_ensure_sketch_found
-	_set_build_paths
-	_set_executable_paths
+	_set_up_environment
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
 
 disassemble() {
-	_find_sketch
-	_ensure_sketch_found
-	_set_build_paths
-	_set_executable_paths
+	_set_up_environment
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
 clean() {
+	_set_up_environment
+	if [ -d "$OUTPUT_PATH" ]; then
+		rm -rf -- "${OUTPUT_PATH}"
+	fi
+}
+
+_set_up_environment() {
 	_find_sketch
 	_ensure_sketch_found
 	_set_build_paths
 	_set_executable_paths
-	if [ -d "$OUTPUT_PATH" ]; then
-		rm -rf -- "${OUTPUT_PATH}"
-	fi
 }
 
 _find_bootloader_port() {
