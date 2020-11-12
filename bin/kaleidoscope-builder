@@ -59,35 +59,35 @@ _configure_arduino_cli_env() {
 	: "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
 }
 
-install_arduino_cli() {
+cmd_install_arduino_cli() {
 	# todo cd to kaleidoscope dir
 	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 }
 
-configure_arduino_cli() {
+cmd_configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
-		install_arduino_cli
+		cmd_install_arduino_cli
 	fi
 	if [ -z "${ARDUINO_CLI_CONFIG}" ]; then
-		install_arduino_cli_config
+		cmd_install_arduino_cli_config
 	fi
 }
 
-install_arduino_cli_config() {
+cmd_install_arduino_cli_config() {
 	_run_arduino_cli config init
 }
 
-install_arduino_core_kaleidoscope() {
-	install_arduino_core_avr
+cmd_install_arduino_core_kaleidoscope() {
+	cmd_install_arduino_core_avr
 
-	install_arduino_core "keyboardio:avr"
+	cmd_install_arduino_core "keyboardio:avr"
 }
 
-install_arduino_core_avr() {
-	install_arduino_core "arduino:avr"
+cmd_install_arduino_core_avr() {
+	cmd_install_arduino_core "arduino:avr"
 }
 
-install_arduino_core() {
+cmd_install_arduino_core() {
 	_run_arduino_cli core install "$1"
 }
 
@@ -190,7 +190,13 @@ _set_build_paths() {
 _absolute_filename() {
 	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 }
+
 _find_sketch() {
+	# If we got a path to the .ino, get the directory we really want
+	if [[ -n "$SKETCH" && -f "$SKETCH" ]]; then
+		SKETCH="$(dirname "$SKETCH")"
+	fi
+
 	SKETCH_DIR="${SKETCH:-$(_absolute_filename "$(pwd)")}"
 	SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
 	SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
@@ -234,8 +240,8 @@ _prompt_before_flashing() {
 }
 
 
-flash() {
-	_set_up_environment
+cmd_flash() {
+        _set_up_environment
 
 
 	# Check to see if we can see a keyboard bootloader port.
@@ -260,7 +266,7 @@ flash() {
 }
 
 
-hex_with_bootloader() {
+cmd_hex_with_bootloader() {
 	_set_up_environment
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
@@ -279,7 +285,7 @@ hex_with_bootloader() {
 	EOF
 }
 
-compile() {
+cmd_compile() {
 	_set_up_environment
 
 	install -d "${OUTPUT_PATH}"
@@ -340,17 +346,17 @@ compile() {
 	FQBN="${SAVED_FQBN}"
 }
 
-size_map() {
+cmd_size_map() {
 	_set_up_environment
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
 
-disassemble() {
+cmd_disassemble() {
 	_set_up_environment
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
 
-clean() {
+cmd_clean() {
 	_set_up_environment
 	if [ -d "$OUTPUT_PATH" ]; then
 		rm -rf -- "${OUTPUT_PATH}"
@@ -392,7 +398,7 @@ _probe_port() {
 }
 
 
-usage() {
+cmd_help() {
 	cat <<-EOF
 		Usage: $0 SKETCH commands...
 
@@ -421,12 +427,8 @@ usage() {
 	EOF
 }
 
-help() {
-	usage
-}
-
 if [ $# -lt 1 ]; then
-	usage
+	cmd_help
 	exit 1
 fi
 
@@ -466,9 +468,10 @@ if [ $# -eq 2 ]; then
 	SKETCH="$1"
 	shift
 fi
+
 if [ $# -eq 1 ]; then
 	cmd="$(echo "$1" | tr '-' '_')"
-	${cmd}
+	cmd_${cmd}
 	exit $?
 else
 	"You passed more than two arguments to $0"
