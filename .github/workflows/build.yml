@@ -16,7 +16,10 @@ jobs:
     - run: rm -rf ../hardware/keyboardio/avr/libraries/Kaleidoscope
     - run: ln -s $(pwd) ../hardware/keyboardio/avr/libraries/Kaleidoscope
     # - run: make adjust-git-timestamps
-    - run: wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
+    #- run: make adjust-git-timestamps
+    - run: make install-arduino-cli
+    - run: make configure-arduino-cli
+    - run: make install-arduino-core-avr
     - run: make -j 8 smoke-sketches
   run-google-tests:
     runs-on: ubuntu-latest
@@ -26,7 +29,9 @@ jobs:
     - run: rm -rf $HOME/Arduino/hardware/keyboardio/avr/libraries/Kaleidoscope
     - run: ln -s $(pwd) $HOME/Arduino/hardware/keyboardio/avr/libraries/Kaleidoscope
     # - run: make adjust-git-timestamps
-    - run: wget --quiet $ARDUINO_DOWNLOAD_URL -O - | tar xJf -
+    - run: make install-arduino-cli
+    - run: make configure-arduino-cli
+    - run: make install-arduino-core-avr
     - run: BOARD_HARDWARE_PATH=$HOME/Arduino/hardware ARDUINO_PATH=$GITHUB_WORKSPACE/arduino-1.8.13 ARDUINO_BUILDER=$ARDUINO_PATH/arduino-builder make simulator-tests
   check-astyle:
     runs-on: ubuntu-latest
