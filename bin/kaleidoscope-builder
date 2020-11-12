@@ -228,6 +228,7 @@ flash() {
 	_find_sketch
 	_ensure_sketch_found
 	_build_paths
+	_set_executable_paths
 
 
 	# Check to see if we can see a keyboard bootloader port.
@@ -256,6 +257,7 @@ hex_with_bootloader() {
 	_find_sketch
 	_ensure_sketch_found
 	_build_paths
+	_set_executable_paths
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 
@@ -357,6 +359,7 @@ clean() {
 	_find_sketch
 	_ensure_sketch_found
 	_build_paths
+	_set_executable_paths
 	if [ -d "$OUTPUT_PATH" ]; then
 		rm -rf -- "${OUTPUT_PATH}"
 	fi
