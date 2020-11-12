@@ -207,7 +207,7 @@ _ensure_sketch_found() {
 }
 
 
-prompt_before_flashing() {
+_prompt_before_flashing() {
 	flashing_instructions=$(_arduino_prop 'build.flashing_instructions')
 
 	if [ "x${flashing_instructions}x" = "xx" ]; then
@@ -234,7 +234,7 @@ flash() {
 	# If we -can-, then we should skip over the "reset to bootloader" thing
 	port="${DEVICE_PORT_BOOTLOADER:=$(_find_bootloader_port)}"
 	if [ -z "${port}" ]; then
-		prompt_before_flashing
+		_prompt_before_flashing
 
 		# This is defined in the (optional) user config.
 		# shellcheck disable=SC2154
