@@ -26,15 +26,6 @@ _identify_os() {
 	uname_O=$(uname -o 2>/dev/null || echo not)
 }
 
-adjust_for_virtual_build() {
-	if [ "${uname_S}" = "FreeBSD" ]; then
-		: "${COMPILER_PATH:=/usr/local/bin/}"
-	else
-		: "${COMPILER_PATH:=/usr/bin/}"
-	fi
-
-	COMPILER_PREFIX=""
-}
 
 
 
@@ -107,6 +98,20 @@ run_arduino_cli() {
 		ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS=${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE} \
 		"${ARDUINO_CLI}" "$@"
 }
+
+_arduino_prop() {
+	pref=$1
+	# Strip the preference name. And then strip leading and trailing quotations
+	_arduino_props | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//'
+}
+
+_arduino_props() {
+	if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
+		_ARDUINO_PREFS=$(run_arduino_cli --fqbn "${FQBN}" compile --show-properties "${SKETCH_FILE_PATH}")
+	fi
+	echo "$_ARDUINO_PREFS"
+}
+
 
 _set_executable_paths() {
 	######
@@ -227,7 +232,7 @@ flash() {
 
 	# Check to see if we can see a keyboard bootloader port.
 	# If we -can-, then we should skip over the "reset to bootloader" thing
-	port="${DEVICE_PORT_BOOTLOADER:$(_find_bootloader_port)}"
+	port="${DEVICE_PORT_BOOTLOADER:=$(_find_bootloader_port)}"
 	if [ -z "${port}" ]; then
 		prompt_before_flashing
 
@@ -235,7 +240,7 @@ flash() {
 		# shellcheck disable=SC2154
 		${preFlash_HOOKS}
 
-		port="${DEVICE_PORT:$(_find_device_port)}"
+		port="${DEVICE_PORT:=$(_find_device_port)}"
 	fi
 	run_arduino_cli upload \
                 --fqbn "${FQBN}" \
@@ -332,19 +337,6 @@ compile() {
 	FQBN="${SAVED_FQBN}"
 }
 
-_arduino_prop() {
-	pref=$1
-	# Strip the preference name. And then strip leading and trailing quotations
-	_arduino_props | grep --max-count=1 "${pref}=" | sed -e s/^.*"${pref}"=// -e 's/^"//' -e 's/"$//'
-}
-
-_arduino_props() {
-	if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
-		_ARDUINO_PREFS=$(run_arduino_cli --fqbn "${FQBN}" compile --show-properties "${SKETCH_FILE_PATH}")
-	fi
-	echo "$_ARDUINO_PREFS"
-}
-
 size_map() {
 	find_sketch
 	ensure_sketch_found
@@ -371,19 +363,10 @@ clean() {
 }
 
 _find_bootloader_port() {
-	if [ -n "${DEVICE_PORT_BOOTLOADER}" ]; then
-		echo "DEVICE_PORT_BOOTLOADER=\"${DEVICE_PORT_BOOTLOADER}\" predefined."
-		return
-	fi
 	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'bootloader.pid' ||  _arduino_prop 'build.pid')"
 }
 
 _find_device_port() {
-	if [ -n "${DEVICE_PORT}" ]; then
-		echo "DEVICE_PORT=\"${DEVICE_PORT}\" predefined."
-		return
-	fi
-
 	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'build.pid')"
 }
 
@@ -451,10 +434,7 @@ if [ -n "${BOARD_HARDWARE_PATH}" ]; then
 	ARDUINO_DIRECTORIES_USER="${BOARD_HARDWARE_PATH}/../"
 fi
 
-: "${KALEIDOSCOPE_DIR:=$(
-	cd "$(dirname "$0")"/..
-	pwd
-)}"
+: "${KALEIDOSCOPE_DIR:=$( cd "$(dirname "$0")"/..  pwd)}"
 # shellcheck disable=SC2034
 : "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
@@ -470,17 +450,23 @@ else
 	ARDUINO_VERBOSE="--quiet"
 fi
 
-: "${BOARD:=model01}"
 
 if [[ -z "${ARCH}" && -n "${FQBN}" ]]; then
 	ARCH=$(echo "${FQBN}" | sed -n -e 's/^[^:]\+:\([^:]\+\).*/\1/p')
 fi
 
+: "${BOARD:=model01}"
 : "${ARCH:=avr}"
 : "${FQBN:=keyboardio:${ARCH}:${BOARD}}"
 
 if [ "${ARCH}" = "virtual" ]; then
-	adjust_for_virtual_build
+	if [ "${uname_S}" = "FreeBSD" ]; then
+		: "${COMPILER_PATH:=/usr/local/bin/}"
+	else
+		: "${COMPILER_PATH:=/usr/bin/}"
+	fi
+
+	COMPILER_PREFIX=""
 fi
 
 ## Parse the command-line
