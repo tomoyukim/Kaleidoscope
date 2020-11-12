@@ -136,7 +136,7 @@ _set_executable_paths() {
 	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
 }
 
-_build_paths() {
+_set_build_paths() {
 	# We need that echo because we\re piping to cksum
 	# shellcheck disable=SC2005
 	SKETCH_IDENTIFIER="$(echo "${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-${SKETCH_FILE_NAME}"
@@ -227,7 +227,7 @@ _prompt_before_flashing() {
 flash() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 
 
@@ -256,7 +256,7 @@ flash() {
 hex_with_bootloader() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 
 	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
@@ -278,7 +278,7 @@ hex_with_bootloader() {
 compile() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 
 	install -d "${OUTPUT_PATH}"
@@ -342,7 +342,7 @@ compile() {
 size_map() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 }
@@ -350,7 +350,7 @@ size_map() {
 disassemble() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
 }
@@ -358,7 +358,7 @@ disassemble() {
 clean() {
 	_find_sketch
 	_ensure_sketch_found
-	_build_paths
+	_set_build_paths
 	_set_executable_paths
 	if [ -d "$OUTPUT_PATH" ]; then
 		rm -rf -- "${OUTPUT_PATH}"
