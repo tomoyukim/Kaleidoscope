@@ -32,7 +32,6 @@ ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 		-I${top_dir} \
 		-I${top_dir}/src \
 		-I${bundle_path}/../../virtual/cores/arduino \
-		-I${bundle_path}/Kaleidoscope-HIDAdaptor-KeyboardioHID/src \
 		-I${bundle_path}/KeyboardioHID/src \
 		-I${top_dir}/testing/googletest/googlemock/include \
 		-I${top_dir}/testing/googletest/googletest/include \
