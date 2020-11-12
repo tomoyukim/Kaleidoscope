@@ -3,9 +3,9 @@ name: Build
 on: [push, pull_request]
 
 env: 
-  ARDUINO_DIRECTORIES_USER: ${GITHUB_WORKSPACE}/.arduino/user
-  KALEIDOSCOPE_ETC_DIR: ${GITHUB_WORKSPACE}/etc
-  BOARD_HARDWARE_PATH: ${ARDUINO_DIRECTORIES_USER}/hardware
+  KALEIDOSCOPE_ETC_DIR: $GITHUB_WORKSPACE/etc
+  ARDUINO_DIRECTORIES_USER: $GITHUB_WORKSPACE/.arduino/user
+  BOARD_HARDWARE_PATH: $ARDUINO_DIRECTORIES_USER/hardware
 jobs:
   smoke-sketches:
     runs-on: ubuntu-latest
