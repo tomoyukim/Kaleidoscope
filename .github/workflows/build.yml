@@ -20,7 +20,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
-    - run: make -j 8 smoke-sketches
+    - run: KALEIDOSCOPE_BUILDER_DIR=$GITHUB_WORKSPACE/bin make -j 8 smoke-sketches
   run-google-tests:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +32,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
-    - run: BOARD_HARDWARE_PATH=$HOME/Arduino/hardware ARDUINO_PATH=$GITHUB_WORKSPACE/arduino-1.8.13 ARDUINO_BUILDER=$ARDUINO_PATH/arduino-builder make simulator-tests
+    - run: BOARD_HARDWARE_PATH=$HOME/Arduino/hardware KALEIDOSCOPE_BUILDER_DIR=$GITHUB_WORKSPACE/bin make simulator-tests
   check-astyle:
     runs-on: ubuntu-latest
     steps:
