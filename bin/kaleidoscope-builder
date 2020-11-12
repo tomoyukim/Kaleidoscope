@@ -74,7 +74,7 @@ configure_arduino_cli() {
 }
 
 install_arduino_cli_config() {
-	run_arduino_cli config init
+	_run_arduino_cli config init
 }
 
 install_arduino_core_kaleidoscope() {
@@ -88,10 +88,10 @@ install_arduino_core_avr() {
 }
 
 install_arduino_core() {
-	run_arduino_cli core install "$1"
+	_run_arduino_cli core install "$1"
 }
 
-run_arduino_cli() {
+_run_arduino_cli() {
 	ARDUINO_DIRECTORIES_USER=${ARDUINO_DIRECTORIES_USER} \
 		ARDUINO_DIRECTORIES_DATA=${ARDUINO_DIRECTORIES_DATA} \
 		ARDUINO_DIRECTORIES_DOWNLOADS=${ARDUINO_DIRECTORIES_DOWNLOADS} \
@@ -107,7 +107,7 @@ _arduino_prop() {
 
 _arduino_props() {
 	if [ "x${_ARDUINO_PREFS}x" == "xx" ]; then
-		_ARDUINO_PREFS=$(run_arduino_cli --fqbn "${FQBN}" compile --show-properties "${SKETCH_FILE_PATH}")
+		_ARDUINO_PREFS=$(_run_arduino_cli --fqbn "${FQBN}" compile --show-properties "${SKETCH_FILE_PATH}")
 	fi
 	echo "$_ARDUINO_PREFS"
 }
@@ -242,7 +242,7 @@ flash() {
 
 		port="${DEVICE_PORT:=$(_find_device_port)}"
 	fi
-	run_arduino_cli upload \
+	_run_arduino_cli upload \
                 --fqbn "${FQBN}" \
 		--port "${port}" \
 		"${ARDUINO_VERBOSE}"
@@ -303,7 +303,7 @@ compile() {
 	_CMD_CXX="${CXX:-${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
 	_CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
 	_CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
-	run_arduino_cli compile \
+	_run_arduino_cli compile \
 		--fqbn "${FQBN}" \
 		--libraries "${KALEIDOSCOPE_DIR}/.." \
 		--build-path "${BUILD_PATH}" \
