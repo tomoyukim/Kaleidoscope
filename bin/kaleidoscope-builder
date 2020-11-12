@@ -469,35 +469,6 @@ if [ "${ARCH}" = "virtual" ]; then
 	COMPILER_PREFIX=""
 fi
 
-## Parse the command-line
-##  - anything that has a =, is an env var
-##  - from the remaining stuff, the first one is the Library/Sketch
-##  - everything else are commands
-##
-##  - if there is only one argument, that's a command
-
-cmds=""
-
-## Export vars
-for i in $(seq 1 $#); do
-	v="$1"
-	shift
-
-	case "${v}" in
-	*=*)
-		# Exporting an expansion is *precisely* what we want here.
-		# shellcheck disable=SC2086,SC2163
-		export ${v}
-		;;
-	*)
-		cmds="${cmds} ${v}"
-		;;
-	esac
-done
-
-# Word splitting is desired here.
-# shellcheck disable=SC2086
-set -- ${cmds}
 
 if [ $# -eq 2 ]; then 
 	SKETCH="$1"
