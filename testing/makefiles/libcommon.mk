@@ -1,11 +1,7 @@
 top_dir		:= $(dir $(lastword ${MAKEFILE_LIST}))../..
 build_dir := ${top_dir}/_build
 
-ifndef BOARD_HARDWARE_PATH
-bundle_path = ${top_dir}/..
-else
-bundle_path = ${BOARD_HARDWARE_PATH}/keyboardio/avr/libraries
-endif
+bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
 LIB_DIR := ${build_dir}/lib
 OBJ_DIR := ${build_dir}/obj

@@ -33,8 +33,8 @@ tar  -cf "${XFER_DIR}/kaleidoscope.tar"  \
 	--exclude testing/googletest/build  \
 	.
 
-echo "The bundle is coming from ${BOARD_HARDWARE_PATH}/keyboardio"
-(cd "${BOARD_HARDWARE_PATH}/keyboardio" && tar  -cf "${XFER_DIR}/bundle.tar" \
+echo "The bundle is coming from ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio"
+(cd "${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio" && tar  -cf "${XFER_DIR}/bundle.tar" \
 	--exclude .git --exclude avr/libraries/Kaleidoscope .)
 
 echo "Building the docker image..."

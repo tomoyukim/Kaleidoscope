@@ -31,11 +31,7 @@ endif
 
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
 
-ifndef BOARD_HARDWARE_PATH
-bundle_path = ${top_dir}/..
-else
-bundle_path = ${BOARD_HARDWARE_PATH}/keyboardio/avr/libraries
-endif
+bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
 build: ${BIN_DIR}/${BIN_FILE} compile-sketch
 

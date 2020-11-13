@@ -10,10 +10,7 @@ SKETCHBOOK_DIR ?= $(HOME)/Arduino
 endif
 
 ifneq ("$(wildcard $(SKETCHBOOK_DIR)/hardware/keyboardio/avr/boards.txt)","")
-
 ARDUINO_DIRECTORIES_USER ?= $(SKETCHBOOK_DIR)
-
-
 endif
 
 
@@ -26,7 +23,6 @@ endif
 ifeq ("$(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk","")
    # Determine the path of this Makefile
    MKFILE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-   BOARD_HARDWARE_PATH := $(MKFILE_DIR)/../../../..
 endif
 
 KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
