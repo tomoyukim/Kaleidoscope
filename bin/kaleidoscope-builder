@@ -69,26 +69,16 @@ cmd_configure_arduino_cli() {
 		cmd_install_arduino_cli
 	fi
 	if [ -z "${ARDUINO_CLI_CONFIG}" ]; then
-		cmd_install_arduino_cli_config
+		_run_arduino_cli config init
 	fi
 }
 
-cmd_install_arduino_cli_config() {
-	_run_arduino_cli config init
-}
-
 cmd_install_arduino_core_kaleidoscope() {
-	cmd_install_arduino_core_avr
-
-	cmd_install_arduino_core "keyboardio:avr"
+	_run_arduino_cli core install "keyboardio:avr"
 }
 
 cmd_install_arduino_core_avr() {
-	cmd_install_arduino_core "arduino:avr"
-}
-
-cmd_install_arduino_core() {
-	_run_arduino_cli core install "$1"
+	_run_arduino_cli core install "arduino:avr"
 }
 
 _run_arduino_cli() {
