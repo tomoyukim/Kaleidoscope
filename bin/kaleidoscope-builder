@@ -454,7 +454,7 @@ fi
 
 if [ $# -eq 1 ]; then
 	cmd="$(echo "$1" | tr '-' '_')"
-	cmd_${cmd}
+	"cmd_${cmd}"
 	exit $?
 else
 	"You passed more than two arguments to $0"
