@@ -27,7 +27,6 @@ install:
 ## This makes sure we're using the current version of the library.
   - export KALEIDOSCOPE_TEMP_PATH=$TRAVIS_BUILD_DIR/.kaleidoscope-build-cache
   - export KALEIDOSCOPE_ETC_DIR=$TRAVIS_BUILD_DIR/etc
-  - export ARDUINO_PATH=$TRAVIS_BUILD_DIR/arduino-1.8.13
   - export KALEIDOSCOPE_BUILDER_DIR=$TRAVIS_BUILD_DIR/bin
   - make adjust-git-timestamps
   - make install-arduino-cli
