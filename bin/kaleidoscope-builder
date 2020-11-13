@@ -302,6 +302,8 @@ cmd_compile() {
 	_CMD_CXX="${CXX:-${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
 	_CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
 	_CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
+
+	# shellcheck disable=SC2086
 	_run_arduino_cli compile \
 		--fqbn "${FQBN}" \
 		--libraries "${KALEIDOSCOPE_DIR}/.." \
@@ -459,6 +461,6 @@ if [ $# -eq 1 ]; then
 else
 	"You passed more than two arguments to $0"
 	help
-	exit -1
+	exit 1 
 /
 fi
