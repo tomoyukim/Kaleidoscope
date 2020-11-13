@@ -23,7 +23,6 @@ VOLUME ["/kaleidoscope", \
         "/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/testing/googletest/build", \
         "/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/_build"]
 
-ENV BOARD_HARDWARE_PATH "/kaleidoscope/hardware"
 ENV KALEIDOSCOPE_TEMP_PATH "/kaleidoscope-persist/temp"
 
 

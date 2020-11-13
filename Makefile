@@ -5,64 +5,31 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
 SKETCHBOOK_DIR ?= $(HOME)/Documents/Arduino
-PACKAGE_DIR ?= $(HOME)/Library/Arduino15
 else
 SKETCHBOOK_DIR ?= $(HOME)/Arduino
-PACKAGE_DIR ?= $(HOME)/.arduino15
 endif
 
+ifneq ("$(wildcard $(SKETCHBOOK_DIR)/hardware/keyboardio/avr/boards.txt)","")
 
-ARDUINO_INSTALLED_ENV=$(shell ls -dt $(PACKAGE_DIR)/packages/keyboardio/hardware/avr 2>/dev/null |head -n 1)
-MANUALLY_INSTALLED_ENV=$(shell ls -dt $(SKETCHBOOK_DIR)/hardware/keyboardio/avr 2>/dev/null |head -n 1)
-
-
-
-ifneq ("$(wildcard $(ARDUINO_INSTALLED_ENV)/boards.txt)","")
-
-ifneq ("$(wildcard $(MANUALLY_INSTALLED_ENV)/boards.txt)","")
-
-$(info ***************************************************************************)
-$(info It appears that you have installed two copies of Kaleidoscope. One copy was)
-$(info installed using Arduino's "Board Manager", while the other was installed by)
-$(info hand, probably using "git".)
-$(info )
-$(info This will likely cause some trouble as you try to build keyboard firmware)
-$(info using Kaleidoscope. You may want to remove either: )
-$(info )
-$(info $(PACKAGE_DIR)/packages/keyboardio/ which was installed using Arduino)
-$(info )
-$(info or)
-$(info )
-$(info $(SKETCHBOOK_DIR)/hardware/keyboardio/ which was installed by hand.)
-$(info )
-$(info ***************************************************************************)
-$(info )
-	
-endif
-
-BOARD_HARDWARE_PATH = $(ARDUINO_INSTALLED_ENV)
-KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR ?= build-tools/makefiles/
-KALEIDOSCOPE_BUILDER_DIR ?= $(ARDUINO_INSTALLED_ENV)/libraries/Kaleidoscope/bin/
-KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_INSTALLED_ENV)/libraries/Kaleidoscope/etc/
-
+ARDUINO_DIRECTORIES_USER ?= $(SKETCHBOOK_DIR)
 
 
 endif
 
-
-BOARD_HARDWARE_PATH ?= $(SKETCHBOOK_DIR)/hardware
-KALEIDOSCOPE_PLUGIN_MAKEFILE_DIR ?= keyboardio/build-tools/makefiles/
-KALEIDOSCOPE_ETC_DIR ?= $(BOARD_HARDWARE_PATH)/keyboardio/avr/libraries/Kaleidoscope/etc/
 
 # If Kaleidoscope's Arduino libraries cannot be found, e.g. because 
 # they reside outside of SKETCHBOOK_DIR, we fall back to assuming that 
 # the hardware directory can be determined in relation to the position of 
 # this Makefile.
+
+
 ifeq ("$(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk","")
    # Determine the path of this Makefile
    MKFILE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-   BOARD_HARDWARE_PATH = $(MKFILE_DIR)/../../../..
+   BOARD_HARDWARE_PATH := $(MKFILE_DIR)/../../../..
 endif
+
+KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
 
 include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
 
@@ -81,22 +48,22 @@ clean:
 	rm -rf testing/googletest/build/*
 
 
-PLUGIN_TEST_SUPPORT_DIR ?= $(BOARD_HARDWARE_PATH)/keyboardio/build-tools/
+PLUGIN_TEST_SUPPORT_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/build-tools/
 PLUGIN_TEST_BIN_DIR ?= $(PLUGIN_TEST_SUPPORT_DIR)/../toolchain/$(shell gcc --print-multiarch)/bin
 
 
 prepare-virtual:
-	$(MAKE) -C $(BOARD_HARDWARE_PATH)/keyboardio prepare-virtual
+	$(MAKE) -C $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio prepare-virtual
 
 
 simulator-tests: configure-arduino-cli prepare-virtual
 	$(MAKE) -C tests all
 
 docker-simulator-tests:
-	BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" ./bin/run-docker "make simulator-tests ${TEST_PATH_ARG}"
+	${TEST_PATH_ARG} ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" ./bin/run-docker "make simulator-tests"
 
 docker-bash:
-	BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" ./bin/run-docker "bash"
+	ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" ./bin/run-docker "bash"
 
 run-tests: prepare-virtual build-gtest-gmock
 	$(MAKE) -c tests
@@ -123,7 +90,7 @@ check-astyle: astyle
 	PATH="$(PLUGIN_TEST_BIN_DIR):$(PATH)" $(PLUGIN_TEST_SUPPORT_DIR)/quality/astyle-check
 
 cpplint-noisy:
-	-$(PLUGIN_TEST_SUPPORT_DIR)/quality/cpplint.py  --filter=-legal/copyright,-build/include,-readability/namespace,-whitespace/line_length,-runtime/references  --recursive --extensions=cpp,h,ino --exclude=$(BOARD_HARDWARE_PATH) src examples
+	-$(PLUGIN_TEST_SUPPORT_DIR)/quality/cpplint.py  --filter=-legal/copyright,-build/include,-readability/namespace,-whitespace/line_length,-runtime/references  --recursive --extensions=cpp,h,ino src examples
 
 
 cpplint:
@@ -153,7 +120,7 @@ smoke-sketches: $(SMOKE_SKETCHES)
 clean: 
 	rm -rf -- "testing/googletest/build"
 	rm -rf -- "_build"
-	@BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
+	@ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
 
 $(SMOKE_SKETCHES): force
-	BOARD_HARDWARE_PATH="$(BOARD_HARDWARE_PATH)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@ compile
+	ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder $@ compile
