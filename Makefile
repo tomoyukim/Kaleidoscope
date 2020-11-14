@@ -19,13 +19,13 @@ endif
 # the hardware directory can be determined in relation to the position of 
 # this Makefile.
 
+KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
 
 ifeq ("$(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk","")
    # Determine the path of this Makefile
-   MKFILE_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-endif
+   KALEIDOSCOPE_ETC_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/etc
 
-KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
+endif
 
 include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
 
@@ -36,8 +36,6 @@ include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
 ifneq ($(TEST_PATH),) 
  TEST_PATH_ARG="TEST_PATH='$(TEST_PATH)'"
 endif
-
-
 
 clean:
 	$(MAKE) -C tests clean
