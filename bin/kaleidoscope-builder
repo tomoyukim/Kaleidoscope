@@ -89,6 +89,7 @@ _run_arduino_cli() {
 		"${ARDUINO_CLI}" "$@"
 }
 
+
 _arduino_prop() {
 	pref=$1
 	# Strip the preference name. And then strip leading and trailing quotations
@@ -233,26 +234,14 @@ _prompt_before_flashing() {
 cmd_flash() {
         _set_up_environment
 
-
-	# Check to see if we can see a keyboard bootloader port.
-	# If we -can-, then we should skip over the "reset to bootloader" thing
-	port="${DEVICE_PORT_BOOTLOADER:=$(_find_bootloader_port)}"
-	if [ -z "${port}" ]; then
-		_prompt_before_flashing
-
-		# This is defined in the (optional) user config.
-		# shellcheck disable=SC2154
-		${preFlash_HOOKS}
-
-		port="${DEVICE_PORT:=$(_find_device_port)}"
-	fi
+	port=$(_run_arduino_cli board list --format=text | grep "$FQBN" |cut -d' ' -f 1) 
+	_prompt_before_flashing
 	_run_arduino_cli upload \
                 --fqbn "${FQBN}" \
 		--port "${port}" \
 		"${ARDUINO_VERBOSE}"
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
-	${postFlash_HOOKS}
 }
 
 
@@ -359,33 +348,6 @@ _set_up_environment() {
 	_ensure_sketch_found
 	_set_build_paths
 	_set_executable_paths
-}
-
-_find_bootloader_port() {
-	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'bootloader.pid' ||  _arduino_prop 'build.pid')"
-}
-
-_find_device_port() {
-	_probe_port "$(_arduino_prop 'build.vid')" "$( _arduino_prop 'build.pid')"
-}
-
-_probe_port() {
-	vendor_id=$1
-	product_id=$2
-	if [ "${uname_S}" = "Darwin" ]; then
-		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-macos"
-		perl "${port_prober}" "${vendor_id}" "${product_id}"
-	elif [ "${uname_O}" = "Cygwin" ]; then
-		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-windows.ps1"
-		powershell -noprofile -executionpolicy bypass "${port_prober}" "${vendor_id}" "${product_id}" -Format Cygwin
-		#DEVICE_COM_PORT="$(powershell -noprofile -executionpolicy bypass "${port_prober}" "${vendor_id}" "${product_id}" -Format COM)"
-	elif [ "${uname_S}" = "FreeBSD" ]; then
-		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-freebsd"
-		perl "${port_prober}"
-	else
-		port_prober="${KALEIDOSCOPE_BIN_DIR}/find-device-port-linux-udev"
-		perl "${port_prober}" "${vendor_id}" "${product_id}"
-	fi
 }
 
 
