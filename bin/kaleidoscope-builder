@@ -233,7 +233,8 @@ _prompt_before_flashing() {
 
 cmd_flash() {
         _set_up_environment
-
+	#TODO (arduino team) I'd love to do this with their json output
+	#but it's short some of the data we kind of need
 	port=$(_run_arduino_cli board list --format=text | grep "$FQBN" |cut -d' ' -f 1) 
 	_prompt_before_flashing
 	_run_arduino_cli upload \
