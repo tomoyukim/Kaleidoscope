@@ -114,7 +114,7 @@ smoke-sketches: $(SMOKE_SKETCHES)
 clean: 
 	rm -rf -- "testing/googletest/build"
 	rm -rf -- "_build"
-	@ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" $(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
+	@$(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
 
 $(SMOKE_SKETCHES): force
-	ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" $(MAKE) -C $@ -f  $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk compile
+	$(MAKE) -C $@ -f  $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk compile

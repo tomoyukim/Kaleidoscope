@@ -19,7 +19,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
-    - run: make -j 2 smoke-sketches
+    - run: make smoke-sketches
   run-google-tests:
     runs-on: ubuntu-latest
     steps:
