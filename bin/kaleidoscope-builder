@@ -165,6 +165,7 @@ _set_build_paths() {
 	)${GIT_VERSION}"
 
 
+	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 	: "${OUTPUT_FILE_PREFIX:=${SKETCH_BASE_NAME}-${LIB_VERSION}}"
 	: "${HEX_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.hex}"
 	: "${HEX_FILE_WITH_BOOTLOADER_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}-with-bootloader.hex}"
@@ -237,19 +238,13 @@ cmd_flash() {
 	#but it's short some of the data we kind of need
 	port=$(_run_arduino_cli board list --format=text | grep "$FQBN" |cut -d' ' -f 1) 
 	_prompt_before_flashing
-	_run_arduino_cli upload \
-                --fqbn "${FQBN}" \
-		--port "${port}" \
-		"${ARDUINO_VERBOSE}"
-	# This is defined in the (optional) user config.
-	# shellcheck disable=SC2154
+	_run_arduino_cli upload --fqbn "${FQBN}" --port "${port}" "${ARDUINO_VERBOSE}"
 }
 
 
 cmd_hex_with_bootloader() {
 	_set_up_environment
 
-	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
 
 	awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" >"${HEX_FILE_WITH_BOOTLOADER_PATH}"
 	echo "Using ${BOOTLOADER_PATH}"
