@@ -27,8 +27,6 @@ _identify_os() {
 }
 
 
-
-
 _read_conf_files() {
 	for conf_file in \
 		"${HOME}/.kaleidoscope-builder.conf" \
@@ -105,9 +103,6 @@ _arduino_props() {
 
 
 _set_executable_paths() {
-	######
-	###### Executable paths
-	######
 
         if [ "${ARCH}" = "virtual" ]; then
                 if [ "${uname_S}" = "FreeBSD" ]; then
