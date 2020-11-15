@@ -48,10 +48,10 @@ compile-sketch:
 	@echo "link"
 	install -d "${BIN_DIR}" "${LIB_DIR}"
 	env LIBONLY=yes \
-		  LOCAL_CFLAGS="'-I$(shell pwd)'" \
-		  OUTPUT_PATH="${LIB_DIR}" \
-			VERBOSE=${VERBOSE} \
-			ARCH=virtual DEFAULT_SKETCH=sketch \
+		LOCAL_CFLAGS="'-I$(shell pwd)'" \
+		OUTPUT_PATH="${LIB_DIR}" \
+		VERBOSE=${VERBOSE} \
+		ARCH=virtual \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
 	g++ -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
