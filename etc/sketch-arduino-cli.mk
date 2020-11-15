@@ -19,6 +19,12 @@ else
 export ARDUINO_CLI ?= $(system_arduino_cli)
 endif
 
+ifneq ($(VERBOSE),)
+export ARDUINO_VERBOSE ?= --verbose
+else
+export ARDUINO_VERBOSE ?= 
+endif
+
 .DEFAULT_GOAL := compile
 
 all: 
