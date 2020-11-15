@@ -4,6 +4,9 @@ mkfile_dir := $(dir $(mkfile_path))
 
 export KALEIDOSCOPE_DIR ?= $(abspath $(mkfile_dir)/..)
 export KALEIDOSCOPE_BIN_DIR ?= $(KALEIDOSCOPE_DIR)/bin
+
+# Arduino CLI config
+
 export ARDUINO_CONTENT ?= $(KALEIDOSCOPE_DIR)/.arduino
 export ARDUINO_DIRECTORIES_DATA ?= $(ARDUINO_CONTENT)/data
 export ARDUINO_DIRECTORIES_DOWNLOADS ?= $(ARDUINO_CONTENT)/downloads
@@ -24,6 +27,25 @@ export ARDUINO_VERBOSE ?= --verbose
 else
 export ARDUINO_VERBOSE ?= 
 endif
+
+#
+# Build path config
+
+TMPDIR ?= /tmp
+
+export KALEIDOSCOPE_TEMP_PATH ?= $(TMPDIR)/kaleidoscope-$(USER)
+export KALEIDOSCOPE_BUILD_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/build
+export KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
+export CORE_CACHE_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/arduino-cores
+
+
+
+
+
+
+
+
+
 
 .DEFAULT_GOAL := compile
 
