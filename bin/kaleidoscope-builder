@@ -169,7 +169,15 @@ _find_sketch() {
 	exit 1
 }
 
-_prompt_before_flashing() {
+}
+
+
+cmd_flash() {
+        _set_up_environment
+	#TODO (arduino team) I'd love to do this with their json output
+	#but it's short some of the data we kind of need
+	port=$(_run_arduino_cli board list --format=text | grep "$FQBN" |cut -d' ' -f 1) 
+
 	flashing_instructions=$(_arduino_prop 'build.flashing_instructions')
 	: "${flashing_instructions:="If your keyboard needs you to do something to put it in flashing mode, do that now."}"
 
@@ -179,15 +187,7 @@ _prompt_before_flashing() {
 	# We do not want to permit line continuations here. We just want a newline.
 	# shellcheck disable=SC2162
 	read
-}
 
-
-cmd_flash() {
-        _set_up_environment
-	#TODO (arduino team) I'd love to do this with their json output
-	#but it's short some of the data we kind of need
-	port=$(_run_arduino_cli board list --format=text | grep "$FQBN" |cut -d' ' -f 1) 
-	_prompt_before_flashing
 	_run_arduino_cli upload --fqbn "${FQBN}" --port "${port}" "${ARDUINO_VERBOSE}"
 }
 
