@@ -43,11 +43,6 @@ _configure_arduino_cli_env() {
 
 }
 
-cmd_install_arduino_cli() {
-	# todo cd to kaleidoscope dir
-	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-}
-
 cmd_configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
 		cmd_install_arduino_cli

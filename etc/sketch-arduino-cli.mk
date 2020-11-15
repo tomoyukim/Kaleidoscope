@@ -20,6 +20,12 @@ all:
 	@echo "Make all target doesn't do anything"
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
+
+install-arduino-cli:
+	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$(KALEIDOSCOPE_BIN_DIR)" sh
+
+
+
 decompile: disassemble
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
