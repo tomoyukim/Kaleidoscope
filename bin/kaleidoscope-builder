@@ -48,13 +48,6 @@ _configure_arduino_cli_env() {
 		: "${ARDUINO_CLI:=${system_arduino_cli}}"
 	fi
 
-
-	: "${ARDUINO_CONTENT:=${KALEIDOSCOPE_DIR}/.arduino}"
-	: "${ARDUINO_DIRECTORIES_DATA:=${ARDUINO_CONTENT}/data}"
-	: "${ARDUINO_DIRECTORIES_DOWNLOADS:=${ARDUINO_CONTENT}/downloads}"
-	: "${ARDUINO_DIRECTORIES_USER:=${ARDUINO_CONTENT}/user}"
-	: "${ARDUINO_CLI_CONFIG:=${ARDUINO_DIRECTORIES_DATA}/arduino-cli.yaml}"
-	: "${ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE:=https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json}"
 }
 
 cmd_install_arduino_cli() {
@@ -364,10 +357,6 @@ if [ $# -lt 1 ]; then
 	cmd_help
 	exit 1
 fi
-
-: "${KALEIDOSCOPE_DIR:=$( cd "$(dirname "$0")"/.. ;  pwd)}"
-# shellcheck disable=SC2034
-: "${KALEIDOSCOPE_BIN_DIR:=${KALEIDOSCOPE_DIR}/bin/}"
 
 _identify_os
 _read_conf_files
