@@ -212,13 +212,9 @@ _ensure_sketch_found() {
 
 _prompt_before_flashing() {
 	flashing_instructions=$(_arduino_prop 'build.flashing_instructions')
-
-	if [ "x${flashing_instructions}x" = "xx" ]; then
-		flashing_instructions="If your keyboard needs you to do something to put it in flashing mode, do that now."
-	fi
+	: "${flashing_instructions:="If your keyboard needs you to do something to put it in flashing mode, do that now."}"
 
 	printf '%b\n\n' "${flashing_instructions}"
-	echo ""
 	echo "When you're ready to proceed, press 'Enter'."
 
 	# We do not want to permit line continuations here. We just want a newline.
