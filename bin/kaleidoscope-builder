@@ -32,16 +32,6 @@ _read_conf_files() {
 
 	done
 }
-_configure_arduino_cli_env() {
-	system_arduino_cli="$(command -v arduino-cli || true)"
-
-	if [ -z "${system_arduino_cli}" ]; then
-		: "${ARDUINO_CLI:=${KALEIDOSCOPE_BIN_DIR}/arduino-cli}"
-	else
-		: "${ARDUINO_CLI:=${system_arduino_cli}}"
-	fi
-
-}
 
 cmd_configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
@@ -344,7 +334,6 @@ if [ $# -lt 1 ]; then
 fi
 
 _read_conf_files
-_configure_arduino_cli_env
 
 # shellcheck disable=SC1090
 

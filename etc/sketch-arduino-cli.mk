@@ -11,8 +11,13 @@ export ARDUINO_DIRECTORIES_USER ?= $(ARDUINO_CONTENT)/user
 export ARDUINO_CLI_CONFIG ?= $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml
 export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json
 
+system_arduino_cli=$(command -v arduino-cli || true)
 
-
+ifeq ($(system_arduino_cli),) 
+export ARDUINO_CLI ?= $(KALEIDOSCOPE_BIN_DIR)/arduino-cli
+else
+export ARDUINO_CLI ?= $(system_arduino_cli)
+endif
 
 .DEFAULT_GOAL := compile
 
