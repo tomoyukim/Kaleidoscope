@@ -30,6 +30,11 @@ install-arduino-cli:
 	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$(KALEIDOSCOPE_BIN_DIR)" sh
 
 
+install-arduino-core-kaleidoscope:
+	$(ARDUINO_CLI) core install "keyboardio:avr"
+
+install-arduino-core-avr: 
+	$(ARDUINO_CLI) core install "arduino:avr"
 
 decompile: disassemble
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.

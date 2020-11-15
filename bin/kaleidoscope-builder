@@ -42,14 +42,6 @@ cmd_configure_arduino_cli() {
 	fi
 }
 
-cmd_install_arduino_core_kaleidoscope() {
-	_run_arduino_cli core install "keyboardio:avr"
-}
-
-cmd_install_arduino_core_avr() {
-	_run_arduino_cli core install "arduino:avr"
-}
-
 _run_arduino_cli() {
 	"${ARDUINO_CLI}" "$@"
 }
