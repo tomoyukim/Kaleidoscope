@@ -133,31 +133,11 @@ _absolute_filename() {
 }
 
 _find_sketch() {
-	# If we got a path to the .ino, get the directory we really want
-	if [[ -n "$SKETCH" && -f "$SKETCH" ]]; then
-		SKETCH="$(dirname "$SKETCH")"
-	fi
-
-	SKETCH_DIR="${SKETCH:-$(_absolute_filename "$(pwd)")}"
-	SKETCH_BASE_NAME=$(basename "${SKETCH_DIR}")
-	SKETCH_FILE_NAME="${SKETCH_BASE_NAME}.ino"
-
-	# Arduino sketches are usually a file inside directory Foo named Foo.ino, so try that as a fallback
-	for dir in \
-		"${SKETCH_DIR}" \
-		"src/" \
-		"."; do
-		if [ -f "${dir}/${SKETCH_FILE_NAME}" ]; then
-			SKETCH_DIR="${dir}"
-			SKETCH_FILE_PATH=$(_absolute_filename "${dir}/${SKETCH_FILE_NAME}")
-			return
-		fi
-	done
-
-
+	if [ -z ${SKETCH_FILE_PATH} ] || [ ! -f ${SKETCH_FILE_PATH} ]; then
 	# Didn't find a sketch
 	echo "I couldn't find your sketch (.ino file)" >&2
 	exit 1
+	fi
 }
 
 

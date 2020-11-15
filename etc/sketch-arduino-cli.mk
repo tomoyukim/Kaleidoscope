@@ -39,12 +39,32 @@ export KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
 export CORE_CACHE_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/arduino-cores
 
 
+# If the sketch is defined
+ifneq ($(SKETCH),) 
+# If the sketch isn't a directory, we want to get the directory the sketch is in
+ifeq ($(wildcard $(SKETCH)/.),)
+sketch_dir	:= $(dir $(SKETCH))
+endif
+else
+# If the sketch wasn't defined as we came in, assume the current directory
+# is where we're looking
+sketch_dir	:= $(realpath $(CURDIR))
+endif
 
 
 
+export SKETCH_BASE_NAME	:=	$(notdir $(sketch_dir))
+export SKETCH_FILE_NAME	:= 	$(addsuffix .ino, $(SKETCH_BASE_NAME))
+
+sketch_dir_candidates = $(sketch_dir) src/ .
+sketch_exists_p = $(realpath $(wildcard $(dir)/$(SKETCH_FILE_NAME)))
+
+# FIND the path of the sketch file 
+export SKETCH_FILE_PATH := $(firstword $(foreach dir,$(sketch_dir_candidates),$(sketch_exists_p)))
 
 
-
+$(SKETCH_FILE_PATH):
+	@echo "Sketch is $(SKETCH_FILE_PATH)"
 
 
 .DEFAULT_GOAL := compile
