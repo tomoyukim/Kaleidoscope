@@ -9,7 +9,7 @@ export ARDUINO_DIRECTORIES_DATA ?= $(ARDUINO_CONTENT)/data
 export ARDUINO_DIRECTORIES_DOWNLOADS ?= $(ARDUINO_CONTENT)/downloads
 export ARDUINO_DIRECTORIES_USER ?= $(ARDUINO_CONTENT)/user
 export ARDUINO_CLI_CONFIG ?= $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml
-export ARDUINO_BOARDS_MANAGER_KALEIDOSCOPE ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json
+export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json
 
 
 
