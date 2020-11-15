@@ -262,8 +262,6 @@ cmd_compile() {
 	# shellcheck disable=SC2154
 	${compile_HOOKS}
 
-	SAVED_BOARD="${BOARD}"
-	SAVED_FQBN="${FQBN}"
 	if [ -e "${SKETCH_DIR}/.kaleidoscope-builder.conf" ]; then
 		# shellcheck disable=SC1090
 		BOARD="$(. "${SKETCH_DIR}"/.kaleidoscope-builder.conf && echo "${BOARD}")"
@@ -308,9 +306,6 @@ cmd_compile() {
 	if [ "${ARDUINO_VERBOSE}" == "--verbose" ]; then
 		echo "Build artifacts can be found in ${BUILD_PATH}"
 	fi
-
-	BOARD="${SAVED_BOARD}"
-	FQBN="${SAVED_FQBN}"
 }
 
 cmd_size_map() {
