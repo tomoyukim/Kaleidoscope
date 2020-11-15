@@ -19,13 +19,6 @@ set -e
 ###### Build and output configuration
 ######
 
-_identify_os() {
-	## Platform-specific overrides
-	# Shamelessly stolen from git's Makefile
-	uname_S=$(uname -s 2>/dev/null || echo not)
-	uname_O=$(uname -o 2>/dev/null || echo not)
-}
-
 
 _read_conf_files() {
 	for conf_file in \
@@ -92,6 +85,7 @@ _arduino_props() {
 
 
 _set_executable_paths() {
+	uname_S=$(uname -s 2>/dev/null || echo not)
 
         if [ "${ARCH}" = "virtual" ]; then
                 if [ "${uname_S}" = "FreeBSD" ]; then
@@ -354,7 +348,6 @@ if [ $# -lt 1 ]; then
 	exit 1
 fi
 
-_identify_os
 _read_conf_files
 _configure_arduino_cli_env
 
