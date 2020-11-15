@@ -93,17 +93,6 @@ _set_executable_paths() {
 }
 
 _set_build_paths() {
-	# We need that echo because we\re piping to cksum
-	# shellcheck disable=SC2005
-	SKETCH_IDENTIFIER="$(echo "${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-${SKETCH_FILE_NAME}"
-
-	: "${SKETCH_BUILD_DIR:=${SKETCH_IDENTIFIER}/build}"
-	: "${SKETCH_OUTPUT_DIR:=${SKETCH_IDENTIFIER}/output}"
-
-	: "${BUILD_PATH:=${KALEIDOSCOPE_BUILD_PATH}/${SKETCH_BUILD_DIR}}"
-	: "${OUTPUT_PATH:=${KALEIDOSCOPE_OUTPUT_PATH}/${SKETCH_OUTPUT_DIR}}"
-
-	: "${LIB_PROPERTIES_PATH:="../.."}"
 	GIT_VERSION="$(
 		cd "${SKETCH_DIR}"
 		if [ -d .git ]; then echo -n '-g' && git describe --abbrev=4 --dirty --always; fi
