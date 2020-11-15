@@ -200,15 +200,11 @@ _find_sketch() {
 		fi
 	done
 	SKETCH_NOT_FOUND=1
-}
-
-_ensure_sketch_found() {
 	if [ -n "${SKETCH_NOT_FOUND}" ]; then
 		echo "I couldn't find your sketch (.ino file)" >&2
 		exit 1
 	fi
 }
-
 
 _prompt_before_flashing() {
 	flashing_instructions=$(_arduino_prop 'build.flashing_instructions')
@@ -327,7 +323,6 @@ cmd_clean() {
 
 _set_up_environment() {
 	_find_sketch
-	_ensure_sketch_found
 	_set_build_paths
 	_set_executable_paths
 }
