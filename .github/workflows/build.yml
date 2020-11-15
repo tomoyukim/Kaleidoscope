@@ -6,6 +6,7 @@ env:
   KALEIDOSCOPE_ETC_DIR: ${{ github.workspace }}/etc
   KALEIDOSCOPE_BUILDER_DIR: ${{ github.workspace }}/bin
   ARDUINO_DIRECTORIES_USER: ${{ github.workspace }}/.arduino/user
+  VERBOSE: 1
 jobs:
   smoke-sketches:
     runs-on: ubuntu-latest
