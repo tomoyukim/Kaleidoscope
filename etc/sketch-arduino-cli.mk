@@ -113,5 +113,5 @@ flash: compile
 
 
 %:
-	ARDUINO_DIRECTORIES_USER=$(ARDUINO_DIRECTORIES_USER) $(KALEIDOSCOPE_BIN_DIR)/kaleidoscope-builder $@
+	$(KALEIDOSCOPE_BIN_DIR)/kaleidoscope-builder $@
 
