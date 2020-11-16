@@ -62,27 +62,10 @@ _arduino_props() {
 
 
 _set_executable_paths() {
-	uname_S=$(uname -s 2>/dev/null || echo not)
-
-        if [ "${ARCH}" = "virtual" ]; then
-                if [ "${uname_S}" = "FreeBSD" ]; then
-                        : "${COMPILER_PATH:=/usr/local/bin/}"
-                else
-                        : "${COMPILER_PATH:=/usr/bin/}"
-                fi
-                COMPILER_PREFIX=""
-        fi
-
 
 	# Allow the compiler path to be empty for virtual builds
 	# should use compiler.path instead of appending bin, but we don't have substitution het
 	: "${COMPILER_PATH=$(_arduino_prop 'runtime.tools.avr-gcc.path')/bin}"
-
-	COMPILER_SUFFIX=""
-
-	C_COMPILER_BASENAME=$(basename "${CC:-gcc}")
-	CXX_COMPILER_BASENAME=$(basename "${CXX:-g++}")
-	AR_BASENAME=$(basename "${AR:-ar}")
 
 	# Allow the compiler prefix to be empty for virtual builds
 	COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
@@ -191,10 +174,6 @@ cmd_compile() {
 		fi
 	fi
 
-	_CMD_CXX="${CXX:-${COMPILER_PREFIX}${CXX_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
-	_CMD_CC="${CC:-${COMPILER_PREFIX}${C_COMPILER_BASENAME}${COMPILER_SUFFIX}}"
-	_CMD_AR="${AR:-${COMPILER_PREFIX}${AR_BASENAME}${COMPILER_SUFFIX}}"
-
 	# shellcheck disable=SC2086
 	_run_arduino_cli compile \
 		--fqbn "${FQBN}" \
@@ -202,11 +181,6 @@ cmd_compile() {
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
 	        --build-cache-path "${CORE_CACHE_PATH}" \
-		--build-properties "compiler.path=${COMPILER_PATH}/" \
-		--build-properties "compiler.c.cmd=${_CMD_CC}" \
-		--build-properties "compiler.cpp.cmd=${_CMD_CXX}" \
-		--build-properties "compiler.ar.cmd=${_CMD_AR}" \
-		--build-properties "compiler.c.elf.cmd=${_CMD_CXX}" \
 		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
 		--warnings all ${ARDUINO_VERBOSE} \
 		"${SKETCH_FILE_PATH}"
