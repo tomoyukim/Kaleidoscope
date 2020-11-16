@@ -61,6 +61,7 @@ cmd_flash() {
 	echo "When you're ready to proceed, press 'Enter'."
 
 	# We do not want to permit line continuations here. We just want a newline.
+
 	# shellcheck disable=SC2162
 	read
 
@@ -68,39 +69,6 @@ cmd_flash() {
 }
 
 
-cmd_compile() {
-	install -d "${OUTPUT_PATH}"
-
-	echo "Building ${SKETCH_FILE_PATH}"
-
-	# This is defined in the (optional) user config.
-	# shellcheck disable=SC2154
-
-	# shellcheck disable=SC2086
-	_run_arduino_cli compile \
-		--fqbn "${FQBN}" \
-		--libraries "${KALEIDOSCOPE_DIR}/.." \
-		--build-path "${BUILD_PATH}" \
-		--output-dir "${OUTPUT_PATH}" \
-	        --build-cache-path "${CORE_CACHE_PATH}" \
-		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
-		--warnings all ${ARDUINO_VERBOSE} \
-		"${SKETCH_FILE_PATH}"
-
-	if [ -z "${LIBONLY}" ]; then
-		cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.hex" "${HEX_FILE_PATH}"
-		cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.elf" "${ELF_FILE_PATH}"
-		ln -sf "${OUTPUT_FILE_PREFIX}.hex" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.hex"
-		ln -sf "${OUTPUT_FILE_PREFIX}.elf" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.elf"
-	else
-		cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.a" "${LIB_FILE_PATH}"
-		ln -sf "${OUTPUT_FILE_PREFIX}.a" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.a"
-	fi
-
-	if [ "${ARDUINO_VERBOSE}" == "--verbose" ]; then
-		echo "Build artifacts can be found in ${BUILD_PATH}"
-	fi
-}
 
 
 cmd_help() {

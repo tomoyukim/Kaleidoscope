@@ -194,6 +194,33 @@ clean:
 	rm -rf -- "${OUTPUT_PATH}/*"
 
 
+_do_compile:
+
+compile:
+	install -d "${OUTPUT_PATH}"
+	@echo "Building ${SKETCH_FILE_PATH}"
+	$(ARDUINO_CLI) compile \
+		--fqbn "${FQBN}" \
+		--libraries "${KALEIDOSCOPE_DIR}/.." \
+		--build-path "${BUILD_PATH}" \
+		--output-dir "${OUTPUT_PATH}" \
+		--build-cache-path "${CORE_CACHE_PATH}" \
+		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
+		--warnings all ${ARDUINO_VERBOSE} \
+		"${SKETCH_FILE_PATH}"
+ifeq ($(LIBONLY),)
+	cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.hex" "${HEX_FILE_PATH}"
+	cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.elf" "${ELF_FILE_PATH}"
+	ln -sf "${OUTPUT_FILE_PREFIX}.hex" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.hex"
+	ln -sf "${OUTPUT_FILE_PREFIX}.elf" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.elf"
+else    
+	cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.a" "${LIB_FILE_PATH}"
+	ln -sf "${OUTPUT_FILE_PREFIX}.a" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.a"
+endif
+	@echo "Build artifacts can be found in ${BUILD_PATH}"
+
+
+
 %:
 	$(KALEIDOSCOPE_BIN_DIR)/kaleidoscope-builder $@
 
