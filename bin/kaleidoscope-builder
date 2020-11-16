@@ -48,21 +48,6 @@ _arduino_props() {
 }
 
 
-_set_executable_paths() {
-
-	# Allow the compiler path to be empty for virtual builds
-	# should use compiler.path instead of appending bin, but we don't have substitution het
-	: "${COMPILER_PATH=$(_arduino_prop 'runtime.tools.avr-gcc.path')/bin}"
-
-	# Allow the compiler prefix to be empty for virtual builds
-	COMPILER_PREFIX="${COMPILER_PREFIX-avr-}"
-	: "${AVR_OBJDUMP:=${COMPILER_PATH}/${COMPILER_PREFIX}objdump}"
-	: "${AVR_OBJCOPY:=${COMPILER_PATH}/${COMPILER_PREFIX}objcopy}"
-	: "${AVR_NM:=${COMPILER_PATH}/${COMPILER_PREFIX}nm}"
-	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
-}
-
-
 _find_sketch() {
 	if [ -z "${SKETCH_FILE_PATH}" ] || [ ! -f "${SKETCH_FILE_PATH}" ]; then
 	# Didn't find a sketch
@@ -147,19 +132,9 @@ cmd_compile() {
 	fi
 }
 
-cmd_size_map() {
-	_set_up_environment
-	"${AVR_NM}" --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
-}
-
-cmd_disassemble() {
-	_set_up_environment
-	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
-}
 
 _set_up_environment() {
 	_find_sketch
-	_set_executable_paths
 }
 
 

@@ -117,8 +117,17 @@ export LIB_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).a
 export LIB_PROPERTIES_PATH := "../.."
 
 
+# We should use compiler.path instead of appending bin, but we 
+# don't have substitution for arduino props yet
 
+export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
 
+# Allow the compiler prefix to be empty for virtual builds
+COMPILER_PREFIX 	?= 	avr-
+AVR_OBJDUMP		:=	${COMPILER_PATH}/${COMPILER_PREFIX}objdump
+AVR_OBJCOPY		:=	${COMPILER_PATH}/${COMPILER_PREFIX}objcopy
+AVR_NM			:=	${COMPILER_PATH}/${COMPILER_PREFIX}nm
+AVR_SIZE		:=	${COMPILER_PATH}/${COMPILER_PREFIX}size
 
 $(SKETCH_FILE_PATH):
 	@echo "Sketch is $(SKETCH_FILE_PATH)"
@@ -145,10 +154,16 @@ decompile: disassemble
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
 disassemble: compile
+	${AVR_OBJDUMP} -C -d "${ELF_FILE_PATH}"
 
 size-map: compile
+	${AVR_NM} --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 
 flash: compile
+
+prop:
+	@echo $(BOOTLOADER_PATH)
+	@echo $(GIT_VERSION)
 
 clean:
 	rm -rf -- "${OUTPUT_PATH}/*"
