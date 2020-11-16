@@ -242,15 +242,6 @@ fi
 
 # shellcheck disable=SC1090
 
-if [[ -z "${ARCH}" && -n "${FQBN}" ]]; then
-	ARCH=$(echo "${FQBN}" | sed -n -e 's/^[^:]\+:\([^:]\+\).*/\1/p')
-fi
-
-: "${BOARD:=model01}"
-: "${ARCH:=avr}"
-: "${FQBN:=keyboardio:${ARCH}:${BOARD}}"
-
-
 if [ $# -eq 1 ]; then
 	cmd="$(echo "$1" | tr '-' '_')"
 	"cmd_${cmd}"
