@@ -28,6 +28,7 @@ jobs:
     - run: make install-arduino-cli
     - run: make configure-arduino-cli
     - run: make install-arduino-core-avr
+    - run: make prepare-virtual
     - run: make simulator-tests
   check-astyle:
     runs-on: ubuntu-latest
