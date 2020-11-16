@@ -111,6 +111,9 @@ size-map: compile
 
 flash: compile
 
+clean:
+	rm -rf -- "${OUTPUT_PATH}/*"
+
 
 %:
 	$(KALEIDOSCOPE_BIN_DIR)/kaleidoscope-builder $@

@@ -87,10 +87,6 @@ _set_build_paths() {
 
 
 
-_absolute_filename() {
-	echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
-}
-
 _find_sketch() {
 	if [ -z "${SKETCH_FILE_PATH}" ] || [ ! -f "${SKETCH_FILE_PATH}" ]; then
 	# Didn't find a sketch
@@ -183,13 +179,6 @@ cmd_size_map() {
 cmd_disassemble() {
 	_set_up_environment
 	"${AVR_OBJDUMP}" -C -d "${ELF_FILE_PATH}"
-}
-
-cmd_clean() {
-	_set_up_environment
-	if [ -d "$OUTPUT_PATH" ]; then
-		rm -rf -- "${OUTPUT_PATH}"
-	fi
 }
 
 _set_up_environment() {
