@@ -1,15 +1,9 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
-
 # Make a variable lazily evaluated at first call
 # From https://blog.jgc.org/2016/07/lazy-gnu-make-variables.html
 make-lazy = $(eval $1 = $$(eval $1 := $(value $(1)))$$($1))
-
-
-
-
-
 
 export KALEIDOSCOPE_DIR ?= $(abspath $(mkfile_dir)/..)
 export KALEIDOSCOPE_BIN_DIR ?= $(KALEIDOSCOPE_DIR)/bin
@@ -165,9 +159,6 @@ install-arduino-core-kaleidoscope:
 install-arduino-core-avr: 
 	$(ARDUINO_CLI) core install "arduino:avr"
 
-decompile: disassemble
-	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
-
 disassemble: ${ELF_FILE_PATH}
 	${AVR_OBJDUMP} -C -d "${ELF_FILE_PATH}"
 
@@ -193,18 +184,9 @@ hex-with-bootloader: ${HEX_FILE_PATH}
 	@echo
 	@echo And TEST THIS ON REAL HARDWARE BEFORE YOU GIVE IT TO ANYONE.
 
-
-
-
-prop:
-	@echo $(BOOTLOADER_PATH)
-	@echo $(GIT_VERSION)
-
 clean:
 	rm -rf -- "${OUTPUT_PATH}/*"
 
-
-_do_compile:
 
 compile:
 	install -d "${OUTPUT_PATH}"
