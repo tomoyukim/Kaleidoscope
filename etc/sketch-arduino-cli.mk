@@ -87,6 +87,16 @@ sketch_dir_candidates = $(sketch_dir) src/ .
 sketch_exists_p = $(realpath $(wildcard $(dir)/$(SKETCH_FILE_NAME)))
 
 
+export FQBN := $(call _arduino_prop,build.fqbn)
+
+# Flashing related config
+port	=	$(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' ' -f 1)
+flashing_instructions	=	$(call _arduino_prop,build.flashing_instructions)
+ifeq ($(flashing_instructions),)
+flashing_instructions	=	"If your keyboard needs you to do something to put it in flashing mode, do that now."
+endif
+
+
 export BOOTLOADER_PATH := $(call _arduino_prop,runtime.platform.path)/bootloaders/$(call _arduino_prop,bootloader.file)
 
 # Find the path of the sketch file 
@@ -217,10 +227,20 @@ else
 	cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.a" "${LIB_FILE_PATH}"
 	ln -sf "${OUTPUT_FILE_PREFIX}.a" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest.a"
 endif
-	@echo "Build artifacts can be found in ${BUILD_PATH}"
+	$(info Build artifacts can be found in ${BUILD_PATH})
 
 
+#TODO (arduino team) I'd love to do this with their json output
+#but it's short some of the data we kind of need
 
-%:
-	$(KALEIDOSCOPE_BIN_DIR)/kaleidoscope-builder $@
-
+flash:
+ifeq ($(port),)
+	$(info Unable to detect keyboard serial port.)
+	#@exit 1
+endif
+	$(info $(flashing_instructions))
+	$(info)
+	$(info When you're ready to proceed, press 'Enter'.)
+	$(info)
+	@$(shell read)
+	@$(ARDUINO_CLI) upload --fqbn $(FQBN) --port $(port) ${ARDUINO_VERBOSE}
