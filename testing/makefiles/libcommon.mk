@@ -47,4 +47,4 @@ ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 		$<
 
 clean:
-	rm -rf "${build_dir}"
+	rm -rf -- "${build_dir}"
