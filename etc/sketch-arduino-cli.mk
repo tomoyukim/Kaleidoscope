@@ -143,6 +143,8 @@ all:
 install-arduino-cli:
 	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$(KALEIDOSCOPE_BIN_DIR)" sh
 
+configure-arduino-cli:
+	$(ARDUINO_CLI) config init
 
 install-arduino-core-kaleidoscope:
 	$(ARDUINO_CLI) core install "keyboardio:avr"
@@ -160,6 +162,24 @@ size-map: compile
 	${AVR_NM} --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 
 flash: compile
+
+
+
+hex-with-bootloader:
+	awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" >"${HEX_FILE_WITH_BOOTLOADER_PATH}"
+	@echo "Using ${BOOTLOADER_PATH}"
+	cat "${BOOTLOADER_PATH}" >>"${HEX_FILE_WITH_BOOTLOADER_PATH}"
+	ln -sf -- "${OUTPUT_FILE_PREFIX}-with-bootloader.hex" "${OUTPUT_PATH}/${SKETCH_BASE_NAME}-latest-with-bootloader.hex"
+	@echo Combined firmware and bootloader are now at 
+	@echo ${HEX_FILE_WITH_BOOTLOADER_PATH}
+	@echo
+	@echo Make sure you have the bootloader version you expect.
+	@echo
+	@echo
+	@echo And TEST THIS ON REAL HARDWARE BEFORE YOU GIVE IT TO ANYONE.
+
+
+
 
 prop:
 	@echo $(BOOTLOADER_PATH)
