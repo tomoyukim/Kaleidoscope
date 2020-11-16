@@ -22,9 +22,7 @@ set -e
 
 _read_conf_files() {
 	for conf_file in \
-		"${HOME}/.kaleidoscope-builder.conf" \
 		"$(pwd)/.kaleidoscope-builder.conf" \
-		"$(pwd)/kaleidoscope-builder.conf"; do
 		if [ -e "${conf_file}" ]; then
 			# shellcheck disable=SC1090
 			. "${conf_file}"
