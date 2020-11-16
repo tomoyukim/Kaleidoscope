@@ -1,5 +1,6 @@
 top_dir         := $(dir $(lastword ${MAKEFILE_LIST}))../..
 
+include $(top_dir)/etc/makefiles/arduino-cli-prop.mk
 
 build_dir := ${top_dir}/_build/${testcase}
 
@@ -52,7 +53,7 @@ compile-sketch:
 		OUTPUT_PATH="${LIB_DIR}" \
 		VERBOSE=${VERBOSE} \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
-	g++ -o "${BIN_DIR}/${BIN_FILE}" \
+	$(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
 		-w \
@@ -84,7 +85,7 @@ endif
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
 	install -d "${OBJ_DIR}"
-	g++ -o "$@" -c \
+	 $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
