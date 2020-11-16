@@ -62,30 +62,6 @@ _set_executable_paths() {
 	: "${AVR_SIZE:=${COMPILER_PATH}/${COMPILER_PREFIX}size}"
 }
 
-_set_build_paths() {
-	GIT_VERSION="$(
-		cd "${SKETCH_DIR}"
-		if [ -d .git ]; then echo -n '-g' && git describe --abbrev=4 --dirty --always; fi
-	)"
-	LIB_VERSION="$(
-		cd "${SKETCH_DIR}"
-		(grep version= "${LIB_PROPERTIES_PATH}/library.properties" 2>/dev/null || echo version=0.0.0) | cut -d= -f2
-	)${GIT_VERSION}"
-
-
-	: "${BOOTLOADER_PATH:=$(_arduino_prop 'runtime.platform.path')/bootloaders/$(_arduino_prop 'bootloader.file')}"
-	: "${OUTPUT_FILE_PREFIX:=${SKETCH_BASE_NAME}-${LIB_VERSION}}"
-	: "${HEX_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.hex}"
-	: "${HEX_FILE_WITH_BOOTLOADER_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}-with-bootloader.hex}"
-	: "${ELF_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.elf}"
-	: "${LIB_FILE_PATH:=${OUTPUT_PATH}/${OUTPUT_FILE_PREFIX}.a}"
-
-	mkdir -p "$BUILD_PATH"
-
-}
-
-
-
 
 _find_sketch() {
 	if [ -z "${SKETCH_FILE_PATH}" ] || [ ! -f "${SKETCH_FILE_PATH}" ]; then
@@ -183,7 +159,6 @@ cmd_disassemble() {
 
 _set_up_environment() {
 	_find_sketch
-	_set_build_paths
 	_set_executable_paths
 }
 

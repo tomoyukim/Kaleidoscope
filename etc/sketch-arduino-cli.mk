@@ -86,12 +86,15 @@ export SKETCH_FILE_NAME	:= 	$(addsuffix .ino, $(SKETCH_BASE_NAME))
 sketch_dir_candidates = $(sketch_dir) src/ .
 sketch_exists_p = $(realpath $(wildcard $(dir)/$(SKETCH_FILE_NAME)))
 
-# FIND the path of the sketch file 
+
+export BOOTLOADER_PATH := $(call _arduino_prop,runtime.platform.path)/bootloaders/$(call _arduino_prop,bootloader.file)
+
+# Find the path of the sketch file 
 export SKETCH_FILE_PATH := $(firstword $(foreach dir,$(sketch_dir_candidates),$(sketch_exists_p)))
 
-
-
-
+# We -could- check to see if sketch-dir is in git before running this command 
+# but since we'd just return an empty value in that case, why bother?
+export GIT_VERSION := $(shell git -C "$(sketch_dir)" describe --abbrev=6 --dirty --alway  2>/dev/null || echo 'unknown')
 
 
 export SKETCH_IDENTIFIER := $(shell echo "$${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-$(SKETCH_FILE_NAME)
@@ -101,6 +104,15 @@ export SKETCH_OUTPUT_DIR ?= $(SKETCH_IDENTIFIER)/output
 
 export BUILD_PATH ?= $(KALEIDOSCOPE_BUILD_PATH)/$(SKETCH_BUILD_DIR)
 export OUTPUT_PATH ?= $(KALEIDOSCOPE_OUTPUT_PATH)/$(SKETCH_OUTPUT_DIR)
+
+
+export OUTPUT_FILE_PREFIX 		:= $(SKETCH_BASE_NAME)-$(GIT_VERSION)
+export HEX_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).hex
+export HEX_FILE_WITH_BOOTLOADER_PATH 	:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX)-with-bootloader.hex
+export ELF_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).elf
+export LIB_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).a
+
+
 
 export LIB_PROPERTIES_PATH := "../.."
 
