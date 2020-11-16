@@ -6,10 +6,6 @@ include $(mkfile_dir)/arduino-cli.mk
 
 TMPDIR ?= /tmp
 
-export KALEIDOSCOPE_TEMP_PATH ?= $(TMPDIR)/kaleidoscope-$(USER)
-export KALEIDOSCOPE_BUILD_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/build
-export KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
-export CORE_CACHE_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/arduino-cores
 
 
 # If the sketch is defined
@@ -49,8 +45,17 @@ export GIT_VERSION := $(shell git -C "$(sketch_dir)" describe --abbrev=6 --dirty
 
 export SKETCH_IDENTIFIER := $(shell echo "$${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-$(SKETCH_FILE_NAME)
 
+
+
+
 export SKETCH_BUILD_DIR ?= $(SKETCH_IDENTIFIER)/build
 export SKETCH_OUTPUT_DIR ?= $(SKETCH_IDENTIFIER)/output
+
+
+export KALEIDOSCOPE_TEMP_PATH ?= $(TMPDIR)/kaleidoscope-$(USER)
+export KALEIDOSCOPE_BUILD_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/build
+export KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
+export CORE_CACHE_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/arduino-cores
 
 export BUILD_PATH ?= $(KALEIDOSCOPE_BUILD_PATH)/$(SKETCH_BUILD_DIR)
 export OUTPUT_PATH ?= $(KALEIDOSCOPE_OUTPUT_PATH)/$(SKETCH_OUTPUT_DIR)
@@ -63,14 +68,13 @@ export ELF_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).elf
 export LIB_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).a
 
 
-
-export LIB_PROPERTIES_PATH := "../.."
+KALEIDOSCOPE_BUNDLE_LIB_DIR := $(abspath (KALEIDOSCOPE_DIR)/..)
 
 
 # We should use compiler.path instead of appending bin, but we 
 # don't have substitution for arduino props yet
 
-#export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
+export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
 
 # Allow the compiler prefix to be empty for virtual builds
 COMPILER_PREFIX 	?= 	avr-
@@ -127,7 +131,7 @@ compile:
 	@echo "Building ${SKETCH_FILE_PATH}"
 	$(ARDUINO_CLI) compile \
 		--fqbn "${FQBN}" \
-		--libraries "${KALEIDOSCOPE_DIR}/.." \
+		--libraries "${KALEIDOSCOPE_BUNDLE_LIB_DIR}" \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
 		--build-cache-path "${CORE_CACHE_PATH}" \
