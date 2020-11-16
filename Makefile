@@ -104,7 +104,7 @@ SMOKE_SKETCHES=$(shell if [ -d ./examples ]; then find ./examples -type f -name 
 smoke-sketches: $(SMOKE_SKETCHES)
 	@echo "Smoke-tested all the sketches"
 
-.PHONY: force
+.PHONY: force all clean test
 
 clean: 
 	$(MAKE) -C tests clean

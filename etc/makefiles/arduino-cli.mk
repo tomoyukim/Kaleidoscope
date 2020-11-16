@@ -50,7 +50,8 @@ _arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
 
 
 #
-.PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr 
+.PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr
+.PHONY: all
 
 .DEFAULT_GOAL := all
 

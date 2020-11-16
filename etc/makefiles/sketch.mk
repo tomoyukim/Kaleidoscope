@@ -88,7 +88,7 @@ $(SKETCH_FILE_PATH):
 
 
 .PHONY: compile configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr 
-.PHONY: disassemble decompile size-map flash clean
+.PHONY: disassemble decompile size-map flash clean all test
 
 .DEFAULT_GOAL := compile
 
