@@ -32,10 +32,10 @@ endif
 .PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr
 .PHONY: all
 
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := non-goal
 
-all: 
-	@echo "Make all target doesn't do anything"
+non-goal: 
+	@echo "Make without a target doesn't do anything"
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
 
