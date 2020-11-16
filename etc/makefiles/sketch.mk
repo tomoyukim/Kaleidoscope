@@ -71,19 +71,6 @@ export LIB_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).a
 
 KALEIDOSCOPE_BUNDLE_LIB_DIR := $(abspath (KALEIDOSCOPE_DIR)/..)
 
-
-# We should use compiler.path instead of appending bin, but we 
-# don't have substitution for arduino props yet
-
-export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
-
-# Allow the compiler prefix to be empty for virtual builds
-COMPILER_PREFIX 	?= 	avr-
-AVR_OBJDUMP		:=	${COMPILER_PATH}/${COMPILER_PREFIX}objdump
-AVR_OBJCOPY		:=	${COMPILER_PATH}/${COMPILER_PREFIX}objcopy
-AVR_NM			:=	${COMPILER_PATH}/${COMPILER_PREFIX}nm
-AVR_SIZE		:=	${COMPILER_PATH}/${COMPILER_PREFIX}size
-
 # Flashing related config
 
 flashing_instructions	:=	$(call _arduino_prop,build.flashing_instructions)
