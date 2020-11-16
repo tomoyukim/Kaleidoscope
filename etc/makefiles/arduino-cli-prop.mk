@@ -22,7 +22,20 @@ endif
 # emoji, since it accurately represents our feelings on this 
 # state of affairs. Later, when finding props, we need to reverse 
 # this process, turning fire into space.
-_arduino_props = $(shell ${ARDUINO_CLI}  compile --show-properties "$${SKETCH_FILE_PATH}"|perl -p -e"s/ /🔥/g")
+ifneq ($(FQBN),)
+fqbn_arg = --fqbn $(FQBN)
+endif
+
+# if we don't have a sketch, make a pretend one so we can run --show properties
+# This is because aruduino-cli doesn't currently allow us to get props with
+# just an FQBN. We've filed a bug with them
+ifeq ($(SKETCH_FILE_PATH),) 
+_arudino_props_sketch_arg	=	$(KALEIDOSCOPE_ETC_DIR)/dummy-sketch/
+else
+_arudino_props_sketch_arg	=	$(SKETCH_FILE_PATH)
+endif
+
+_arduino_props = $(shell ${ARDUINO_CLI}  compile $(fqbn_arg) --show-properties "$(_arduino_props_sketch_arg)"|perl -p -e"s/ /🔥/g")
 $(call make-lazy,_arduino_props)
 
 _arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
