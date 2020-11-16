@@ -1,6 +1,9 @@
 top_dir		:= $(dir $(lastword ${MAKEFILE_LIST}))../..
 build_dir := ${top_dir}/_build
 
+include $(top_dir)/etc/makefiles/arduino-cli-prop.mk
+
+
 bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
 LIB_DIR := ${build_dir}/lib
@@ -18,12 +21,13 @@ all: ${OBJ_FILES} ${LIB_DIR}/${LIB_FILE}
 
 ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
 	@install -d "${LIB_DIR}"
-	ar rcs "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
+	$(call _arduino_prop,compiler.ar.cmd) \
+		$(call _arduino_prop,compiler.ar.flags) "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
 
 ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 	@echo "compile $@"
 	@install -d "${OBJ_DIR}"
-	g++ -o "$@" -c \
+	$(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
