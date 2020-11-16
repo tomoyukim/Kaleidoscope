@@ -149,13 +149,6 @@ cmd_compile() {
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
 
-	if [ -z ${FQBN} ]; then
-	if [ -e "${SKETCH_DIR}/.kaleidoscope-builder.conf" ]; then
-		# shellcheck disable=SC1090
-		FQBN="$(. "${SKETCH_DIR}"/.kaleidoscope-builder.conf && echo "${FQBN}")"
-	fi
-	fi 
-
 	# shellcheck disable=SC2086
 	_run_arduino_cli compile \
 		--fqbn "${FQBN}" \
