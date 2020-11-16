@@ -1,5 +1,6 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
+
 include $(mkfile_dir)/arduino-cli.mk
 
 # Build path config
@@ -83,6 +84,16 @@ AVR_OBJCOPY		:=	${COMPILER_PATH}/${COMPILER_PREFIX}objcopy
 AVR_NM			:=	${COMPILER_PATH}/${COMPILER_PREFIX}nm
 AVR_SIZE		:=	${COMPILER_PATH}/${COMPILER_PREFIX}size
 
+# Flashing related config
+
+flashing_instructions	:=	$(call _arduino_prop,build.flashing_instructions)
+ifeq ($(flashing_instructions),)
+flashing_instruction	:= "If your keyboard needs you to do something to put it in flashing mode, do that now."
+endif
+
+port := $(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' ' -f 1)
+
+
 $(SKETCH_FILE_PATH):
 	@echo "Sketch is $(SKETCH_FILE_PATH)"
 
@@ -154,11 +165,6 @@ endif
 #but it's short some of the data we kind of need
 
 flash:
-	flashing_instructions	:=	$(call _arduino_prop,build.flashing_instructions)
-ifeq ($(flashing_instructions),)
-	flashing_instructions	:=	"If your keyboard needs you to do something to put it in flashing mode, do that now."
-endif
-	port = $(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' ' -f 1)
 ifeq ($(port),)
 	$(info Unable to detect keyboard serial port.)
 	#@exit 1
