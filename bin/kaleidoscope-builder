@@ -20,17 +20,6 @@ set -e
 ######
 
 
-_read_conf_files() {
-	for conf_file in \
-		"$(pwd)/.kaleidoscope-builder.conf"; do \
-		if [ -e "${conf_file}" ]; then
-			# shellcheck disable=SC1090
-			. "${conf_file}"
-		fi
-
-	done
-}
-
 cmd_configure_arduino_cli() {
 	if [ -z "${ARDUINO_CLI}" ]; then
 		cmd_install_arduino_cli
@@ -159,18 +148,13 @@ cmd_compile() {
 
 	# This is defined in the (optional) user config.
 	# shellcheck disable=SC2154
-	${compile_HOOKS}
 
+	if [ -z ${FQBN} ]; then
 	if [ -e "${SKETCH_DIR}/.kaleidoscope-builder.conf" ]; then
 		# shellcheck disable=SC1090
-		BOARD="$(. "${SKETCH_DIR}"/.kaleidoscope-builder.conf && echo "${BOARD}")"
-		# shellcheck disable=SC1090
 		FQBN="$(. "${SKETCH_DIR}"/.kaleidoscope-builder.conf && echo "${FQBN}")"
-		if [ -n "${BOARD}" ]; then
-			: "${ARCH:=avr}"
-			FQBN="keyboardio:${ARCH}:${BOARD}"
-		fi
 	fi
+	fi 
 
 	# shellcheck disable=SC2086
 	_run_arduino_cli compile \
@@ -255,8 +239,6 @@ if [ $# -lt 1 ]; then
 	cmd_help
 	exit 1
 fi
-
-_read_conf_files
 
 # shellcheck disable=SC1090
 
