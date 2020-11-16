@@ -1,55 +1,7 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
+include $(mkfile_dir)/arduino-cli.mk
 
-# Make a variable lazily evaluated at first call
-# From https://blog.jgc.org/2016/07/lazy-gnu-make-variables.html
-make-lazy = $(eval $1 = $$(eval $1 := $(value $(1)))$$($1))
-
-export KALEIDOSCOPE_DIR ?= $(abspath $(mkfile_dir)/..)
-export KALEIDOSCOPE_BIN_DIR ?= $(KALEIDOSCOPE_DIR)/bin
-
-# Arduino CLI config
-
-export ARDUINO_CONTENT ?= $(KALEIDOSCOPE_DIR)/.arduino
-export ARDUINO_DIRECTORIES_DATA ?= $(ARDUINO_CONTENT)/data
-export ARDUINO_DIRECTORIES_DOWNLOADS ?= $(ARDUINO_CONTENT)/downloads
-export ARDUINO_DIRECTORIES_USER ?= $(ARDUINO_CONTENT)/user
-export ARDUINO_CLI_CONFIG ?= $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml
-export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json
-
-system_arduino_cli=$(shell command -v arduino-cli || true)
-
-ifeq ($(system_arduino_cli),) 
-export ARDUINO_CLI ?= $(KALEIDOSCOPE_BIN_DIR)/arduino-cli
-else
-export ARDUINO_CLI ?= $(system_arduino_cli)
-endif
-
-ifneq ($(VERBOSE),)
-export ARDUINO_VERBOSE ?= --verbose
-else
-export ARDUINO_VERBOSE ?= 
-endif
-
-# This is horrible. But because make doesn't really support
-# multi-line variables and we want to cache the full
-# _arduino_props in a variable, which means letting make 
-# split the properties on space, which is what it converts
-# newlines into. To make this go, we we need to replace interior
-# spaces in the variables with something. We chose the fire 
-# emoji, since it accurately represents our feelings on this 
-# state of affairs. Later, when finding props, we need to reverse 
-# this process, turning fire into space.
-_arduino_props = $(shell ${ARDUINO_CLI}  compile --show-properties "$${SKETCH_FILE_PATH}"|perl -p -e"s/ /🔥/g")
-$(call make-lazy,_arduino_props)
-
-_arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
-
-# How to use_arduino_prop
-# $(call _arduino_prop,recipe.hooks.sketch.prebuild.2.pattern)
-
-
-#
 # Build path config
 
 TMPDIR ?= /tmp
@@ -83,12 +35,6 @@ sketch_exists_p = $(realpath $(wildcard $(dir)/$(SKETCH_FILE_NAME)))
 
 export FQBN := $(call _arduino_prop,build.fqbn)
 
-# Flashing related config
-port	=	$(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' ' -f 1)
-flashing_instructions	=	$(call _arduino_prop,build.flashing_instructions)
-ifeq ($(flashing_instructions),)
-flashing_instructions	=	"If your keyboard needs you to do something to put it in flashing mode, do that now."
-endif
 
 
 export BOOTLOADER_PATH := $(call _arduino_prop,runtime.platform.path)/bootloaders/$(call _arduino_prop,bootloader.file)
@@ -124,7 +70,7 @@ export LIB_PROPERTIES_PATH := "../.."
 # We should use compiler.path instead of appending bin, but we 
 # don't have substitution for arduino props yet
 
-export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
+#export COMPILER_PATH	:=	$(call _arduino_prop,runtime.tools.avr-gcc.path)/bin
 
 # Allow the compiler prefix to be empty for virtual builds
 COMPILER_PREFIX 	?= 	avr-
@@ -146,18 +92,6 @@ all:
 	@echo "Make all target doesn't do anything"
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
-
-install-arduino-cli:
-	curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$(KALEIDOSCOPE_BIN_DIR)" sh
-
-configure-arduino-cli:
-	$(ARDUINO_CLI) config init
-
-install-arduino-core-kaleidoscope:
-	$(ARDUINO_CLI) core install "keyboardio:avr"
-
-install-arduino-core-avr: 
-	$(ARDUINO_CLI) core install "arduino:avr"
 
 disassemble: ${ELF_FILE_PATH}
 	${AVR_OBJDUMP} -C -d "${ELF_FILE_PATH}"
@@ -216,6 +150,11 @@ endif
 #but it's short some of the data we kind of need
 
 flash:
+	flashing_instructions	:=	$(call _arduino_prop,build.flashing_instructions)
+ifeq ($(flashing_instructions),)
+	flashing_instructions	:=	"If your keyboard needs you to do something to put it in flashing mode, do that now."
+endif
+	port = $(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' ' -f 1)
 ifeq ($(port),)
 	$(info Unable to detect keyboard serial port.)
 	#@exit 1

@@ -16,4 +16,4 @@ endif
 
 KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
 
-include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
+include $(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk

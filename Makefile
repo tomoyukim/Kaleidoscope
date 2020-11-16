@@ -21,13 +21,13 @@ endif
 
 KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
 
-ifeq ("$(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk","")
+ifeq ("$(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk","")
    # Determine the path of this Makefile
    KALEIDOSCOPE_ETC_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/etc
 
 endif
 
-include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
+include $(KALEIDOSCOPE_ETC_DIR)/makefiles/arduino-cli.mk
 
 # Set up an argument for passing to the simulator tests in docker
 # but if the var isn't set, don't even pass the definition
@@ -36,10 +36,6 @@ include $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk
 ifneq ($(TEST_PATH),) 
  TEST_PATH_ARG="TEST_PATH='$(TEST_PATH)'"
 endif
-
-clean:
-	$(MAKE) -C tests clean
-	rm -rf testing/googletest/build/*
 
 
 PLUGIN_TEST_SUPPORT_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/build-tools/
@@ -111,9 +107,10 @@ smoke-sketches: $(SMOKE_SKETCHES)
 .PHONY: force
 
 clean: 
-	rm -rf -- "testing/googletest/build"
-	rm -rf -- "_build"
-	@$(KALEIDOSCOPE_BUILDER_DIR)/kaleidoscope-builder clean
+	$(MAKE) -C tests clean
+	rm -rf -- "testing/googletest/build/*"
+	rm -rf -- "_build/*"
+
 
 $(SMOKE_SKETCHES): force
-	$(MAKE) -C $@ -f  $(KALEIDOSCOPE_ETC_DIR)/sketch-arduino-cli.mk compile
+	$(MAKE) -C $@ -f  $(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk compile
