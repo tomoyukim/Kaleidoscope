@@ -109,10 +109,14 @@ all:
 
 
 disassemble: ${ELF_FILE_PATH}
-	${AVR_OBJDUMP} -C -d "${ELF_FILE_PATH}"
+	$(call _arduino_prop,compiler.objdump.cmd) \
+		$(call _arduino_prop,compiler.objdump.flags) \
+		"${ELF_FILE_PATH}"
 
 size-map: ${ELF_FILE_PATH}
-	${AVR_NM} --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
+	$(call _arduino_prop,compiler.size-map.cmd) \
+		$(call _arduino_prop,compiler.size-map.flags) \
+		"${ELF_FILE_PATH}"
 
 flash: ${HEX_FILE_PATH}
 
