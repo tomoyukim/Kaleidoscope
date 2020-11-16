@@ -133,6 +133,9 @@ $(SKETCH_FILE_PATH):
 	@echo "Sketch is $(SKETCH_FILE_PATH)"
 
 
+.PHONY: compile configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr 
+.PHONY: disassemble decompile size-map flash clean
+
 .DEFAULT_GOAL := compile
 
 all: 
@@ -155,17 +158,19 @@ install-arduino-core-avr:
 decompile: disassemble
 	@: ## Do not remove this line, otherwise `make all` will trigger the `%` rule too.
 
-disassemble: compile
+disassemble: ${ELF_FILE_PATH}
 	${AVR_OBJDUMP} -C -d "${ELF_FILE_PATH}"
 
-size-map: compile
+size-map: ${ELF_FILE_PATH}
 	${AVR_NM} --size-sort -C -r -l -t decimal "${ELF_FILE_PATH}"
 
-flash: compile
+flash: ${HEX_FILE_PATH}
 
+${ELF_FILE_PATH}: compile
+${HEX_FILE_PATH}: compile
+	
 
-
-hex-with-bootloader:
+hex-with-bootloader: ${HEX_FILE_PATH}  
 	awk '/^:00000001FF/ == 0' "${HEX_FILE_PATH}" >"${HEX_FILE_WITH_BOOTLOADER_PATH}"
 	@echo "Using ${BOOTLOADER_PATH}"
 	cat "${BOOTLOADER_PATH}" >>"${HEX_FILE_WITH_BOOTLOADER_PATH}"
