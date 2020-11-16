@@ -2,7 +2,8 @@ name: Build
 
 on: [push, pull_request]
 
-env: 
+env:
+  LC_ALL: C
   KALEIDOSCOPE_ETC_DIR: ${{ github.workspace }}/etc
   ARDUINO_DIRECTORIES_USER: ${{ github.workspace }}/.arduino/user
 jobs:
