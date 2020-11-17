@@ -1,6 +1,8 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
+include $(mkfile_dir)/kaleidoscope-env.mk
+
 # Make a variable lazily evaluated at first call
 # From https://blog.jgc.org/2016/07/lazy-gnu-make-variables.html
 make-lazy = $(eval $1 = $$(eval $1 := $(value $(1)))$$($1))
