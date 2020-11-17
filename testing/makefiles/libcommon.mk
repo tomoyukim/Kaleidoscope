@@ -1,7 +1,6 @@
 top_dir		:= $(abspath $(dir $(lastword ${MAKEFILE_LIST}))../..)
 build_dir := ${top_dir}/_build
 
-include $(top_dir)/etc/makefiles/arduino-cli.mk
 
 bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
@@ -22,13 +21,12 @@ all: ${OBJ_FILES} ${LIB_DIR}/${LIB_FILE}
 
 ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
 	@install -d "${LIB_DIR}"
-	$(call _arduino_prop,compiler.ar.cmd) \
-		$(call _arduino_prop,compiler.ar.flags) "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
+	ar rcs "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
 
 ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 	$(info compile $@)
 	@install -d "${OBJ_DIR}"
-	$(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
+	g++ -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
