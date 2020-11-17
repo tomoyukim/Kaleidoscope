@@ -19,7 +19,7 @@ endif
 # the hardware directory can be determined in relation to the position of 
 # this Makefile.
 
-KALEIDOSCOPE_ETC_DIR := $(mkfile_dir)/etc
+export KALEIDOSCOPE_ETC_DIR := $(mkfile_dir)/etc
 include $(mkfile_dir)/etc/makefiles/arduino-cli.mk
 
 # Set up an argument for passing to the simulator tests in docker
