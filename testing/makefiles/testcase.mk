@@ -1,6 +1,6 @@
 top_dir         := $(dir $(lastword ${MAKEFILE_LIST}))../..
 
-include $(top_dir)/etc/makefiles/arduino-cli-prop.mk
+include $(top_dir)/etc/makefiles/arduino-cli.mk
 
 build_dir := ${top_dir}/_build/${testcase}
 

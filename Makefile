@@ -1,5 +1,5 @@
-# This stub makefile for a Kaleidoscope plugin pulls in 
-# all targets from the Kaleidoscope-Plugin library
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+mkfile_dir := $(dir $(mkfile_path))
 
 UNAME_S := $(shell uname -s)
 
@@ -19,15 +19,8 @@ endif
 # the hardware directory can be determined in relation to the position of 
 # this Makefile.
 
-KALEIDOSCOPE_ETC_DIR ?= $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/libraries/Kaleidoscope/etc/
-
-ifeq ("$(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk","")
-   # Determine the path of this Makefile
-   KALEIDOSCOPE_ETC_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/etc
-
-endif
-
-include $(KALEIDOSCOPE_ETC_DIR)/makefiles/arduino-cli.mk
+KALEIDOSCOPE_ETC_DIR := $(mkfile_dir)/etc
+include $(mkfile_dir)/etc/makefiles/arduino-cli.mk
 
 # Set up an argument for passing to the simulator tests in docker
 # but if the var isn't set, don't even pass the definition
@@ -113,4 +106,4 @@ clean:
 
 
 $(SMOKE_SKETCHES): force
-	$(MAKE) -C $@ -f  $(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk compile
+	$(MAKE) -C $@ -f $(KALEIDOSCOPE_ETC_DIR)/makefiles/sketch.mk compile

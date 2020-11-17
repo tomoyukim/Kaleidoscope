@@ -1,7 +1,7 @@
 top_dir		:= $(dir $(lastword ${MAKEFILE_LIST}))../..
 build_dir := ${top_dir}/_build
 
-include $(top_dir)/etc/makefiles/arduino-cli-prop.mk
+include $(top_dir)/etc/makefiles/arduino-cli.mk
 
 
 bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
