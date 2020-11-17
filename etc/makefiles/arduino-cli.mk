@@ -63,9 +63,6 @@ _arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
 # $(call _arduino_prop,recipe.hooks.sketch.prebuild.2.pattern)
 
 .PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr
-.PHONY: all
-
-.DEFAULT_GOAL := non-goal
 
 non-goal: 
 	@echo "Make without a target doesn't do anything"

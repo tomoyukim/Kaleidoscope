@@ -1,25 +1,26 @@
 top_dir		:= $(abspath $(dir $(lastword ${MAKEFILE_LIST}))..)
-build_dir := ${top_dir}/_build
+build_dir 	:= ${top_dir}/_build
+
 LIB_DIR		:= ${build_dir}/lib
 
 libcommon_a	:= ${top_dir}/_build/lib/libcommon.a
 
-TEST_PATH ?= tests/
+TEST_PATH 	?= tests/
 
-FQBN	?= keyboarido:virtual:model01
+FQBN		?= keyboarido:virtual:model01
 
+TESTS		?= $(shell find ${top_dir}/${TEST_PATH} -name '*.ino' -exec dirname {} \;)
 
-TESTS			?= $(shell find ${top_dir}/${TEST_PATH} -name '*.ino' -exec dirname {} \;)
 .PHONY: clean cmake-clean all googletest
 
 generate-testcases:
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} generate-testcase; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C ${test} top_dir=${top_dir} testcase=${test} generate-testcase; \
 	done
 
 all: ${TESTS}
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} run; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C ${test} top_dir=${top_dir} testcase=${test} run; \
 	done || exit 1
 
 cmake-clean:

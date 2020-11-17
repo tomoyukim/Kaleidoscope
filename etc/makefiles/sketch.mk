@@ -23,8 +23,8 @@ endif
 
 
 
-export SKETCH_BASE_NAME	:=	$(notdir $(sketch_dir))
-export SKETCH_FILE_NAME	:= 	$(addsuffix .ino, $(SKETCH_BASE_NAME))
+SKETCH_BASE_NAME	:=	$(notdir $(sketch_dir))
+SKETCH_FILE_NAME	:= 	$(addsuffix .ino, $(SKETCH_BASE_NAME))
 
 sketch_dir_candidates = $(sketch_dir) src/ .
 sketch_exists_p = $(realpath $(wildcard $(dir)/$(SKETCH_FILE_NAME)))
@@ -34,30 +34,30 @@ export FQBN := $(call _arduino_prop,build.fqbn)
 
 
 
-export BOOTLOADER_PATH := $(call _arduino_prop,runtime.platform.path)/bootloaders/$(call _arduino_prop,bootloader.file)
+BOOTLOADER_PATH := $(call _arduino_prop,runtime.platform.path)/bootloaders/$(call _arduino_prop,bootloader.file)
 
 # Find the path of the sketch file 
 SKETCH_FILE_PATH := $(firstword $(foreach dir,$(sketch_dir_candidates),$(sketch_exists_p)))
 
 # We -could- check to see if sketch-dir is in git before running this command 
 # but since we'd just return an empty value in that case, why bother?
-export GIT_VERSION := $(shell git -C "$(sketch_dir)" describe --abbrev=6 --dirty --alway  2>/dev/null || echo 'unknown')
+GIT_VERSION := $(shell git -C "$(sketch_dir)" describe --abbrev=6 --dirty --alway  2>/dev/null || echo 'unknown')
 
 
-export SKETCH_IDENTIFIER := $(shell echo "${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-$(SKETCH_FILE_NAME)
+SKETCH_IDENTIFIER := $(shell echo "${SKETCH_FILE_PATH}" | cksum | cut -d ' ' -f 1)-$(SKETCH_FILE_NAME)
 
 
 
 
 
-export KALEIDOSCOPE_TEMP_PATH ?= $(TMPDIR)/kaleidoscope-$(USER)
-export KALEIDOSCOPE_BUILD_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/build
-export KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
+KALEIDOSCOPE_TEMP_PATH ?= $(TMPDIR)/kaleidoscope-$(USER)
+KALEIDOSCOPE_BUILD_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/build
+KALEIDOSCOPE_OUTPUT_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/output
 
 CORE_CACHE_PATH ?= $(KALEIDOSCOPE_TEMP_PATH)/arduino-cores
 
-export BUILD_PATH ?= $(KALEIDOSCOPE_BUILD_PATH)/$(SKETCH_IDENTIFIER)
-export OUTPUT_PATH ?= $(KALEIDOSCOPE_OUTPUT_PATH)/$(SKETCH_IDENTIFIER)
+BUILD_PATH ?= $(KALEIDOSCOPE_BUILD_PATH)/$(SKETCH_IDENTIFIER)
+OUTPUT_PATH ?= $(KALEIDOSCOPE_OUTPUT_PATH)/$(SKETCH_IDENTIFIER)
 
 
 OUTPUT_FILE_PREFIX 		:= $(SKETCH_BASE_NAME)-$(GIT_VERSION)
@@ -85,8 +85,6 @@ $(SKETCH_FILE_PATH):
 
 .PHONY: compile configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr 
 .PHONY: disassemble decompile size-map flash clean all test
-
-.DEFAULT_GOAL := compile
 
 all: 
 	@echo "Make all target doesn't do anything"
