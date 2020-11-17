@@ -1,14 +1,17 @@
 top_dir         := $(dir $(lastword ${MAKEFILE_LIST}))../..
 
-include $(top_dir)/etc/makefiles/arduino-cli.mk
 
 build_dir := ${top_dir}/_build/${testcase}
+
 
 LIB_DIR := ${build_dir}/lib
 OBJ_DIR := ${build_dir}/obj
 BIN_DIR	:= ${build_dir}/bin
 
 COMMON_LIB_DIR	:= ${top_dir}/_build/lib
+
+include $(top_dir)/etc/makefiles/arduino-cli.mk
+
 
 SRC_DIR	:= test
 
@@ -29,6 +32,7 @@ TEST_FILES += $(SRC_DIR)/generated-testcase.cpp
 endif
 endif
 
+.DEFAULT_GOAL := build
 
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
 

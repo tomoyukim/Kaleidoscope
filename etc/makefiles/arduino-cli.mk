@@ -1,5 +1,4 @@
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-mkfile_dir := $(dir $(mkfile_path))
+mkfile_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 KALEIDOSCOPE_DIR ?= $(abspath $(mkfile_dir)/../..)
 KALEIDOSCOPE_BIN_DIR ?= $(KALEIDOSCOPE_DIR)/bin
