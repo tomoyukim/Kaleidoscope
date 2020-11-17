@@ -27,7 +27,7 @@ include $(mkfile_dir)/etc/makefiles/arduino-cli.mk
 # since this messes with downstream makefiles
 
 ifneq ($(TEST_PATH),) 
- TEST_PATH_ARG="TEST_PATH='$(TEST_PATH)'"
+TEST_PATH_ARG="TEST_PATH='$(TEST_PATH)'"
 endif
 
 
@@ -42,7 +42,7 @@ simulator-tests: configure-arduino-cli prepare-virtual
 	$(MAKE) -C tests all
 
 docker-simulator-tests:
-	${TEST_PATH_ARG} ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" ./bin/run-docker "make simulator-tests"
+	ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" ./bin/run-docker "make simulator-tests $(TEST_PATH_ARG)"
 
 docker-bash:
 	ARDUINO_DIRECTORIES_USER="$(ARDUINO_DIRECTORIES_USER)" ./bin/run-docker "bash"

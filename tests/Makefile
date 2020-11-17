@@ -1,7 +1,5 @@
 top_dir		:= $(abspath $(dir $(lastword ${MAKEFILE_LIST}))..)
 
-$(info Top dir is $(top_dir))
-
 build_dir 	:= ${top_dir}/_build
 
 LIB_DIR		:= ${build_dir}/lib
@@ -16,17 +14,16 @@ TESTS		?= $(shell find ${top_dir}/${TEST_PATH} -name '*.ino' -exec dirname {} \;
 
 .PHONY: clean cmake-clean all googletest
 
-$(info TEst dir is $(TESTS))
-
-all: ${TESTS}
-	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C ${test} top_dir=${top_dir} testcase=${test} run; \
-	done || exit 1
 
 generate-testcases:
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C ${test} top_dir=${top_dir} testcase=${test} generate-testcase; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} generate-testcase; \
 	done
+
+all: ${TESTS}
+	@for test in ${TESTS}; do \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} run; \
+	done || exit 1
 
 cmake-clean:
 	rm -rf "${top_dir}/testing/googletest/build/*"
@@ -45,13 +42,13 @@ ${top_dir}/testing/googletest/build/Makefile:
 	install -d ${top_dir}/testing/googletest/build && cd ${top_dir}/testing/googletest/build && cmake ..
 
 ${libcommon_a}:
-	${MAKE} -f ${top_dir}/testing/makefiles/libcommon.mk -C ${top_dir}/testing
+	${MAKE} -f ${top_dir}/testing/makefiles/libcommon.mk -C ${top_dir}/testing all
 
 Makefile:
 	@:
 
 ${TESTS}: ${libcommon_a} googletest
-	${MAKE} -f ${top_dir}/testing/makefiles/testcase.mk -C $@ top_dir=${top_dir} testcase=$@
+	${MAKE} -f ${top_dir}/testing/makefiles/testcase.mk -C $@ top_dir=${top_dir} testcase=$@ build
 
 %+run:
 	${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $* top_dir=${top_dir} testcase=$* run

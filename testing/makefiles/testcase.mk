@@ -51,7 +51,7 @@ ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS}
 # We force sketch recompiliation because otherwise, make won't pick up changes to...anything on the arduino side
 compile-sketch:
 	@echo "link"
-	install -d "${BIN_DIR}" "${LIB_DIR}"
+	@install -d "${BIN_DIR}" "${LIB_DIR}"
 	env LIBONLY=yes \
 		LOCAL_CFLAGS="'-I$(shell pwd)'" \
 		OUTPUT_PATH="${LIB_DIR}" \
