@@ -3,7 +3,6 @@ build_dir := ${top_dir}/_build
 
 include $(top_dir)/etc/makefiles/arduino-cli.mk
 
-
 bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
 LIB_DIR := ${build_dir}/lib
@@ -17,6 +16,8 @@ LIB_FILE	:= libcommon.a
 
 .PHONY: all
 
+DEFAULT_GOAL: all
+
 all: ${OBJ_FILES} ${LIB_DIR}/${LIB_FILE}
 
 ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
@@ -25,7 +26,7 @@ ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
 		$(call _arduino_prop,compiler.ar.flags) "${LIB_DIR}/${LIB_FILE}" ${OBJ_FILES}
 
 ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
-	@echo "compile $@"
+	$(info compile $@)
 	@install -d "${OBJ_DIR}"
 	$(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
 	  -std=c++14 \

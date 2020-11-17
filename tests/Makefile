@@ -42,7 +42,7 @@ ${top_dir}/testing/googletest/build/Makefile:
 	install -d ${top_dir}/testing/googletest/build && cd ${top_dir}/testing/googletest/build && cmake ..
 
 ${libcommon_a}:
-	${MAKE} -f ${top_dir}/testing/makefiles/libcommon.mk -C ${top_dir}/testing all
+	${MAKE} -f ${top_dir}/testing/makefiles/libcommon.mk -C ${top_dir}/testing
 
 Makefile:
 	@:
