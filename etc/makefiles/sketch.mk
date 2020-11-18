@@ -67,7 +67,7 @@ ELF_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).elf
 LIB_FILE_PATH 			:= $(OUTPUT_PATH)/$(OUTPUT_FILE_PREFIX).a
 
 
-KALEIDOSCOPE_BUNDLE_LIB_DIR := $(abspath (KALEIDOSCOPE_DIR)/..)
+KALEIDOSCOPE_PLATFORM_LIB_DIR := $(abspath (KALEIDOSCOPE_DIR)/..)
 
 # Flashing related config
 
@@ -129,7 +129,7 @@ compile:
 	@echo "Building ${SKETCH_FILE_PATH}"
 	$(ARDUINO_CLI) compile \
 		--fqbn "${FQBN}" \
-		--libraries "${KALEIDOSCOPE_BUNDLE_LIB_DIR}" \
+		--libraries "${KALEIDOSCOPE_PLATFORM_LIB_DIR}" \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
 		--build-cache-path "${CORE_CACHE_PATH}" \
