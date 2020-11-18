@@ -1,4 +1,4 @@
-top_dir         := $(dir $(lastword ${MAKEFILE_LIST}))../..
+top_dir         := $(abspath $(dir $(lastword ${MAKEFILE_LIST}))../..)
 
 
 build_dir := ${top_dir}/_build/${testcase}
