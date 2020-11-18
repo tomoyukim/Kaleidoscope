@@ -1,8 +1,9 @@
-top_dir         := $(abspath $(dir $(lastword ${MAKEFILE_LIST}))../..)
+mkfile_dir 	:= $(dir $(lastword ${MAKEFILE_LIST}))
+top_dir         := $(abspath $(mkfile_dir)../..)
 
+include $(mkfile_dir)/shared.mk
 
 build_dir := ${top_dir}/_build/${testcase}
-
 
 LIB_DIR := ${build_dir}/lib
 OBJ_DIR := ${build_dir}/obj
@@ -39,8 +40,6 @@ endif
 .DEFAULT_GOAL := build
 
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
-
-bundle_path = ${ARDUINO_DIRECTORIES_USER}/hardware/keyboardio/avr/libraries
 
 build: ${BIN_DIR}/${BIN_FILE} compile-sketch
 
@@ -93,24 +92,8 @@ endif
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
 	install -d "${OBJ_DIR}"
-	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
-	  -std=c++14 \
-		-I${top_dir} \
-		-I${top_dir}/src \
-		-I${bundle_path}/../../virtual/cores/arduino \
-		-I${bundle_path}/KeyboardioHID/src \
-		-I${top_dir}/testing/googletest/googlemock/include \
-		-I${top_dir}/testing/googletest/googletest/include \
-		-DARDUINO=10607 \
-		-DARDUINO_ARCH_VIRTUAL \
-		-DARDUINO_AVR_MODEL01 \
-		'-DKALEIDOSCOPE_HARDWARE_H="Kaleidoscope-Hardware-Model01.h"' \
-		-DKALEIDOSCOPE_VIRTUAL_BUILD=1 \
-		-DKEYBOARDIOHID_BUILD_WITHOUT_HID=1 \
-		-DUSBCON=dummy \
-		-DARDUINO_ARCH_AVR=1 \
-		'-DUSB_PRODUCT="Model 01"' \
-		$<
+	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) \
+		-o "$@" -c -std=c++14 ${shared_includes} ${shared_defines} $<
 
 clean:
 	rm -f -- "${SRC_DIR}/generated-testcase.cpp"
