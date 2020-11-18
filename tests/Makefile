@@ -20,12 +20,12 @@ TESTS		?= $(shell cd $(tests_dir); find ${TEST_PATH} -name '*.ino' -exec dirname
 
 generate-testcases:
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} generate-testcase; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} generate-testcase; \
 	done
 
 all: ${TESTS}
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} run; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} run; \
 	done || exit 1
 
 cmake-clean:
@@ -33,7 +33,7 @@ cmake-clean:
 
 clean: cmake-clean
 	@for test in ${TESTS}; do \
-		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} top_dir=${top_dir} testcase=$${test} clean; \
+		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} clean; \
 	done
 
 	rm -rf "${build_dir}/*"
@@ -51,7 +51,7 @@ Makefile:
 	@:
 
 ${TESTS}: ${libcommon_a} googletest
-	${MAKE} -f ${top_dir}/testing/makefiles/testcase.mk -C $@ top_dir=${top_dir} testcase=$@ build
+	${MAKE} -f ${top_dir}/testing/makefiles/testcase.mk -C $@ testcase=$@ build
 
 %+run:
-	${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $* top_dir=${top_dir} testcase=$* run
+	${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $* testcase=$* run
