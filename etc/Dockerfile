@@ -3,7 +3,7 @@ LABEL maintainer="Keyboard.io, inc"
 
 RUN apt-get -qq update && \
     DEBIAN_FRONTEND=noninteractive \
-    apt-get -qq install -y xz-utils curl make build-essential libxtst-dev cmake ccache
+    apt-get -qq install -y xz-utils curl make build-essential libxtst-dev cmake ccache vim
 
 RUN ccache --set-config=cache_dir=/kaleidoscope-persist/ccache/cache
 
