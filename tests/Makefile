@@ -23,7 +23,9 @@ generate-testcases:
 		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} generate-testcase; \
 	done
 
-all: ${TESTS}
+all: ${TESTS} run-all
+
+run-all:
 	@for test in ${TESTS}; do \
 		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} run; \
 	done || exit 1
