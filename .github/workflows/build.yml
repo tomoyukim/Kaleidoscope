@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   LC_ALL: C
+  KALEIDOSCOPE_CCACHE: 1
   ARDUINO_DIRECTORIES_USER: ${{ github.workspace }}/.arduino/user
 jobs:
   smoke-sketches:
