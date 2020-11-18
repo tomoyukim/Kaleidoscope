@@ -61,7 +61,7 @@ compile-sketch:
 		OUTPUT_PATH="${LIB_DIR}" \
 		VERBOSE=${VERBOSE} \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
-	$(CCACHE) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
+	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
 		-w \
@@ -93,7 +93,7 @@ endif
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
 	install -d "${OBJ_DIR}"
-	$(CCACHE) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
+	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
