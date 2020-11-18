@@ -9,11 +9,11 @@ LIB_DIR		:= ${build_dir}/lib
 
 libcommon_a	:= ${top_dir}/_build/lib/libcommon.a
 
-TEST_PATH 	?= tests/
+TEST_PATH 	?= ./
 
 FQBN		?= keyboarido:virtual:model01
 
-TESTS		?= $(shell find ${top_dir}/${TEST_PATH} -name '*.ino' -exec dirname {} \;)
+TESTS		?= $(shell cd $(tests_dir); find ${TEST_PATH} -name '*.ino' -exec dirname {} \;)
 
 .PHONY: clean cmake-clean all googletest
 
