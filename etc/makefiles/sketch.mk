@@ -134,7 +134,7 @@ compile:
 		--output-dir "${OUTPUT_PATH}" \
 		--build-cache-path "${CORE_CACHE_PATH}" \
 		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
-		--warnings all ${ARDUINO_VERBOSE} \
+		--warnings all ${ARDUINO_VERBOSE} ${ccache_wrapper_property} \
 		"${SKETCH_FILE_PATH}"
 ifeq ($(LIBONLY),)
 	@cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.hex" "${HEX_FILE_PATH}"

@@ -61,6 +61,10 @@ _arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
 # How to use_arduino_prop
 # $(call _arduino_prop,recipe.hooks.sketch.prebuild.2.pattern)
 
+ifneq ($(KALEIDOSCOPE_CCACHE),) 
+ccache_wrapper_property := --build-properties "compiler.wrapper.cmd=ccache"
+endif
+
 .PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr
 
 non-goal: 

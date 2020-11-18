@@ -13,6 +13,11 @@ BARE_CXX_FILES := $(foreach path,${CXX_FILES},$(notdir ${path}))
 OBJ_FILES	:= $(patsubst %.cpp,${OBJ_DIR}/%.o,$(BARE_CXX_FILES))
 LIB_FILE	:= libcommon.a
 
+ifneq ($(KALEIDOSCOPE_CCACHE),)
+COMPILER_WRAPPER := ccache
+endif
+
+
 .PHONY: all
 
 DEFAULT_GOAL: all
@@ -26,7 +31,7 @@ ${LIB_DIR}/${LIB_FILE}: ${OBJ_FILES}
 ${OBJ_DIR}/%.o: ${top_dir}/testing/%.cpp ${H_FILES}
 	$(info compile $@)
 	@install -d "${OBJ_DIR}"
-	g++ -o "$@" -c \
+	$(COMPILER_WRAPPER) g++ -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \

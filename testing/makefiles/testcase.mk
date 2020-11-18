@@ -12,6 +12,10 @@ COMMON_LIB_DIR	:= ${top_dir}/_build/lib
 
 include $(top_dir)/etc/makefiles/arduino-cli.mk
 
+ifneq ($(KALEIDOSCOPE_CCACHE),)
+COMPILER_WRAPPER := ccache
+endif
+
 
 SRC_DIR	:= test
 
@@ -57,7 +61,7 @@ compile-sketch:
 		OUTPUT_PATH="${LIB_DIR}" \
 		VERBOSE=${VERBOSE} \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
-	$(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
+	$(CCACHE) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
 		-g \
 		-w \
@@ -89,7 +93,7 @@ endif
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	@echo "compile $@"
 	install -d "${OBJ_DIR}"
-	 $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
+	$(CCACHE) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c \
 	  -std=c++14 \
 		-I${top_dir} \
 		-I${top_dir}/src \
