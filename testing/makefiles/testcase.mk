@@ -57,18 +57,11 @@ compile-sketch:
 		OUTPUT_PATH="${LIB_DIR}" \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
 	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
-		-lpthread \
-		-g \
-		-w \
-		${TEST_OBJS} \
-		-L"${COMMON_LIB_DIR}" \
-		-lcommon \
+		-lpthread -g -w ${TEST_OBJS} \
+		-L"${COMMON_LIB_DIR}" -lcommon \
 		"${LIB_DIR}/${LIB_FILE}" \
 		-L"${top_dir}/testing/googletest/build/lib" \
-		-lgtest \
-		-lgmock \
-		-lpthread \
-		-lm
+		-lgtest -lgmock -lpthread -lm
 
 
 # If we have a test.ktest file, it should be processed into a c++ testcase
@@ -86,9 +79,9 @@ ifneq (,$(wildcard test.ktest))
 endif
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
-	install -d "${OBJ_DIR}"
-	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) \
-		-o "$@" -c -std=c++14 ${shared_includes} ${shared_defines} $<
+	@install -d "${OBJ_DIR}"
+	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c -std=c++14 \
+		${shared_includes} ${shared_defines} $<
 
 clean:
 	rm -f -- "${SRC_DIR}/generated-testcase.cpp"

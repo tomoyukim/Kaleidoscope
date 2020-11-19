@@ -80,7 +80,7 @@ port := $(shell $(ARDUINO_CLI) board list --format=text | grep $(FQBN) |cut -d' 
 
 
 $(SKETCH_FILE_PATH):
-	@echo "Sketch is $(SKETCH_FILE_PATH)"
+	$(info Sketch is $(SKETCH_FILE_PATH))
 
 
 .PHONY: compile configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr 
@@ -127,14 +127,13 @@ clean:
 compile:
 	install -d "${OUTPUT_PATH}"
 	@echo "Building ${SKETCH_FILE_PATH}"
-	$(ARDUINO_CLI) compile \
-		--fqbn "${FQBN}" \
+	$(ARDUINO_CLI) compile --fqbn "${FQBN}" ${ARDUINO_VERBOSE} \
 		--libraries "${KALEIDOSCOPE_PLATFORM_LIB_DIR}" \
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
 		--build-cache-path "${CORE_CACHE_PATH}" \
 		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
-		--warnings all ${ARDUINO_VERBOSE} ${ccache_wrapper_property} \
+		--warnings all ${ccache_wrapper_property} \
 		"${SKETCH_FILE_PATH}"
 ifeq ($(LIBONLY),)
 	@cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.hex" "${HEX_FILE_PATH}"
