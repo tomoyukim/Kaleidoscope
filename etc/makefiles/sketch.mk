@@ -125,7 +125,7 @@ clean:
 
 
 compile:
-	install -d "${OUTPUT_PATH}"
+	@install -d "${OUTPUT_PATH}"
 	@echo "Building ${SKETCH_FILE_PATH}"
 	$(ARDUINO_CLI) compile --fqbn "${FQBN}" ${ARDUINO_VERBOSE} \
 		--libraries "${KALEIDOSCOPE_PLATFORM_LIB_DIR}" \
