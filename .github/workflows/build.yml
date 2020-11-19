@@ -12,12 +12,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v2
-        id: arduino-cache
-        with:
-            path: |
-              ${{ github.workspace }}/.arduino/data
-              ${{ github.workspace }}/.arduino/downloads
-            key: ${{ runner.os }}-arduino
+      id: arduino-cache
+      with:
+        path: |
+          ${{ github.workspace }}/.arduino/data
+          ${{ github.workspace }}/.arduino/downloads
+        key: ${{ runner.os }}-arduino
 
 ## We delete the Bundle's version of Kaleidoscope, and symlink ourselves in.
 ## This makes sure we're using the current version of the library.
