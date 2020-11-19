@@ -20,8 +20,8 @@ COPY docker-entrypoint.sh /usr/local/bin/entrypoint
 VOLUME ["/kaleidoscope", \
         "/kaleidoscope-src", \
         "/kaleidoscope-persist", \
-        "/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/testing/googletest/build", \
-        "/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/_build"]
+        "/kaleidoscope/testing/googletest/build", \
+        "/kaleidoscope/_build"]
 
 ENV KALEIDOSCOPE_TEMP_PATH "/kaleidoscope-persist/temp"
 

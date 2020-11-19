@@ -48,7 +48,7 @@ docker run --rm $DOCKER_RUN_INTERACTIVE_OPTS \
        --mount type=volume,source=kaleidoscope-googletest-build,destination=/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/testing/googletest/build,consistency=delegated \
        --mount type=volume,source=kaleidoscope-build,destination=/kaleidoscope/hardware/keyboardio/avr/libraries/Kaleidoscope/_build,consistency=delegated \
        --env ARDUINO_DIRECTORIES_DATA=/arduino-cli/data \
-       --env ARDUINO_DIRECTORIES_USER=/kaleidoscope \
+       --env ARDUINO_DIRECTORIES_USER=/kaleidoscope/.arduino/user/ \
        kaleidoscope/docker "$*"
 
 
