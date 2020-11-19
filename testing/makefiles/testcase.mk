@@ -46,19 +46,15 @@ build: ${BIN_DIR}/${BIN_FILE} compile-sketch
 all: run
 
 run: ${BIN_DIR}/${BIN_FILE}
-	@echo "run"
 	"${BIN_DIR}/${BIN_FILE}" -t -q
 
 ${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} 
 
 # We force sketch recompiliation because otherwise, make won't pick up changes to...anything on the arduino side
 compile-sketch:
-	@echo "link"
 	@install -d "${BIN_DIR}" "${LIB_DIR}"
-	env LIBONLY=yes \
-		LOCAL_CFLAGS="'-I$(shell pwd)'" \
+	env LIBONLY=yes VERBOSE=${VERBOSE}  LOCAL_CFLAGS="'-I$(shell pwd)'" \
 		OUTPUT_PATH="${LIB_DIR}" \
-		VERBOSE=${VERBOSE} \
 		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
 	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread \
@@ -82,15 +78,14 @@ generate-testcase: $(if $(HAS_KTEST_FILE), ${SRC_DIR}/generated-testcase.cpp)
 
 ${SRC_DIR}/generated-testcase.cpp: test.ktest
 ifneq (,$(wildcard test.ktest))
-	@echo "Compiling ${testcase} ktest script into ${SRC_DIR}/generated-testcase.cpp"
-	install -d "${SRC_DIR}"
+	$(info Compiling ${testcase} ktest script into ${SRC_DIR}/generated-testcase.cpp)
+	@install -d "${SRC_DIR}"
 	perl ${top_dir}/testing/bin/ktest-to-cxx \
 		--ktest=test.ktest \
 		--cxx=${SRC_DIR}/generated-testcase.cpp
 endif
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
-	@echo "compile $@"
 	install -d "${OBJ_DIR}"
 	$(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) \
 		-o "$@" -c -std=c++14 ${shared_includes} ${shared_defines} $<
