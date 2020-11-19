@@ -1,5 +1,6 @@
 # Kaleidoscope
 
+
 Flexible firmware for Arduino-powered keyboards.
 
 This package contains the "core" of Kaleidoscope and a number of [example firmware "Sketches"](https://github.com/keyboardio/Kaleidoscope/tree/master/examples).
@@ -7,6 +8,8 @@ This package contains the "core" of Kaleidoscope and a number of [example firmwa
 If you're just getting started with the Keyboardio Model 01, the [introductory docs are here](https://github.com/keyboardio/Kaleidoscope/wiki/Keyboardio-Model-01-Introduction) and the source for the basic firmware package is here: https://github.com/keyboardio/Model01-Firmware. It's probably a good idea to start there, learn how to modify your keymap and maybe turn some modules on or off, and then come back to the full repository when you have more complex changes in mind.
 
 # Getting Started
+
+(These instructions need to be rewritten for the new arduino-cli way of doing things)
 
 ## Setup the Arduino IDE
 
