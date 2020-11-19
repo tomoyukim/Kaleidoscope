@@ -121,7 +121,7 @@ hex-with-bootloader: ${HEX_FILE_PATH}
 	@echo And TEST THIS ON REAL HARDWARE BEFORE YOU GIVE IT TO ANYONE.
 
 clean:
-	rm -rf -- "${OUTPUT_PATH}/*"
+	rm -rf -- "${OUTPUT_PATH}"/*
 
 
 ifneq ($(LOCAL_CFLAGS),)

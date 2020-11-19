@@ -31,19 +31,19 @@ run-all: ${TESTS}
 	done || exit 1
 
 cmake-clean:
-	rm -rf "${top_dir}/testing/googletest/build/*"
+	rm -rf "${top_dir}"/testing/googletest/build/*
 
 clean: cmake-clean
 	@for test in ${TESTS}; do \
 		${MAKE} -s -f ${top_dir}/testing/makefiles/testcase.mk -C $${test} testcase=$${test} clean; \
 	done
-
-	rm -rf "${build_dir}/*"
+	rm -rf "${build_dir}"/*
 
 googletest: ${top_dir}/testing/googletest/build/Makefile
 	cd ${top_dir}/testing/googletest/build && $(MAKE)
 
 ${top_dir}/testing/googletest/build/Makefile:
+	$(info googletest Makefile is being remade)
 	install -d ${top_dir}/testing/googletest/build && cd ${top_dir}/testing/googletest/build && cmake ..
 
 ${libcommon_a}:
