@@ -124,6 +124,12 @@ clean:
 	rm -rf -- "${OUTPUT_PATH}/*"
 
 
+ifneq ($(LOCAL_CFLAGS),)
+local_cflags_property = --build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}"
+else
+local_cflags_property =
+endif
+
 compile:
 	@install -d "${OUTPUT_PATH}"
 	@echo "Building ${SKETCH_FILE_PATH}"
@@ -132,8 +138,7 @@ compile:
 		--build-path "${BUILD_PATH}" \
 		--output-dir "${OUTPUT_PATH}" \
 		--build-cache-path "${CORE_CACHE_PATH}" \
-		--build-properties "compiler.cpp.extra_flags=${LOCAL_CFLAGS}" \
-		--warnings all ${ccache_wrapper_property} \
+		--warnings all ${ccache_wrapper_property} ${local_cflags_property} \
 		"${SKETCH_FILE_PATH}"
 ifeq ($(LIBONLY),)
 	@cp "${BUILD_PATH}/${SKETCH_FILE_NAME}.hex" "${HEX_FILE_PATH}"
