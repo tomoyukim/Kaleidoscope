@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: mxschmitt/action-tmate@v3
+#    - uses: mxschmitt/action-tmate@v3
 
 ## We delete the Bundle's version of Kaleidoscope, and symlink ourselves in.
 ## This makes sure we're using the current version of the library.
     - run: sudo apt-get install ccache
     - run: make setup
-    - run: make smoke-sketches
+    - run: make smoke-sketches -j $(nproc)
   run-google-tests:
     runs-on: ubuntu-20.04
     steps:
@@ -25,7 +25,7 @@ jobs:
 #    - uses: mxschmitt/action-tmate@v3
     - run: sudo apt-get install ccache
     - run: make setup
-    - run: make simulator-tests
+    - run: make simulator-tests -j $(nproc)
   check-astyle:
     runs-on: ubuntu-latest
     steps:
