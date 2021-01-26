@@ -18,7 +18,7 @@
  */
 
 #ifndef BUILD_INFORMATION
-#define BUILD_INFORMATION "t7m.keymap.20210125"
+#define BUILD_INFORMATION "t7m.keymap.20210126"
 #endif
 
 #include "Kaleidoscope.h"
@@ -66,7 +66,7 @@ KEYMAPS(
                       ,Key_Y     ,Key_U      ,Key_I          ,Key_O         ,Key_P
                       ,Key_H     ,Key_J      ,Key_K          ,Key_L         ,Key_Semicolon
        ,Key_Backspace ,Key_N     ,Key_M      ,Key_Comma      ,Key_Period    ,Key_Slash
-       ,Key_Space     ,Key_Enter ,Key_Equals ,Key_Minus      ,Key_Quote     ,Key_Backslash
+       ,Key_Enter     ,Key_Space ,Key_Equals ,Key_Minus      ,Key_Quote     ,Key_Backslash
   ),
 
   [FUN] = KEYMAP_STACKED
@@ -136,12 +136,12 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
 void setup() {
   QUKEYS(
     // L
+    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 0), MO(UPPER)),
     kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 3), Key_LeftGui),
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 4), Key_LeftControl),
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 5), Key_LeftShift),
     // R
     kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 7), MO(FUN)),
-    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 8), MO(UPPER)),
   )
   Qukeys.setHoldTimeout(1000);
   Qukeys.setOverlapThreshold(50);
