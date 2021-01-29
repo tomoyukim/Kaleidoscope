@@ -18,7 +18,7 @@
  */
 
 #ifndef BUILD_INFORMATION
-#define BUILD_INFORMATION "t7m.keymap.20210126"
+#define BUILD_INFORMATION "t7m.keymap.20210129"
 #endif
 
 #include "Kaleidoscope.h"
@@ -61,7 +61,7 @@ KEYMAPS(
        Key_Q   ,Key_W        ,Key_E         ,Key_R         ,Key_T
       ,Key_A   ,Key_S        ,Key_D         ,Key_F         ,Key_G
       ,Key_Z   ,Key_X        ,Key_C         ,Key_V         ,Key_B           ,Key_Tab
-      ,Key_Esc ,Key_Backtick ,Key_LeftAlt   ,TD(ei_kana)   ,Key_LeftControl ,Key_LeftShift
+      ,Key_Esc ,Key_Backtick ,Key_Lang1     ,Key_Lang2     ,Key_LeftControl ,Key_LeftShift
 
                       ,Key_Y     ,Key_U      ,Key_I          ,Key_O         ,Key_P
                       ,Key_H     ,Key_J      ,Key_K          ,Key_L         ,Key_Semicolon
@@ -137,6 +137,7 @@ void setup() {
   QUKEYS(
     // L
     kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 0), MO(UPPER)),
+    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 2), Key_LeftAlt),
     kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 3), Key_LeftGui),
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 4), Key_LeftControl),
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 5), Key_LeftShift),
