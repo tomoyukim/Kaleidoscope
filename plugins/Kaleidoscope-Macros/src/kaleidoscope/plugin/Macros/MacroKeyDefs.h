@@ -1,3 +1,4 @@
+// -*- mode: c++ -*-
 /* Kaleidoscope-Macros - Macro keys for Kaleidoscope.
  * Copyright (C) 2017-2018  Keyboard.io, Inc.
  *
@@ -16,7 +17,10 @@
 
 #pragma once
 
-#include "Kaleidoscope-Ranges.h"
+#include <Kaleidoscope-Ranges.h>  // for MACRO_FIRST
+#include <stdint.h>               // for uint8_t
+
+#include "kaleidoscope/key_defs.h"  // for Key
 
 constexpr Key M(uint8_t n) {
   return Key(kaleidoscope::ranges::MACRO_FIRST + n);

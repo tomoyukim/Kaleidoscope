@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/mcu/Base.h"
+#include "kaleidoscope/driver/mcu/Base.h"  // for Base, BaseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -31,6 +31,6 @@ namespace mcu {
  */
 class None : public kaleidoscope::driver::mcu::Base<BaseProps> {};
 
-}
-}
-}
+}  // namespace mcu
+}  // namespace driver
+}  // namespace kaleidoscope

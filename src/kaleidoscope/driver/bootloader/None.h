@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/bootloader/Base.h"
+#include "kaleidoscope/driver/bootloader/Base.h"  // for Base
 
 namespace kaleidoscope {
 namespace driver {
@@ -31,6 +31,6 @@ namespace bootloader {
  */
 class None : public kaleidoscope::driver::bootloader::Base {};
 
-}
-}
-}
+}  // namespace bootloader
+}  // namespace driver
+}  // namespace kaleidoscope

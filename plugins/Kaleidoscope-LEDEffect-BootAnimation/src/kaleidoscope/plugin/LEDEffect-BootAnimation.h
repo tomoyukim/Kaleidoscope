@@ -17,15 +17,17 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include "Kaleidoscope-LEDControl.h"
+#include <stdint.h>  // for uint16_t, uint8_t
+
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+struct cRGB;
 
 namespace kaleidoscope {
 namespace plugin {
 class BootAnimationEffect : public kaleidoscope::Plugin {
  public:
-  BootAnimationEffect(void) {}
-
   static uint16_t timeout;
   static cRGB color;
 
@@ -39,7 +41,8 @@ class BootAnimationEffect : public kaleidoscope::Plugin {
   static uint16_t start_time_;
   static uint8_t current_index_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::BootAnimationEffect BootAnimationEffect;

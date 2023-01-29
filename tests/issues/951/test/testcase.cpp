@@ -15,7 +15,6 @@
  */
 
 #include "Kaleidoscope.h"
-#include "testing/fix-macros.h"
 
 #include "testing/setup-googletest.h"
 
@@ -27,11 +26,11 @@ namespace {
 
 using ::testing::IsEmpty;
 
-class Issue951: public VirtualDeviceTest {};
+class Issue951 : public VirtualDeviceTest {};
 
 TEST_F(Issue951, InitialLayerState) {
   EXPECT_THAT(Layer.isActive(0), true)
-      << "Layer 0 should be active when the keyboard starts up.";
+    << "Layer 0 should be active when the keyboard starts up.";
 }
 
 }  // namespace

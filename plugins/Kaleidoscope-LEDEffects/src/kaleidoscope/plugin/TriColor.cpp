@@ -15,21 +15,26 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-LEDEffects.h>
-#include "kaleidoscope/layers.h"
+#include "kaleidoscope/plugin/TriColor.h"
+
+#include "kaleidoscope/KeyAddr.h"            // for KeyAddr, MatrixAddr, MatrixAddr<>::Range
+#include "kaleidoscope/device/device.h"      // for cRGB
+#include "kaleidoscope/key_defs.h"           // for Key, Key_0, Key_A, Key_Escape, Key_F1, Key_F12
+#include "kaleidoscope/layers.h"             // for Layer, Layer_
+#include "kaleidoscope/plugin/LEDControl.h"  // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
 
 TriColor::TriColor(cRGB base_color, cRGB mod_color, cRGB esc_color) {
   base_color_ = base_color;
-  mod_color_ = mod_color;
-  esc_color_ = esc_color;
+  mod_color_  = mod_color;
+  esc_color_  = esc_color;
 }
 
-void TriColor::TransientLEDMode::update(void) {
+void TriColor::TransientLEDMode::update() {
   for (auto key_addr : KeyAddr::all()) {
-    Key k = Layer.lookup(key_addr);
+    Key k = Layer.lookupOnActiveLayer(key_addr);
 
     // Special keys are always mod_color
     if (k.getFlags() != 0) {
@@ -40,12 +45,12 @@ void TriColor::TransientLEDMode::update(void) {
     cRGB color = parent_->mod_color_;
 
     switch (k.getKeyCode()) {
-    case Key_A.getKeyCode() ... Key_0.getKeyCode():
+    case Key_A.getKeyCode()... Key_0.getKeyCode():
     case Key_Spacebar.getKeyCode():
-    case Key_KeypadDivide.getKeyCode() ... Key_KeypadSubtract.getKeyCode():
-    case Key_Keypad1.getKeyCode() ... Key_KeypadDot.getKeyCode():
-    case Key_F1.getKeyCode() ... Key_F4.getKeyCode():
-    case Key_F9.getKeyCode() ... Key_F12.getKeyCode():
+    case Key_KeypadDivide.getKeyCode()... Key_KeypadSubtract.getKeyCode():
+    case Key_Keypad1.getKeyCode()... Key_KeypadDot.getKeyCode():
+    case Key_F1.getKeyCode()... Key_F4.getKeyCode():
+    case Key_F9.getKeyCode()... Key_F12.getKeyCode():
       color = parent_->base_color_;
       break;
     case Key_Escape.getKeyCode():
@@ -57,5 +62,5 @@ void TriColor::TransientLEDMode::update(void) {
   }
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope

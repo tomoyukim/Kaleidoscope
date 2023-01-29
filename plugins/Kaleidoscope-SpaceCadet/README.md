@@ -75,16 +75,19 @@ void setup() {
     , SPACECADET_MAP_END
   };
   //Set the map.
-  SpaceCadet.map = spacecadetmap;
+  SpaceCadet.setMap(spacecadetmap);
 }
 ```
 
 ##   Plugin methods
 
-The plugin provides the `SpaceCadet` object, with the following methods and
-properties:
+The plugin provides two objects, `SpaceCadet` and `SpaceCadetConfig`. The latter
+requires the first, and allows configuring some aspects of `SpaceCadet` through
+[Focus][focus].
 
-### `.map`
+The `SpaceCadet` object provides the following methods:
+
+### `.setMap(map)`
 
 > Set the key map. This takes an array of
 > `kaleidoscope::plugin::SpaceCadet::KeyBinding` objects with the special
@@ -103,15 +106,22 @@ properties:
 > optional and may be set per-key or left out entirely (or set to `0`) to use
 > the default timeout value.
 
-### `.time_out`
+### `.setTimeout(timeout)`
 
-> Set this property to the number of milliseconds to wait before considering a
+> Sets the number of milliseconds to wait before considering a
 > held key in isolation as its secondary role. That is, we'd have to hold a
 > `Shift` key this long, by itself, to trigger the `Shift` role in itself. This
 > timeout setting can be overridden by an individual key in the keymap, but if
 > it is omitted or set to `0` in the key map, the global timeout will be used.
 >
-> Defaults to 1000.
+> Defaults to 200.
+
+### `.getTimeout()`
+
+> Returns the number of milliseconds SpaceCadet will wait before considering a
+> key held in isolation as its secondary role. This returns the *global*
+> setting, as set by `.setTimeout()`. If any key in the mapping set by
+> `.setMap()` has a different timeout, that is not considered here.
 
 ### `.enable()`
 
@@ -120,6 +130,13 @@ properties:
 > always desired.
 >
 > The default behavior is `enabled`.
+
+### `.enableWithoutDelay()`
+
+> This method enables the SpaceCadet plugin in "no-delay" mode. In this mode,
+> SpaceCadet immediately sends the primary (modifier) value of the SpaceCadet
+> key when it is pressed. If it is then released before timing out, it sends the
+> alternate "tap" value, replacing the modifier.
 
 ### `.disable()`
 
@@ -133,6 +150,12 @@ properties:
 > is disabled. This is useful for interfacing with other plugins or macros,
 > especially where SpaceCadet functionality isn't always desired.
 
+
+### `.activeWithoutDelay()`
+
+> This method returns `true` if SpaceCadet is enabled, and is in "no-delay"
+> mode, as set by `.enableWithoutDelay()`.
+
 ### `Key_SpaceCadetEnable`
 
 > This provides a key for placing on a keymap for enabling the SpaceCadet
@@ -145,9 +168,37 @@ properties:
 > behavior. This is only triggered on initial press, and does not
 > trigger again if held down or when the key is released.
 
+## Focus commands
+
+When using the `SpaceCadetConfig` plugin, the following Focus commands become
+available:
+
+### `spacecadet.mode`
+
+> Without arguments, returns the mode SpaceCadet is currently in, as a number.
+> When `SpaceCadet` is enabled in normal mode, this returns 0. When it is turned
+> off, it returns 1. When it is active in no-delay mode, it returns 2.
+>
+> When an argument is supplied, it must be one of the above, and will set the
+> SpaceCadet mode appropriately. Giving a numeric argument other than the
+> allowed ones will disable SpaceCadet.
+
+### `spacecadet.timeout`
+
+> Without arguments, prints the global timeout used by SpaceCadet.
+>
+> When an argument is given, it sets the global timeout.
+
 ## Dependencies
 
 * [Kaleidoscope-Ranges](Kaleidoscope-Ranges.md)
+
+### Optional dependencies, if using the `SpaceCadetConfig` object
+
+* [Kaleidoscope-EEPROM-Settings](Kaleidoscope-EEPROM-Settings.md)
+* [Kaleidoscope-FocusSerial][focus]
+
+ [focus]: Kaleidoscope-FocusSerial.md
 
 ## Further reading
 

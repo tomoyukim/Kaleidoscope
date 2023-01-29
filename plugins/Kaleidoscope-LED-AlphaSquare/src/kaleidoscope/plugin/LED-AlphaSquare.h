@@ -17,27 +17,30 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include <stdint.h>  // for uint16_t, uint8_t
 
+#include "kaleidoscope/KeyAddr.h"        // for KeyAddr
+#include "kaleidoscope/device/device.h"  // for cRGB
+#include "kaleidoscope/key_defs.h"       // for Key
+#include "kaleidoscope/plugin.h"         // for Plugin
+
+// clang-format off
 #define SYM4x4(                                                   \
                p00, p01, p02, p03,                                \
                p10, p11, p12, p13,                                \
                p20, p21, p22, p23,                                \
-               p30, p31, p32, p33)                               \
+               p30, p31, p32, p33)                                \
   (uint16_t) (                                                    \
               p00 <<  0 | p01 <<  1 | p02 <<  2 | p03 <<  3 |     \
               p10 <<  4 | p11 <<  5 | p12 <<  6 | p13 <<  7 |     \
               p20 <<  8 | p21 <<  9 | p22 << 10 | p23 << 11 |     \
               p30 << 12 | p31 << 13 | p32 << 14 | p33 << 15 )
+// clang-format on
 
 namespace kaleidoscope {
 namespace plugin {
 class AlphaSquare : public kaleidoscope::Plugin {
  public:
-
-  AlphaSquare(void) {}
-
   static void display(Key key, KeyAddr key_addr, cRGB key_color);
   static void display(Key key, KeyAddr key_addr);
   static void display(Key key) {
@@ -86,7 +89,7 @@ class AlphaSquare : public kaleidoscope::Plugin {
   static cRGB color;
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::AlphaSquare AlphaSquare;

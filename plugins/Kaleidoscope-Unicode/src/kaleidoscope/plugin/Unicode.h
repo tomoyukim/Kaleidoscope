@@ -17,18 +17,18 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-HostOS.h>
+#include <stdint.h>  // for uint8_t, uint32_t
+
+#include "kaleidoscope/key_defs.h"  // for Key
+#include "kaleidoscope/plugin.h"    // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 class Unicode : public kaleidoscope::Plugin {
  public:
-  Unicode(void) {}
-
-  static void start(void);
-  static void input(void);
-  static void end(void);
+  static void start();
+  static void input();
+  static void end();
 
   static void type(uint32_t unicode);
   static void typeCode(uint32_t unicode);
@@ -39,17 +39,27 @@ class Unicode : public kaleidoscope::Plugin {
   static uint8_t input_delay() {
     return input_delay_;
   }
+
+  static void setLinuxKey(const Key key) {
+    linux_key_ = key;
+  }
+  static Key getLinuxKey() {
+    return linux_key_;
+  }
+
  private:
+  static Key linux_key_;
   static uint8_t input_delay_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 Key hexToKey(uint8_t hex);
 Key hexToKeysWithNumpad(uint8_t hex);
 
-void unicodeCustomStart(void);
-void unicodeCustomEnd(void);
-void unicodeCustomInput(void);
+void unicodeCustomStart();
+void unicodeCustomEnd();
+void unicodeCustomInput();
 
 extern kaleidoscope::plugin::Unicode Unicode;

@@ -17,22 +17,24 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
-class WinKeyToggle: public kaleidoscope::Plugin {
+class WinKeyToggle : public kaleidoscope::Plugin {
  public:
-  WinKeyToggle() {}
-
-  EventHandlerResult onKeyswitchEvent(Key &key, KeyAddr key_addr, uint8_t key_state);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
   void toggle() {
     enabled_ = !enabled_;
   }
+
  private:
   static bool enabled_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::WinKeyToggle WinKeyToggle;

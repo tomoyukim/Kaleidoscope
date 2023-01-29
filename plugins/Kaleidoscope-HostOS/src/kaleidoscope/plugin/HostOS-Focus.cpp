@@ -15,18 +15,25 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-HostOS.h>
-#include <Kaleidoscope-FocusSerial.h>
+#include "kaleidoscope/plugin/HostOS-Focus.h"
+
+#include <Arduino.h>                   // for PSTR
+#include <Kaleidoscope-FocusSerial.h>  // for Focus, FocusSerial
+#include <stdint.h>                    // for uint8_t
+
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/plugin/HostOS.h"         // for HostOS, Type
 
 namespace kaleidoscope {
 namespace plugin {
 
-EventHandlerResult FocusHostOSCommand::onFocusEvent(const char *command) {
+EventHandlerResult FocusHostOSCommand::onFocusEvent(const char *input) {
   const char *cmd = PSTR("hostos.type");
 
-  if (::Focus.handleHelp(command, cmd))
-    return EventHandlerResult::OK;
-  if (strcmp_P(command, cmd) != 0)
+  if (::Focus.inputMatchesHelp(input))
+    return ::Focus.printHelp(cmd);
+
+  if (!::Focus.inputMatchesCommand(input, cmd))
     return EventHandlerResult::OK;
 
   if (::Focus.isEOL()) {
@@ -34,13 +41,13 @@ EventHandlerResult FocusHostOSCommand::onFocusEvent(const char *command) {
   } else {
     uint8_t new_os;
     ::Focus.read(new_os);
-    ::HostOS.os((hostos::Type) new_os);
+    ::HostOS.os((hostos::Type)new_os);
   }
 
   return EventHandlerResult::EVENT_CONSUMED;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::FocusHostOSCommand FocusHostOSCommand;

@@ -20,10 +20,17 @@ Nevertheless, a very simple example is shown below:
 namespace kaleidoscope {
 class FocusTestCommand : public Plugin {
  public:
-  FocusTestCommand() {}
+  EventHandlerResult onNameQuery() {
+    return ::Focus.sendName(F("FocusTestCommand"));
+  }
 
-  EventHandlerResult onFocusEvent(const char *command) {
-    if (strcmp_P(command, PSTR("test")) != 0)
+  EventHandlerResult onFocusEvent(const char *input) {
+    const char *cmd = PSTR("test");
+
+    if (::Focus.inputMatchesHelp(input))
+      return ::Focus.printHelp(cmd);
+
+    if (!::Focus.inputMatchesCommand(input, cmd))
       return EventHandlerResult::OK;
 
     ::Focus.send(F("Congratulations, the test command works!"));
@@ -45,12 +52,31 @@ void setup () {
 
 The plugin provides the `Focus` object, with a couple of helper methods aimed at developers. Terminating the response with a dot on its own line is handled implicitly by `FocusSerial`, one does not need to do that explicitly.
 
+### `.inputMatchesHelp(input)`
+
+Returns `true` if the given `input` matches the `help` command. To be used at the top of `onFocusEvent()`, followed by `.printHelp(...)`.
+
+### `.printHelp(...)`
+
+Given a series of strings (stored in `PROGMEM`, via `PSTR()`), prints them one per line. Assumes it is run as part of handling the `help` command. Returns `EventHandlerResult::OK`.
+
+### `.inputMatchesCommand(input, command)`
+
+Returns `true` if the `input` matches the expected `command`, false otherwise. A convenience function over `strcmp_P()`.
+
 ### `.send(...)`
 ### `.sendRaw(...)`
 
 Sends a list of variables over the wire. The difference between `.send()` and `.sendRaw()` is that the former puts a space between each variable, the latter does not. If one just wants to send a list of things, use the former. If one needs more control over the formatting, use the latter. In most cases, `.send()` is the recommended method to use.
 
 Both of them take a variable number of arguments, of almost any type: all built-in types can be sent, `cRGB`, `Key` and `bool` too in addition. For colors, `.send()` will write them as an `R G B` sequence; `Key` objects will be sent as the raw 16-bit keycode; and `bool` will be sent as either the string `true`, or `false`.
+
+### `.sendName(F("..."))`
+
+To be used with the `onNameQuery()` hook, this sends the plugin name given,
+followed by a newline, and returns `EventHandlerResult::OK`, so that
+`onNameQuery()` hooks can be implemented in a single line with the help of this
+function.
 
 ### `.read(variable)`
 
@@ -121,6 +147,9 @@ the keyboard responds.
 
 ## Further reading
 
-Starting from the [example][plugin:example] is the recommended way of getting started with the plugin.
+- The [`focus-send` script][focus-send] in the Kaleidoscope repo make use of this protocol.
+
+- Starting from the [example][plugin:example] is the recommended way of getting started with the plugin.
 
   [plugin:example]: /examples/Features/FocusSerial/FocusSerial.ino
+  [focus-send]: https://github.com/keyboardio/Kaleidoscope/blob/master/bin/focus-send

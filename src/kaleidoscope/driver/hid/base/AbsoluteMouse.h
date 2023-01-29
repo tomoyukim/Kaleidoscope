@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>  // for uint8_t, int8_t, uint16_t
 
 namespace kaleidoscope {
 namespace driver {
@@ -41,10 +41,11 @@ struct AbsoluteMouseProps {
   typedef NoAbsoluteMouse AbsoluteMouse;
 };
 
-template <typename _Props>
+template<typename _Props>
 class AbsoluteMouse {
  private:
   typename _Props::AbsoluteMouse absolute_mouse_;
+
  public:
   AbsoluteMouse() {}
 
@@ -70,7 +71,7 @@ class AbsoluteMouse {
   }
 };
 
-}
-}
-}
-}
+}  // namespace base
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

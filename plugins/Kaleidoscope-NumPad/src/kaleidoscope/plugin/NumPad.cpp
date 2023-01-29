@@ -14,30 +14,39 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-NumPad.h"
-#include "kaleidoscope/layers.h"
+#include "kaleidoscope/plugin/NumPad.h"
+
+#include <stdint.h>  // for uint8_t
+
+#include "kaleidoscope/KeyAddr.h"                     // for KeyAddr, MatrixAddr, MatrixAddr<>::...
+#include "kaleidoscope/device/device.h"               // for cRGB, CRGB
+#include "kaleidoscope/event_handler_result.h"        // for EventHandlerResult, EventHandlerRes...
+#include "kaleidoscope/key_defs.h"                    // for Key, KEY_FLAGS, Key_NoKey, LockLayer
+#include "kaleidoscope/layers.h"                      // for Layer, Layer_
+#include "kaleidoscope/plugin/LEDControl.h"           // for LEDControl
+#include "kaleidoscope/plugin/LEDControl/LEDUtils.h"  // for breath_compute
 
 namespace kaleidoscope {
 namespace plugin {
 
 // public:
 uint8_t NumPad::numPadLayer;
-cRGB NumPad::color = CRGB(160, 0, 0);
+cRGB NumPad::color       = CRGB(160, 0, 0);
 uint8_t NumPad::lock_hue = 170;
 
 // private:
 KeyAddr NumPad::numpadLayerToggleKeyAddr;
 bool NumPad::numpadActive = false;
 
-EventHandlerResult NumPad::onSetup(void) {
+EventHandlerResult NumPad::onSetup() {
   return EventHandlerResult::OK;
 }
 
-void NumPad::setKeyboardLEDColors(void) {
+void NumPad::setKeyboardLEDColors() {
   ::LEDControl.set_mode(::LEDControl.get_mode_index());
 
   for (auto key_addr : KeyAddr::all()) {
-    Key k = Layer.lookupOnActiveLayer(key_addr);
+    Key k         = Layer.lookupOnActiveLayer(key_addr);
     Key layer_key = Layer.getKey(numPadLayer, key_addr);
 
     if (k == LockLayer(numPadLayer)) {
@@ -64,7 +73,7 @@ EventHandlerResult NumPad::afterEachCycle() {
       numpadActive = false;
     }
   } else {
-    if (!numpadActive)  {
+    if (!numpadActive) {
       numpadActive = true;
     }
     setKeyboardLEDColors();
@@ -72,7 +81,7 @@ EventHandlerResult NumPad::afterEachCycle() {
   return EventHandlerResult::OK;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::NumPad NumPad;

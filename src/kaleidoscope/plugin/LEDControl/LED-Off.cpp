@@ -16,6 +16,8 @@
 
 #include "kaleidoscope/plugin/LEDControl/LED-Off.h"
 
+#include "kaleidoscope/plugin/LEDControl.h"  // for LEDControl
+
 namespace kaleidoscope {
 namespace plugin {
 void LEDOff::onActivate(void) {
@@ -25,7 +27,7 @@ void LEDOff::onActivate(void) {
 void LEDOff::refreshAt(KeyAddr key_addr) {
   ::LEDControl.setCrgbAt(key_addr, {0, 0, 0});
 }
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::LEDOff LEDOff;

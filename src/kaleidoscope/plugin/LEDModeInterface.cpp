@@ -15,8 +15,8 @@
  */
 
 
-#include <kaleidoscope/plugin/LEDModeInterface.h>
-#include <kaleidoscope/plugin/LEDControl.h>
+#include <kaleidoscope/plugin/LEDControl.h>        // for LEDControl
+#include <kaleidoscope/plugin/LEDModeInterface.h>  // for LEDModeInterface
 
 namespace kaleidoscope {
 namespace plugin {
@@ -25,5 +25,5 @@ void LEDModeInterface::activate() {
   LEDControl::activate(this);
 }
 
-} // end namespace plugin
-} // end namespace kaleidoscope
+}  // namespace plugin
+}  // namespace kaleidoscope

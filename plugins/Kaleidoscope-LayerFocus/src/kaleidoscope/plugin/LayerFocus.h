@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-LayerFocus -- Focus commands to work with layers
- * Copyright (C) 2020  Keyboard.io, Inc
+ * Copyright (C) 2020, 2021  Keyboard.io, Inc
  * Copyright (C) 2020  DygmaLab, SE.
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -18,19 +18,19 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
-class LayerFocus: public kaleidoscope::Plugin {
+class LayerFocus : public kaleidoscope::Plugin {
  public:
-  LayerFocus() {}
-
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onFocusEvent(const char *input);
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LayerFocus LayerFocus;

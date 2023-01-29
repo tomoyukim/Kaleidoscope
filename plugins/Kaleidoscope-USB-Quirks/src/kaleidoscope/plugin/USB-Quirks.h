@@ -17,17 +17,16 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include "kaleidoscope/plugin.h"  // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
-class USBQuirks: public kaleidoscope::Plugin {
+class USBQuirks : public kaleidoscope::Plugin {
  public:
-  USBQuirks() {}
-
   void toggleKeyboardProtocol();
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::USBQuirks USBQuirks;

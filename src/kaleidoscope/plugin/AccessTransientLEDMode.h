@@ -16,12 +16,13 @@
 
 #pragma once
 
+#include <stdint.h>  // for uint8_t
+
 namespace kaleidoscope {
 namespace plugin {
 
 class AccessTransientLEDMode {
  public:
-
   // This method is called when a plugin's LED mode is activated.
   // Derived plugins may reimplement it to store the id of their
   // exported LED mode. A plugin can thus check
@@ -32,9 +33,8 @@ class AccessTransientLEDMode {
   }
 
  protected:
-
   uint8_t led_mode_id_ = 255; /* 255 means uninitialized */
 };
 
-} // end namespace plugin
-} // end namespace kaleidoscope
+}  // namespace plugin
+}  // namespace kaleidoscope

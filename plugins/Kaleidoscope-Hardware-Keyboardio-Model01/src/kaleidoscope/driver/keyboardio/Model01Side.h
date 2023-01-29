@@ -23,12 +23,8 @@
 
 #pragma once
 
-namespace kaleidoscope {
-namespace driver {
-namespace keyboardio {
-
-#include <Arduino.h>
-#include "wire-protocol-constants.h"
+// System headers
+#include <stdint.h>  // for uint8_t, uint32_t
 
 // We allow cRGB/CRGB to be defined already when this is included.
 //
@@ -38,17 +34,22 @@ struct cRGB {
   uint8_t g;
   uint8_t r;
 };
-#define CRGB(r,g,b) (cRGB){b, g, r}
+#define CRGB(r, g, b) \
+  (cRGB) { b, g, r }
 #endif
 
-#define LED_BANKS 4
+#define LED_BANKS          4
 
-#define LEDS_PER_HAND 32
-#define LED_BYTES_PER_BANK sizeof(cRGB)  * LEDS_PER_HAND/LED_BANKS
+#define LEDS_PER_HAND      32
+#define LED_BYTES_PER_BANK sizeof(cRGB) * LEDS_PER_HAND / LED_BANKS
+
+namespace kaleidoscope {
+namespace driver {
+namespace keyboardio {
 
 typedef union {
   cRGB leds[LEDS_PER_HAND];
-  byte bytes[LED_BANKS][LED_BYTES_PER_BANK];
+  uint8_t bytes[LED_BANKS][LED_BYTES_PER_BANK];
 } LEDData_t;
 
 typedef union {
@@ -62,19 +63,19 @@ typedef union {
 // used to configure interrupts, configuration for a particular controller
 class Model01Side {
  public:
-  explicit Model01Side(byte setAd01);
+  explicit Model01Side(uint8_t setAd01);
   ~Model01Side() {}
 
   int readVersion();
 
-  byte setKeyscanInterval(byte delay);
+  uint8_t setKeyscanInterval(uint8_t delay);
   int readKeyscanInterval();
 
-  byte setLEDSPIFrequency(byte frequency);
+  uint8_t setLEDSPIFrequency(uint8_t frequency);
   int readLEDSPIFrequency();
 
   void sendLEDData();
-  void setOneLEDTo(byte led, cRGB color);
+  void setOneLEDTo(uint8_t led, cRGB color);
   void setAllLEDsTo(cRGB color);
   keydata_t getKeyData();
   bool readKeys();
@@ -93,14 +94,12 @@ class Model01Side {
   int addr;
   int ad01;
   keydata_t keyData;
-  byte nextLEDBank = 0;
-  void sendLEDBank(byte bank);
+  uint8_t nextLEDBank = 0;
+  void sendLEDBank(uint8_t bank);
   int readRegister(uint8_t cmd);
 };
-#else // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-class Model01Side;
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 
-} // namespace keyboardio
-} // namespace driver
-} // namespace kaleidoscope
+}  // namespace keyboardio
+}  // namespace driver
+}  // namespace kaleidoscope

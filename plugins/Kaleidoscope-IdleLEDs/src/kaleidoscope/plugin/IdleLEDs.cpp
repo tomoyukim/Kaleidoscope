@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Idle-LEDs -- Turn off the LEDs when the keyboard's idle
- * Copyright (C) 2018, 2019, 2020  Keyboard.io, Inc
+ * Copyright (C) 2018, 2019, 2020, 2021  Keyboard.io, Inc
  * Copyright (C) 2019  Dygma, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -16,15 +16,23 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-IdleLEDs.h>
-#include <Kaleidoscope-LEDControl.h>
-#include <Kaleidoscope-EEPROM-Settings.h>
-#include <Kaleidoscope-FocusSerial.h>
+#include "kaleidoscope/plugin/IdleLEDs.h"
+
+#include <Arduino.h>                       // for F, PSTR, __FlashStringHelper
+#include <Kaleidoscope-EEPROM-Settings.h>  // for EEPROMSettings
+#include <Kaleidoscope-FocusSerial.h>      // for Focus, FocusSerial
+#include <stdint.h>                        // for uint32_t, uint16_t
+
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"         // for VirtualProps::Storage, Base<>::Storage
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/plugin/LEDControl.h"     // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
 
-uint32_t IdleLEDs::idle_time_limit = 600000; // 10 minutes
+uint32_t IdleLEDs::idle_time_limit = 600000;  // 10 minutes
 uint32_t IdleLEDs::start_time_     = 0;
 bool IdleLEDs::idle_;
 
@@ -49,8 +57,7 @@ EventHandlerResult IdleLEDs::beforeEachCycle() {
   return EventHandlerResult::OK;
 }
 
-EventHandlerResult IdleLEDs::onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state) {
-
+EventHandlerResult IdleLEDs::onKeyEvent(KeyEvent &event) {
   if (idle_) {
     ::LEDControl.enable();
     idle_ = false;
@@ -63,6 +70,10 @@ EventHandlerResult IdleLEDs::onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr,
 
 uint16_t PersistentIdleLEDs::settings_base_;
 
+EventHandlerResult PersistentIdleLEDs::onNameQuery() {
+  return ::Focus.sendName(F("PersistentIdleLEDs"));
+}
+
 EventHandlerResult PersistentIdleLEDs::onSetup() {
   settings_base_ = ::EEPROMSettings.requestSlice(sizeof(uint16_t));
 
@@ -71,7 +82,7 @@ EventHandlerResult PersistentIdleLEDs::onSetup() {
   uint16_t idle_time;
   Runtime.storage().get(settings_base_, idle_time);
   if (idle_time == 0xffff) {
-    idle_time = idle_time_limit;
+    idle_time = idle_time_limit / 1000;
   }
   setIdleTimeoutSeconds(idle_time);
 
@@ -86,13 +97,13 @@ void PersistentIdleLEDs::setIdleTimeoutSeconds(uint32_t new_limit) {
   Runtime.storage().commit();
 }
 
-EventHandlerResult PersistentIdleLEDs::onFocusEvent(const char *command) {
+EventHandlerResult PersistentIdleLEDs::onFocusEvent(const char *input) {
   const char *cmd = PSTR("idleleds.time_limit");
 
-  if (::Focus.handleHelp(command, cmd))
-    return EventHandlerResult::OK;
+  if (::Focus.inputMatchesHelp(input))
+    return ::Focus.printHelp(cmd);
 
-  if (strcmp_P(command, cmd) != 0)
+  if (!::Focus.inputMatchesCommand(input, cmd))
     return EventHandlerResult::OK;
 
   if (::Focus.isEOL()) {
@@ -105,8 +116,8 @@ EventHandlerResult PersistentIdleLEDs::onFocusEvent(const char *command) {
   return EventHandlerResult::EVENT_CONSUMED;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::IdleLEDs IdleLEDs;
 kaleidoscope::plugin::PersistentIdleLEDs PersistentIdleLEDs;

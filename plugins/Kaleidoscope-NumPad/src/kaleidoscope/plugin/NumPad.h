@@ -16,30 +16,33 @@
 
 #pragma once
 
-#include "Kaleidoscope-LEDControl.h"
+#include <stdint.h>  // for uint8_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/device/device.h"         // for cRGB
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
 class NumPad : public kaleidoscope::Plugin {
  public:
-  NumPad(void) {}
-
   static uint8_t numPadLayer;
   static cRGB color;
   static uint8_t lock_hue;
 
-  EventHandlerResult onSetup(void);
+  EventHandlerResult onSetup();
   EventHandlerResult afterEachCycle();
 
  private:
-
-  void setKeyboardLEDColors(void);
+  void setKeyboardLEDColors();
 
   static KeyAddr numpadLayerToggleKeyAddr;
   static bool numpadActive;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::NumPad NumPad;

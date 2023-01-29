@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
+#include <cstdint>  // for uint8_t, uint32_t
+#include <vector>   // for vector
 
-#include "HID-Settings.h"
-#include "MultiReport/SystemControl.h"
+#include "HID-Settings.h"               // for HID_REPORTID_SYSTEMCONTROL
+#include "MultiReport/SystemControl.h"  // for HID_SystemControlReport_Data_t
 
 namespace kaleidoscope {
 namespace testing {
@@ -31,7 +31,7 @@ class SystemControlReport : public std::vector<uint8_t> {
 
   static constexpr uint8_t kHidReportType = HID_REPORTID_SYSTEMCONTROL;
 
-  SystemControlReport(const void* data);
+  SystemControlReport(const void *data);
 
   uint32_t Timestamp() const;
   uint8_t ActiveKeycode() const;

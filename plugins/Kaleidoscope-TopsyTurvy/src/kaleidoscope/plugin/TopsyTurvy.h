@@ -17,26 +17,39 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
+#include <Kaleidoscope-Ranges.h>  // for TT_FIRST, TT_LAST
 
-#define TOPSY(k) Key(kaleidoscope::ranges::TT_FIRST + (Key_ ## k).getKeyCode())
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+#define TOPSY(k) ::kaleidoscope::plugin::TopsyTurvyKey(Key_##k)
 
 namespace kaleidoscope {
 namespace plugin {
 
-class TopsyTurvy: public kaleidoscope::Plugin {
- public:
-  TopsyTurvy(void) {}
+constexpr Key TopsyTurvyKey(Key key) {
+  return Key(kaleidoscope::ranges::TT_FIRST + key.getKeyCode());
+}
 
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
+class TopsyTurvy : public kaleidoscope::Plugin {
+ public:
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult onNameQuery();
+  EventHandlerResult beforeReportingState(const KeyEvent &event);
+
+  static bool isTopsyTurvyKey(Key key) {
+    return (key >= ranges::TT_FIRST &&
+            key <= ranges::TT_LAST);
+  }
 
  private:
-  static uint8_t last_pressed_position_;
-  static bool is_shifted_;
-  static bool is_active_;
+  KeyAddr tt_addr_ = KeyAddr::none();
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::TopsyTurvy TopsyTurvy;

@@ -27,9 +27,10 @@
 
 #ifdef __SAMD21G18A__
 
-#include "kaleidoscope/driver/storage/Base.h"
-#include <FlashStorage.h>
 #include <FlashAsEEPROM.h>
+#include <FlashStorage.h>
+
+#include "kaleidoscope/driver/storage/Base.h"
 
 // We need to undefine Flash, because `FlashStorage` defines it as a macro, yet,
 // we want to use it as a class name.
@@ -43,16 +44,16 @@ struct FlashProps : kaleidoscope::driver::storage::BaseProps {
   static constexpr uint16_t length = EEPROM_EMULATION_SIZE;
 };
 
-template <typename _StorageProps>
-class Flash: public kaleidoscope::driver::storage::Base<_StorageProps> {
+template<typename _StorageProps>
+class Flash : public kaleidoscope::driver::storage::Base<_StorageProps> {
  public:
   template<typename T>
-  T& get(uint16_t offset, T& t) {
+  T &get(uint16_t offset, T &t) {
     return EEPROM.get(offset, t);
   }
 
   template<typename T>
-  const T& put(uint16_t offset, T& t) {
+  const T &put(uint16_t offset, T &t) {
     EEPROM.put(offset, t);
   }
 
@@ -73,8 +74,8 @@ class Flash: public kaleidoscope::driver::storage::Base<_StorageProps> {
   }
 };
 
-}
-}
-}
+}  // namespace storage
+}  // namespace driver
+}  // namespace kaleidoscope
 
 #endif

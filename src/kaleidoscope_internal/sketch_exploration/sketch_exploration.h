@@ -14,10 +14,12 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+
 #pragma once
 
-#include "kaleidoscope_internal/sketch_exploration/keymap_exploration.h"
-#include "kaleidoscope_internal/sketch_exploration/plugin_exploration.h"
+#include "kaleidoscope_internal/sketch_exploration/keymap_exploration.h"  // for _INIT_KEYMAP_EX...
+#include "kaleidoscope_internal/sketch_exploration/plugin_exploration.h"  // IWYU pragma: keep
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Read carefully

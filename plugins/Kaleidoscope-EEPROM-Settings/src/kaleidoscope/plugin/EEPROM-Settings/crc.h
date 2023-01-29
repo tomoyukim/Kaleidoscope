@@ -28,19 +28,17 @@
 
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>  // for uint8_t, uint16_t
 
 class CRC_ {
  public:
   uint16_t crc = 0;
 
-  CRC_(void) {};
-
   void update(const void *data, uint8_t len);
-  void finalize(void) {
+  void finalize() {
     reflect(16);
   }
   void reflect(uint8_t len);
 };
 
-extern CRC_ CRC;
+extern CRC_ CRCCalculator;

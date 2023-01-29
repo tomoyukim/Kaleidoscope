@@ -1,5 +1,5 @@
 /* Kaleidoscope - Firmware for computer input devices
- * Copyright (C) 2013-2018  Keyboard.io, Inc.
+ * Copyright (C) 2013-2021  Keyboard.io, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -14,14 +14,21 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "kaleidoscope/Runtime.h"
-#include "kaleidoscope/layers.h"
-#include "kaleidoscope/keyswitch_state.h"
+#include <stdint.h>  // for uint8_t, int8_t
+#include <string.h>  // for memmove, memset
 
-// The maximum number of layers allowed. `layer_state_`, which stores
-// the on/off status of the layers in a bitfield has only 32 bits, and
-// that should be enough for almost any layout.
-#define MAX_LAYERS sizeof(uint32_t) * 8;
+#include "kaleidoscope/KeyAddr.h"          // for MatrixAddr, MatrixAddr<>::Range, KeyAddr
+#include "kaleidoscope/KeyAddrMap.h"       // for KeyAddrMap<>::Iterator, KeyAddrMap
+#include "kaleidoscope/KeyEvent.h"         // for KeyEvent
+#include "kaleidoscope/KeyMap.h"           // for KeyMap
+#include "kaleidoscope/LiveKeys.h"         // for LiveKeys, live_keys
+#include "kaleidoscope/device/device.h"    // for Device
+#include "kaleidoscope/hooks.h"            // for Hooks
+#include "kaleidoscope/key_defs.h"         // for Key, LAYER_MOVE_OFFSET, LAYER_SHIFT_OFFSET
+#include "kaleidoscope/keymaps.h"          // for keyFromKeymap
+#include "kaleidoscope/keyswitch_state.h"  // for keyToggledOn
+#include "kaleidoscope/layers.h"           // for Layer_, Layer, Layer_::GetKeyFunction, Layer_:...
+#include "kaleidoscope_internal/device.h"  // for device
 
 // The following definitions of layer_count and keymaps_linear
 // are used if the user does not define a keymap within the sketch
@@ -34,132 +41,129 @@
 __attribute__((weak))
 uint8_t layer_count = 0;
 
-__attribute__((weak))
-extern constexpr Key keymaps_linear[][kaleidoscope_internal::device.matrix_rows * kaleidoscope_internal::device.matrix_columns] = {};
+__attribute__((weak)) extern constexpr Key keymaps_linear[][kaleidoscope_internal::device.matrix_rows * kaleidoscope_internal::device.matrix_columns] = {};
 
 namespace kaleidoscope {
-uint32_t Layer_::layer_state_;
 uint8_t Layer_::active_layer_count_ = 1;
-int8_t Layer_::active_layers_[31];
+int8_t Layer_::active_layers_[MAX_ACTIVE_LAYERS];
 
-Key Layer_::live_composite_keymap_[Runtime.device().numKeys()];
-uint8_t Layer_::active_layer_keymap_[Runtime.device().numKeys()];
+uint8_t Layer_::active_layer_keymap_[kaleidoscope_internal::device.numKeys()];
 Layer_::GetKeyFunction Layer_::getKey = &Layer_::getKeyFromPROGMEM;
 
 void Layer_::setup() {
-  // Explicitly set layer 0's state to 1
-  bitSet(layer_state_, 0);
-
-  // Update the keymap cache, so we start with a non-empty state.
+  // Update the active layer cache (every entry will be `0` to start)
   Layer.updateActiveLayers();
-  for (auto key_addr : KeyAddr::all()) {
-    Layer.updateLiveCompositeKeymap(key_addr);
-  }
 }
 
-void Layer_::handleKeymapKeyswitchEvent(Key keymapEntry, uint8_t keyState) {
-  if (keymapEntry.getKeyCode() >= LAYER_MOVE_OFFSET) {
-    if (keyToggledOn(keyState)) {
-      move(keymapEntry.getKeyCode() - LAYER_MOVE_OFFSET);
+void Layer_::handleLayerKeyEvent(const KeyEvent &event) {
+  // The caller is responsible for checking that this is a Layer `Key`, so we
+  // skip checking for it here.
+  uint8_t key_code = event.key.getKeyCode();
+
+  // If this is a ModLayer key, we need to convert it into a layer shift first.
+  if (event.key.isModLayerKey())
+    key_code = (key_code / 8) + LAYER_SHIFT_OFFSET;
+
+  uint8_t target_layer;
+
+  if (key_code >= LAYER_MOVE_OFFSET) {
+    // MoveToLayer()
+    if (keyToggledOn(event.state)) {
+      target_layer = key_code - LAYER_MOVE_OFFSET;
+      move(target_layer);
     }
-  } else if (keymapEntry.getKeyCode() >= LAYER_SHIFT_OFFSET) {
-    uint8_t target = keymapEntry.getKeyCode() - LAYER_SHIFT_OFFSET;
+  } else if (key_code >= LAYER_SHIFT_OFFSET) {
+    // layer shift keys (two types)
+    target_layer = key_code - LAYER_SHIFT_OFFSET;
 
-    switch (target) {
+    switch (target_layer) {
+
     case KEYMAP_NEXT:
-      if (keyToggledOn(keyState))
-        activateNext();
-      else if (keyToggledOff(keyState))
-        deactivateMostRecent();
-      break;
-
     case KEYMAP_PREVIOUS:
-      if (keyToggledOn(keyState))
-        deactivateMostRecent();
-      else if (keyToggledOff(keyState))
-        activateNext();
+      if (keyToggledOn(event.state)) {
+        uint8_t top_layer = active_layers_[active_layer_count_ - 1];
+        if (target_layer == KEYMAP_NEXT) {
+          // Key_KeymapNext_Momentary
+          target_layer = top_layer + 1;
+        } else {
+          // Key_KeymapPrevious_Momentary
+          target_layer = top_layer - 1;
+        }
+        if (target_layer >= layer_count) {
+          live_keys.mask(event.addr);
+          return;
+        }
+        uint8_t target_layer_shifted = target_layer + LAYER_SHIFT_OFFSET;
+        activate(target_layer_shifted);
+        // We can't just change `event.key` here because `live_keys[]` has
+        // already been updated by the time `handleLayerKeyEvent()` gets called.
+        live_keys[event.addr] = ShiftToLayer(target_layer);
+      }
       break;
 
     default:
-      /* The default case is when we are switching to a layer by its number, and
-       * is a bit more complicated than switching there when the key toggles on,
-       * and away when it toggles off.
-       *
-       * We want to handle the case where we have more than one momentary layer
-       * key on our keymap that point to the same target layer, and we hold
-       * both, and release one. In this case, the layer should remain active,
-       * because the second momentary key is still held.
-       *
-       * To do this, we turn the layer back on if the switcher key is still
-       * held, not only when it toggles on. So when one of them is released,
-       * that does turn the layer off, but with the other still being held, the
-       * layer will toggle back on in the same cycle.
-       */
-      if (keyIsPressed(keyState)) {
-        if (!Layer.isActive(target))
-          activate(target);
-      } else if (keyToggledOff(keyState)) {
-        deactivate(target);
+      // ShiftToLayer()
+      target_layer += LAYER_SHIFT_OFFSET;
+
+      if (keyToggledOn(event.state)) {
+        if (stackPosition(target_layer) < 0) {
+          activate(target_layer);
+        }
+      } else {
+        deactivate(target_layer);
       }
       break;
     }
-  } else if (keyToggledOn(keyState)) {
-    // switch keymap and stay there
-    if (Layer.isActive(keymapEntry.getKeyCode()) && keymapEntry.getKeyCode())
-      deactivate(keymapEntry.getKeyCode());
-    else
-      activate(keymapEntry.getKeyCode());
+  } else if (keyToggledOn(event.state)) {
+    // LockLayer()/UnlockLayer()
+    target_layer = key_code;
+
+    if (stackPosition(target_layer) == active_layer_count_ - 1) {
+      deactivate(target_layer);
+    } else {
+      activate(target_layer);
+    }
   }
-}
-
-Key Layer_::eventHandler(Key mappedKey, KeyAddr key_addr, uint8_t keyState) {
-  if (mappedKey.getFlags() != (SYNTHETIC | SWITCH_TO_KEYMAP))
-    return mappedKey;
-
-  handleKeymapKeyswitchEvent(mappedKey, keyState);
-  return Key_NoKey;
 }
 
 Key Layer_::getKeyFromPROGMEM(uint8_t layer, KeyAddr key_addr) {
   return keyFromKeymap(layer, key_addr);
 }
 
-void Layer_::updateLiveCompositeKeymap(KeyAddr key_addr) {
-  int8_t layer = active_layer_keymap_[key_addr.toInt()];
-  live_composite_keymap_[key_addr.toInt()] = (*getKey)(layer, key_addr);
-}
-
 void Layer_::updateActiveLayers(void) {
-  memset(active_layer_keymap_, 0, Runtime.device().numKeys());
-  for (auto key_addr : KeyAddr::all()) {
-    int8_t layer_index = active_layer_count_;
-    while (layer_index > 0) {
-      uint8_t layer = active_layers_[layer_index - 1];
-      if (Layer.isActive(layer)) {
-        Key mappedKey = (*getKey)(layer, key_addr);
+  // First, set every entry in the active layer keymap to point to the default
+  // layer (layer 0).
+  memset(active_layer_keymap_, 0, kaleidoscope_internal::device.numKeys());
 
-        if (mappedKey != Key_Transparent) {
-          active_layer_keymap_[key_addr.toInt()] = layer;
-          break;
-        }
+  // For each key address, set its entry in the active layer keymap to the value
+  // of the top active layer that has a non-transparent entry for that address.
+  for (auto key_addr : KeyAddr::all()) {
+    for (uint8_t i = active_layer_count_; i > 0; --i) {
+      uint8_t layer = unshifted(active_layers_[i - 1]);
+
+      Key key = (*getKey)(layer, key_addr);
+      if (key != Key_Transparent) {
+        active_layer_keymap_[key_addr.toInt()] = layer;
+        break;
       }
-      layer_index--;
     }
   }
+  // Even if there are no active layers (a situation that should be prevented by
+  // `deactivate()`), each key will be mapped from the base layer (layer
+  // 0). Likewise, for any address where all active layers have a transparent
+  // entry, that key will be mapped from the base layer, even if the base layer
+  // has been deactivated.
 }
 
 void Layer_::move(uint8_t layer) {
   // We do pretty much what activate() does, except we do everything
   // unconditionally, to make sure all parts of the firmware are aware of the
   // layer change.
-  layer_state_ = 0;
+  if (layer >= layer_count)
+    return;
 
-  if (layer >= layer_count) {
-    layer = 0;
-  }
-  bitSet(layer_state_, layer);
   active_layer_count_ = 1;
-  active_layers_[0] = layer;
+  active_layers_[0]   = layer;
 
   updateActiveLayers();
 
@@ -170,15 +174,23 @@ void Layer_::move(uint8_t layer) {
 void Layer_::activate(uint8_t layer) {
   // If we're trying to turn on a layer that doesn't exist, abort (but
   // if the keymap wasn't defined using the KEYMAPS() macro, proceed anyway
-  if (layer >= layer_count)
+  uint8_t layer_unshifted = unshifted(layer);
+
+  if (layer_unshifted >= layer_count)
     return;
 
-  // If the target layer was already on, return
-  if (isActive(layer))
-    return;
+  int8_t old_pos = stackPosition(layer);
+  if (old_pos >= 0) {
+    remove(old_pos);
+  }
 
-  // Otherwise, turn on its bit in layer_state_
-  bitSet(layer_state_, layer);
+  // Guarantee that we don't overflow by removing layers from the bottom if
+  // we're about to exceed the size of the active layers array.
+  while (active_layer_count_ >= MAX_ACTIVE_LAYERS) {
+    remove(0);
+  }
+
+  // Otherwise, push it onto the active layer stack
   active_layers_[active_layer_count_++] = layer;
 
   // Update the keymap cache (but not live_composite_keymap_; that gets
@@ -188,51 +200,71 @@ void Layer_::activate(uint8_t layer) {
   kaleidoscope::Hooks::onLayerChange();
 }
 
+void Layer_::remove(uint8_t i) {
+  memmove(&active_layers_[i], &active_layers_[i + 1], active_layer_count_ - (i + 1));
+  --active_layer_count_;
+}
+
 // Deactivate a given layer
 void Layer_::deactivate(uint8_t layer) {
+  int8_t current_pos = stackPosition(layer);
+
   // If the target layer was already off, return
-  if (!bitRead(layer_state_, layer))
+  if (current_pos < 0)
     return;
 
-  // Turn off its bit in layer_state_
-  bitClear(layer_state_, layer);
-
-  // Rearrange the activation order array...
-  uint8_t idx = 0;
-  for (uint8_t i = active_layer_count_; i > 0; i--) {
-    if (active_layers_[i] == layer) {
-      idx = i;
-      break;
-    }
+  // If the sole active layer is being deactivated, turn on the base layer and
+  // return so we always have at least one layer active.
+  if (active_layer_count_ <= 1) {
+    move(0);
+    return;
   }
-  memmove(&active_layers_[idx], &active_layers_[idx + 1], active_layer_count_ - idx);
-  active_layer_count_--;
 
-  // Update the keymap cache (but not live_composite_keymap_; that gets
-  // updated separately, when keys toggle on or off. See layers.h)
+  // Remove the target layer from the active layer stack, and shift any layers
+  // above it down to fill in the gap.
+  remove(current_pos);
+
+  // Update the keymap cache.
   updateActiveLayers();
 
   kaleidoscope::Hooks::onLayerChange();
 }
 
 boolean Layer_::isActive(uint8_t layer) {
-  return bitRead(layer_state_, layer);
+  return ((stackPosition(layer) >= 0) ||
+          (stackPosition(layer + LAYER_SHIFT_OFFSET) >= 0));
 }
 
-void Layer_::activateNext(void) {
+int8_t Layer_::stackPosition(uint8_t layer) {
+  for (int8_t i = 0; i < active_layer_count_; ++i) {
+    if (active_layers_[i] == layer)
+      return i;
+  }
+  return -1;
+}
+
+void Layer_::activateNext() {
   activate(active_layers_[active_layer_count_ - 1] + 1);
 }
 
-void Layer_::deactivateMostRecent(void) {
-  deactivate(active_layers_[active_layer_count_ - 1]);
+void Layer_::deactivateMostRecent() {
+  uint8_t layer = active_layers_[active_layer_count_ - 1];
+  deactivate(layer);
 }
 
 void Layer_::forEachActiveLayer(forEachHandler h) {
   for (uint8_t i = 0; i < active_layer_count_; i++) {
-    (*h)(i, active_layers_[i]);
+    uint8_t layer = unshifted(active_layers_[i]);
+    (*h)(i, layer);
   }
 }
 
+uint8_t Layer_::unshifted(uint8_t layer) {
+  if (layer >= LAYER_SHIFT_OFFSET)
+    layer -= LAYER_SHIFT_OFFSET;
+  return layer;
 }
+
+}  // namespace kaleidoscope
 
 kaleidoscope::Layer_ Layer;

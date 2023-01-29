@@ -35,7 +35,8 @@ ARDUINO_CONTENT ?= $(KALEIDOSCOPE_DIR)/.arduino
 export ARDUINO_DIRECTORIES_DATA ?= $(ARDUINO_CONTENT)/data
 export ARDUINO_DIRECTORIES_DOWNLOADS ?= $(ARDUINO_CONTENT)/downloads
 export ARDUINO_CLI_CONFIG ?= $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml
-export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/package_keyboardio_index.json
+export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS ?= https://raw.githubusercontent.com/keyboardio/boardsmanager/master/devel/package_kaleidoscope_devel_index.json
+
 
 # If it looks like Kaleidoscope is inside a "traditional" Arduino hardware directory 
 # in the user's homedir, let's use that.
@@ -54,33 +55,14 @@ endif
 # Otherwise, use the arduino-cli bundle
 export ARDUINO_DIRECTORIES_USER ?= $(ARDUINO_CONTENT)/user
 
-# If we're not calling setup, we should freak out if the hardware
-# definitions don't exist
 
-ifneq ($(MAKECMDGOALS),setup)
-
-ifeq ($(wildcard $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/boards.txt),)
- 
-$(info Kaleidoscope hardware definitions not found in)
-$(info $(ARDUINO_DIRECTORIES_USER))
-$(info )
-$(info You may be able to resolve this issue by running the following command)
-$(info to initialize Kaleidoscope )
-$(info )
-$(info $(MAKE) -C $(KALEIDOSCOPE_DIR) setup )
-$(info )
-$(error )
-
-endif
-
-endif
 
 arduino_env = ARDUINO_DIRECTORIES_USER=$(ARDUINO_DIRECTORIES_USER) \
 	      ARDUINO_DIRECTORIES_DATA=$(ARDUINO_DIRECTORIES_DATA)
 
 ifeq ($(ARDUINO_CLI_PATH),) 
 
-system_arduino_cli ?= $(shell command -v arduino-cli || true)
+system_arduino_cli := $(shell command -v arduino-cli || true)
 
 ifeq ($(system_arduino_cli),) 
 export ARDUINO_CLI_PATH ?= $(KALEIDOSCOPE_BIN_DIR)/arduino-cli
@@ -126,15 +108,16 @@ _arduino_prop = $(subst $1=,,$(subst 🔥, ,$(filter $1=%,$(_arduino_props))))
 # $(call _arduino_prop,recipe.hooks.sketch.prebuild.2.pattern)
 
 ifneq ($(KALEIDOSCOPE_CCACHE),) 
-ccache_wrapper_property := --build-properties "compiler.wrapper.cmd=ccache"
+ccache_wrapper_property := --build-property compiler.wrapper.cmd=ccache
 endif
 
 .PHONY: configure-arduino-cli install-arduino-core-kaleidoscope install-arduino-core-avr
 .PHONY: stupid-workaround-for-make-inclusion-semantics
 
-stupid-workaround-for-make-inclusion-semantics: DEFAULT_GOAL
+stupid-workaround-for-make-inclusion-semantics:
 	@: # This is here so that the sketch makefile including this file doesn't
 	@: # default to arduino-cli installation as its priamry target
+	@echo "No default target specified; aborting. Please set the .DEFAULT_GOAL variable in your makefile."
 
 $(KALEIDOSCOPE_BIN_DIR)/arduino-cli:
 	$(QUIET) curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR="$(KALEIDOSCOPE_BIN_DIR)" sh
@@ -146,9 +129,38 @@ configure-arduino-cli: $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml
 $(ARDUINO_DIRECTORIES_DATA)/arduino-cli.yaml:
 	$(QUIET) $(ARDUINO_CLI) config init
 
-install-arduino-core-kaleidoscope:
-	$(QUIET) $(ARDUINO_CLI) core install "keyboardio:avr"
+arduino-update-cores:
+	$(QUIET) $(ARDUINO_CLI) core update-index
 
-install-arduino-core-avr: 
+
+
+install-arduino-core-kaleidoscope: arduino-update-cores
+	$(QUIET) $(ARDUINO_CLI) core install "keyboardio:avr-tools-only"
+	$(QUIET) $(ARDUINO_CLI) core install "keyboardio:gd32-tools-only"
+
+install-arduino-core-avr: arduino-update-cores
 	$(QUIET) $(ARDUINO_CLI) core install "arduino:avr"
 
+
+install-arduino-core-deps:
+	$(QUIET) $(ARDUINO_CLI) core install "keyboardio:avr-tools-only"
+	$(QUIET) $(ARDUINO_CLI) core install "keyboardio:gd32-tools-only"
+
+
+# If we're not calling setup, we should freak out if the hardware
+# definitions don't exist
+
+.PHONY: kaleidoscope-hardware-configured
+
+kaleidoscope-hardware-configured: $(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/platform.txt
+
+$(ARDUINO_DIRECTORIES_USER)/hardware/keyboardio/avr/platform.txt:
+	$(info Kaleidoscope hardware definitions not found in)
+	$(info $(ARDUINO_DIRECTORIES_USER))
+	$(info )
+	$(info You may be able to resolve this issue by running the following command)
+	$(info to initialize Kaleidoscope )
+	$(info )
+	$(info $(MAKE) -C $(KALEIDOSCOPE_DIR) setup )
+	$(info )
+	$(error )

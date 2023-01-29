@@ -16,10 +16,12 @@
  */
 
 #pragma once
-#include <Arduino.h>
-#include <KeyboardioHID.h>
 
-#include "kaleidoscope/driver/hid/base/Mouse.h"
+#include <KeyboardioHID.h>  // for HID_MouseReport_Data_t, (anonymous union...
+#include <stdint.h>         // for int8_t, uint8_t
+
+// From Kaleidoscope:
+#include "kaleidoscope/driver/hid/base/Mouse.h"  // for Mouse, MouseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -50,6 +52,20 @@ class MouseWrapper {
   void move(int8_t x, int8_t y, int8_t vWheel, int8_t hWheel) {
     Mouse.move(x, y, vWheel, hWheel);
   }
+  void stop(bool x, bool y, bool vWheel = false, bool hWheel = false) {
+    HID_MouseReport_Data_t report = Mouse.getReport();
+
+    if (x)
+      report.xAxis = 0;
+    if (y)
+      report.yAxis = 0;
+    if (vWheel)
+      report.vWheel = 0;
+    if (hWheel)
+      report.hWheel = 0;
+    move(report.xAxis, report.yAxis, report.vWheel, report.hWheel);
+  }
+
   void releaseAll() {
     Mouse.releaseAll();
   }
@@ -62,19 +78,16 @@ class MouseWrapper {
   void click(uint8_t buttons) {
     Mouse.click(buttons);
   }
-  HID_MouseReport_Data_t getReport() {
-    return Mouse.getReport();
-  }
 };
 
-struct MouseProps: public base::MouseProps {
+struct MouseProps : public base::MouseProps {
   typedef MouseWrapper Mouse;
 };
 
-template <typename _Props>
-class Mouse: public base::Mouse<_Props> {};
+template<typename _Props>
+class Mouse : public base::Mouse<_Props> {};
 
-}
-}
-}
-}
+}  // namespace keyboardio
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

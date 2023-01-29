@@ -15,18 +15,20 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-EEPROM-Settings.h>
-#include <Kaleidoscope-FocusSerial.h>
-#include "kaleidoscope/plugin/EEPROM-Settings/crc.h"
-#include "kaleidoscope/layers.h"
+#include "kaleidoscope/plugin/EEPROM-Settings.h"
+
+#include <Arduino.h>                   // for PSTR, F, __FlashStringHelper
+#include <Kaleidoscope-FocusSerial.h>  // for Focus, FocusSerial
+#include <stdint.h>                    // for uint16_t, uint8_t
+
+#include "kaleidoscope/Runtime.h"                     // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"               // for VirtualProps::Storage, Base<>::Storage
+#include "kaleidoscope/event_handler_result.h"        // for EventHandlerResult, EventHandlerRes...
+#include "kaleidoscope/layers.h"                      // for Layer, Layer_, layer_count
+#include "kaleidoscope/plugin/EEPROM-Settings/crc.h"  // for CRCCalculator, CRC_
 
 namespace kaleidoscope {
 namespace plugin {
-
-struct EEPROMSettings::settings EEPROMSettings::settings_;
-bool EEPROMSettings::is_valid_;
-bool EEPROMSettings::sealed_;
-uint16_t EEPROMSettings::next_start_ = sizeof(EEPROMSettings::settings);
 
 EventHandlerResult EEPROMSettings::onSetup() {
   Runtime.storage().get(0, settings_);
@@ -40,7 +42,7 @@ EventHandlerResult EEPROMSettings::onSetup() {
          uninitialized state, we do not override them, to avoid overwriting user
          settings. */
       settings_.ignore_hardcoded_layers = false;
-      settings_.default_layer = 0;
+      settings_.default_layer           = 0;
     }
 
     /* If the version is undefined, we'll set it to our current one. */
@@ -63,11 +65,11 @@ EventHandlerResult EEPROMSettings::beforeEachCycle() {
   return EventHandlerResult::OK;
 }
 
-bool EEPROMSettings::isValid(void) {
+bool EEPROMSettings::isValid() {
   return is_valid_;
 }
 
-uint16_t EEPROMSettings::crc(void) {
+uint16_t EEPROMSettings::crc() {
   if (sealed_)
     return settings_.crc;
   return 0;
@@ -98,10 +100,10 @@ void EEPROMSettings::ignoreHardcodedLayers(bool value) {
   update();
 }
 
-void EEPROMSettings::seal(void) {
+void EEPROMSettings::seal() {
   sealed_ = true;
 
-  CRC.finalize();
+  CRCCalculator.finalize();
 
   if (settings_.version != VERSION_CURRENT) {
     is_valid_ = false;
@@ -109,11 +111,13 @@ void EEPROMSettings::seal(void) {
   }
 
   if (settings_.crc == 0xffff) {
-    settings_.crc = CRC.crc;
+    settings_.crc = CRCCalculator.crc;
     update();
-  } else if (settings_.crc != CRC.crc) {
+  } else if (settings_.crc != CRCCalculator.crc) {
     return;
   }
+
+  is_valid_ = true;
 
   /* If we have a default layer set, switch to it.
    *
@@ -134,48 +138,50 @@ uint16_t EEPROMSettings::requestSlice(uint16_t size) {
   uint16_t start = next_start_;
   next_start_ += size;
 
-  CRC.update((const void *)&size, sizeof(size));
+  CRCCalculator.update((const void *)&size, sizeof(size));
 
   return start;
 }
 
-void EEPROMSettings::invalidate(void) {
+void EEPROMSettings::invalidate() {
   is_valid_ = false;
 }
 
-uint16_t EEPROMSettings::used(void) {
+uint16_t EEPROMSettings::used() {
   return next_start_;
 }
 
-void EEPROMSettings::update(void) {
+void EEPROMSettings::update() {
   Runtime.storage().put(0, settings_);
   Runtime.storage().commit();
   is_valid_ = true;
 }
 
 /** Focus **/
-EventHandlerResult FocusSettingsCommand::onFocusEvent(const char *command) {
+EventHandlerResult FocusSettingsCommand::onFocusEvent(const char *input) {
   enum {
     DEFAULT_LAYER,
     IS_VALID,
     GET_VERSION,
-    CRC,
+    GET_CRC,
   } sub_command;
 
-  if (::Focus.handleHelp(command, PSTR("settings.defaultLayer\nsettings.valid?\nsettings.version\nsettings.crc")))
-    return EventHandlerResult::OK;
+  const char *cmd_defaultLayer = PSTR("settings.defaultLayer");
+  const char *cmd_isValid      = PSTR("settings.valid?");
+  const char *cmd_version      = PSTR("settings.version");
+  const char *cmd_crc          = PSTR("settings.crc");
 
-  if (strncmp_P(command, PSTR("settings."), 9) != 0)
-    return EventHandlerResult::OK;
+  if (::Focus.inputMatchesHelp(input))
+    return ::Focus.printHelp(cmd_defaultLayer, cmd_isValid, cmd_version, cmd_crc);
 
-  if (strcmp_P(command + 9, PSTR("defaultLayer")) == 0)
+  if (::Focus.inputMatchesCommand(input, cmd_defaultLayer))
     sub_command = DEFAULT_LAYER;
-  else if (strcmp_P(command + 9, PSTR("valid?")) == 0)
+  else if (::Focus.inputMatchesCommand(input, cmd_isValid))
     sub_command = IS_VALID;
-  else if (strcmp_P(command + 9, PSTR("version")) == 0)
+  else if (::Focus.inputMatchesCommand(input, cmd_version))
     sub_command = GET_VERSION;
-  else if (strcmp_P(command + 9, PSTR("crc")) == 0)
-    sub_command = CRC;
+  else if (::Focus.inputMatchesCommand(input, cmd_crc))
+    sub_command = GET_CRC;
   else
     return EventHandlerResult::OK;
 
@@ -196,27 +202,34 @@ EventHandlerResult FocusSettingsCommand::onFocusEvent(const char *command) {
   case GET_VERSION:
     ::Focus.send(::EEPROMSettings.version());
     break;
-  case CRC:
-    ::Focus.sendRaw(::CRC.crc, F("/"), ::EEPROMSettings.crc());
+  case GET_CRC:
+    ::Focus.sendRaw(::CRCCalculator.crc, F("/"), ::EEPROMSettings.crc());
     break;
   }
 
   return EventHandlerResult::EVENT_CONSUMED;
 }
 
-EventHandlerResult FocusEEPROMCommand::onFocusEvent(const char *command) {
+EventHandlerResult FocusEEPROMCommand::onFocusEvent(const char *input) {
   enum {
     CONTENTS,
     FREE,
+    ERASE,
   } sub_command;
 
-  if (::Focus.handleHelp(command, PSTR("eeprom.contents\neeprom.free")))
-    return EventHandlerResult::OK;
+  const char *cmd_contents = PSTR("eeprom.contents");
+  const char *cmd_free     = PSTR("eeprom.free");
+  const char *cmd_erase    = PSTR("eeprom.erase");
 
-  if (strcmp_P(command, PSTR("eeprom.contents")) == 0)
+  if (::Focus.inputMatchesHelp(input))
+    return ::Focus.printHelp(cmd_contents, cmd_free, cmd_erase);
+
+  if (::Focus.inputMatchesCommand(input, cmd_contents))
     sub_command = CONTENTS;
-  else if (strcmp_P(command, PSTR("eeprom.free")) == 0)
+  else if (::Focus.inputMatchesCommand(input, cmd_free))
     sub_command = FREE;
+  else if (::Focus.inputMatchesCommand(input, cmd_erase))
+    sub_command = ERASE;
   else
     return EventHandlerResult::OK;
 
@@ -233,6 +246,7 @@ EventHandlerResult FocusEEPROMCommand::onFocusEvent(const char *command) {
         ::Focus.read(d);
         Runtime.storage().update(i, d);
       }
+      Runtime.storage().commit();
     }
 
     break;
@@ -240,13 +254,20 @@ EventHandlerResult FocusEEPROMCommand::onFocusEvent(const char *command) {
   case FREE:
     ::Focus.send(Runtime.storage().length() - ::EEPROMSettings.used());
     break;
+  case ERASE: {
+    for (uint16_t i = 0; i < Runtime.storage().length(); i++) {
+      Runtime.storage().update(i, EEPROMSettings::EEPROM_UNINITIALIZED_BYTE);
+    }
+    Runtime.storage().commit();
+    Runtime.device().rebootBootloader();
+    break;
   }
-
+  }
   return EventHandlerResult::EVENT_CONSUMED;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::EEPROMSettings EEPROMSettings;
 kaleidoscope::plugin::FocusSettingsCommand FocusSettingsCommand;

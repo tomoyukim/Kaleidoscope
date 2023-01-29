@@ -15,8 +15,18 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-LEDEffect-BootGreeting.h"
-#include "kaleidoscope/layers.h"
+#include "kaleidoscope/plugin/LEDEffect-BootGreeting.h"
+
+#include <stdint.h>  // for uint16_t, uint8_t
+
+#include "kaleidoscope/KeyAddr.h"                     // for KeyAddr, MatrixAddr, MatrixAddr<>::...
+#include "kaleidoscope/Runtime.h"                     // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"               // for cRGB
+#include "kaleidoscope/event_handler_result.h"        // for EventHandlerResult, EventHandlerRes...
+#include "kaleidoscope/key_defs.h"                    // for Key
+#include "kaleidoscope/layers.h"                      // for Layer, Layer_
+#include "kaleidoscope/plugin/LEDControl.h"           // for LEDControl, Key_LEDEffectNext
+#include "kaleidoscope/plugin/LEDControl/LEDUtils.h"  // for breath_compute
 
 namespace kaleidoscope {
 namespace plugin {
@@ -24,19 +34,19 @@ namespace plugin {
 bool BootGreetingEffect::done_ = false;
 KeyAddr BootGreetingEffect::key_addr_;
 KeyAddr BootGreetingEffect::user_key_addr;
-Key BootGreetingEffect::search_key = Key_LEDEffectNext;
-uint8_t BootGreetingEffect::hue = 170;
+Key BootGreetingEffect::search_key      = Key_LEDEffectNext;
+uint8_t BootGreetingEffect::hue         = 170;
 uint16_t BootGreetingEffect::start_time = 0;
-uint16_t BootGreetingEffect::timeout = 9200;
+uint16_t BootGreetingEffect::timeout    = 9200;
 
 BootGreetingEffect::BootGreetingEffect(KeyAddr key_addr) {
   user_key_addr = key_addr;
 }
 
-void BootGreetingEffect::findLed(void) {
+void BootGreetingEffect::findLed() {
   if (user_key_addr.isValid()) {
     key_addr_ = user_key_addr;
-    done_ = true;
+    done_     = true;
     return;
   }
 
@@ -81,7 +91,7 @@ EventHandlerResult BootGreetingEffect::afterEachCycle() {
   return EventHandlerResult::OK;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::BootGreetingEffect BootGreetingEffect;

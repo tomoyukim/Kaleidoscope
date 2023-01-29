@@ -17,17 +17,20 @@
 
 #pragma once
 
+#include <stdint.h>  // for uint8_t
+
 #ifndef CRGB
 
 struct cRGB {
   uint8_t r, g, b;
 };
 
-#define CRGB(r,g,b) (cRGB){b, g, r}
+#define CRGB(r, g, b) \
+  (cRGB) { b, g, r }
 
 #endif
 
-#include "kaleidoscope/driver/led/Base.h"
+#include "kaleidoscope/driver/led/Base.h"  // for Base, BaseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -41,6 +44,6 @@ namespace led {
  */
 class None : public kaleidoscope::driver::led::Base<BaseProps> {};
 
-}
-}
-}
+}  // namespace led
+}  // namespace driver
+}  // namespace kaleidoscope

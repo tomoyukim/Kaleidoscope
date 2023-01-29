@@ -15,13 +15,18 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <kaleidoscope/plugin/HostOS.h>
-#include <Kaleidoscope-EEPROM-Settings.h>
+#include "kaleidoscope/plugin/HostOS.h"
+
+#include <Kaleidoscope-EEPROM-Settings.h>  // for EEPROMSettings
+
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"         // for VirtualProps::Storage, Base<>::Storage
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
 
 namespace kaleidoscope {
 namespace plugin {
 
-EventHandlerResult HostOS::onSetup(void) {
+EventHandlerResult HostOS::onSetup() {
   if (is_configured_)
     return EventHandlerResult::OK;
 
@@ -44,7 +49,7 @@ void HostOS::os(hostos::Type new_os) {
   Runtime.storage().commit();
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::HostOS HostOS;

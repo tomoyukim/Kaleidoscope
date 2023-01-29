@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-LED-Palette-Theme -- Palette-based LED theme foundation
- * Copyright (C) 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2017-2022  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,16 +17,18 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include <stdint.h>  // for uint16_t, uint8_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/device/device.h"         // for cRGB
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
 class LEDPaletteTheme : public kaleidoscope::Plugin {
  public:
-  LEDPaletteTheme(void) {}
-
   static uint16_t reserveThemes(uint8_t max_themes);
   static void updateHandler(uint16_t theme_base, uint8_t theme);
   static void refreshAt(uint16_t theme_base, uint8_t theme, KeyAddr key_addr);
@@ -35,18 +37,21 @@ class LEDPaletteTheme : public kaleidoscope::Plugin {
   static const cRGB lookupColorAtPosition(uint16_t theme_base, uint16_t position);
   static void updateColorIndexAtPosition(uint16_t theme_base, uint16_t position, uint8_t color_index);
 
+  static void updatePaletteColor(uint8_t palette_index, cRGB color);
   static const cRGB lookupPaletteColor(uint8_t palette_index);
 
-  EventHandlerResult onFocusEvent(const char *command);
-  EventHandlerResult themeFocusEvent(const char *command,
-                                     const char *expected_command,
-                                     uint16_t theme_base, uint8_t max_themes);
+  EventHandlerResult onFocusEvent(const char *input);
+  EventHandlerResult themeFocusEvent(const char *input,
+                                     const char *expected_input,
+                                     uint16_t theme_base,
+                                     uint8_t max_themes);
+  static bool isThemeUninitialized(uint16_t theme_base, uint8_t max_themes);
 
  private:
   static uint16_t palette_base_;
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LEDPaletteTheme LEDPaletteTheme;

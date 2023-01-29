@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Leader -- VIM-style leader keys
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2016, 2017, 2018, 2021  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -15,34 +15,42 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-Leader.h>
-#include "kaleidoscope/keyswitch_state.h"
-#include "kaleidoscope/keyswitch_state.h"
-#include "kaleidoscope/key_events.h"
+#include "kaleidoscope/plugin/Leader.h"
+
+#include <Arduino.h>                   // for F, __FlashStringHelper, pgm_read_ptr
+#include <Kaleidoscope-FocusSerial.h>  // for Focus, FocusSerial
+#include <Kaleidoscope-Ranges.h>       // for LEAD_FIRST, LEAD_LAST
+#include <stdint.h>                    // for uint16_t, uint8_t, int8_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/KeyEventTracker.h"       // for KeyEventTracker
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/key_defs.h"              // for Key, Key_NoKey
+#include "kaleidoscope/keyswitch_state.h"       // for INJECTED, keyToggledOff
 
 namespace kaleidoscope {
 namespace plugin {
 
 // --- state ---
-Key Leader::sequence_[LEADER_MAX_SEQUENCE_LENGTH + 1];
-uint8_t Leader::sequence_pos_;
-uint16_t Leader::start_time_ = 0;
+#ifndef NDEPRECATED
 uint16_t Leader::time_out = 1000;
-const Leader::dictionary_t *Leader::dictionary;
+#endif
 
 // --- helpers ---
 
 #define PARTIAL_MATCH -1
-#define NO_MATCH -2
+#define NO_MATCH      -2
 
-#define isLeader(k) (k.getRaw() >= ranges::LEAD_FIRST && k.getRaw() <= ranges::LEAD_LAST)
-#define isActive() (sequence_[0] != Key_NoKey)
+#define isLeader(k)   (k.getRaw() >= ranges::LEAD_FIRST && k.getRaw() <= ranges::LEAD_LAST)
+#define isActive()    (sequence_[0] != Key_NoKey)
 
 // --- actions ---
-int8_t Leader::lookup(void) {
+int8_t Leader::lookup() {
   bool match;
 
-  for (uint8_t seq_index = 0; ; seq_index++) {
+  for (uint8_t seq_index = 0;; seq_index++) {
     match = true;
 
     if (dictionary[seq_index].sequence[0].readFromProgmem() == Key_NoKey)
@@ -61,8 +69,7 @@ int8_t Leader::lookup(void) {
     if (!match)
       continue;
 
-    seq_key
-      = dictionary[seq_index].sequence[sequence_pos_ + 1].readFromProgmem();
+    seq_key = dictionary[seq_index].sequence[sequence_pos_ + 1].readFromProgmem();
     if (seq_key == Key_NoKey) {
       return seq_index;
     } else {
@@ -75,84 +82,86 @@ int8_t Leader::lookup(void) {
 
 // --- api ---
 
-void Leader::reset(void) {
+void Leader::reset() {
   sequence_pos_ = 0;
-  sequence_[0] = Key_NoKey;
+  sequence_[0]  = Key_NoKey;
 }
 
+#ifndef NDEPRECATED
 void Leader::inject(Key key, uint8_t key_state) {
-  onKeyswitchEvent(key, UnknownKeyswitchLocation, key_state);
+  Runtime.handleKeyEvent(KeyEvent(KeyAddr::none(), key_state | INJECTED, key));
 }
+#endif
 
 // --- hooks ---
-EventHandlerResult Leader::onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t keyState) {
-  if (keyState & INJECTED)
+EventHandlerResult Leader::onNameQuery() {
+  return ::Focus.sendName(F("Leader"));
+}
+
+EventHandlerResult Leader::onKeyswitchEvent(KeyEvent &event) {
+  // If the plugin has already processed and released this event, ignore it.
+  // There's no need to update the event tracker explicitly.
+  if (event_tracker_.shouldIgnore(event))
     return EventHandlerResult::OK;
 
-  if (!isActive() && !isLeader(mapped_key))
+  if (keyToggledOff(event.state) || event.state & INJECTED)
     return EventHandlerResult::OK;
 
   if (!isActive()) {
-    // Must be a leader key!
-
-    if (keyToggledOff(keyState)) {
-      // not active, but a leader key = start the sequence on key release!
-      start_time_ = Runtime.millisAtCycleStart();
-      sequence_pos_ = 0;
-      sequence_[sequence_pos_] = mapped_key;
-    }
-
-    // If the sequence was not active yet, ignore the key.
-    return EventHandlerResult::EVENT_CONSUMED;
-  }
-
-  // active
-  int8_t action_index = lookup();
-
-  if (keyToggledOn(keyState)) {
-    sequence_pos_++;
-    if (sequence_pos_ > LEADER_MAX_SEQUENCE_LENGTH) {
-      reset();
+    if (!isLeader(event.key))
       return EventHandlerResult::OK;
-    }
 
-    start_time_ = Runtime.millisAtCycleStart();
-    sequence_[sequence_pos_] = mapped_key;
-    action_index = lookup();
+    start_time_              = Runtime.millisAtCycleStart();
+    sequence_pos_            = 0;
+    sequence_[sequence_pos_] = event.key;
 
-    if (action_index >= 0) {
-      return EventHandlerResult::EVENT_CONSUMED;
-    }
-  } else if (keyIsPressed(keyState)) {
-    // held, no need for anything here.
-    return EventHandlerResult::EVENT_CONSUMED;
+    return EventHandlerResult::ABORT;
   }
+
+  ++sequence_pos_;
+  if (sequence_pos_ > LEADER_MAX_SEQUENCE_LENGTH) {
+    reset();
+    return EventHandlerResult::OK;
+  }
+
+  start_time_              = Runtime.millisAtCycleStart();
+  sequence_[sequence_pos_] = event.key;
+  int8_t action_index      = lookup();
 
   if (action_index == NO_MATCH) {
     reset();
     return EventHandlerResult::OK;
   }
   if (action_index == PARTIAL_MATCH) {
-    return EventHandlerResult::EVENT_CONSUMED;
+    return EventHandlerResult::ABORT;
   }
 
-  action_t leaderAction = (action_t) pgm_read_ptr((void const **) & (dictionary[action_index].action));
+  action_t leaderAction = (action_t)pgm_read_ptr((void const **)&(dictionary[action_index].action));
   (*leaderAction)(action_index);
+  reset();
 
-  return EventHandlerResult::EVENT_CONSUMED;
+  return EventHandlerResult::ABORT;
 }
 
 EventHandlerResult Leader::afterEachCycle() {
   if (!isActive())
     return EventHandlerResult::OK;
 
+#ifndef NDEPRECATED
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   if (Runtime.hasTimeExpired(start_time_, time_out))
     reset();
+#pragma GCC diagnostic pop
+#else
+  if (Runtime.hasTimeExpired(start_time_, timeout_))
+    reset();
+#endif
 
   return EventHandlerResult::OK;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::Leader Leader;

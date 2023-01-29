@@ -58,9 +58,6 @@ The dictionary is made up of a list of keys, and an action callback. Using the
 `LEADER_DICT` and `LEADER_SEQ` helpers is recommended. The dictionary *must* be
 marked `PROGMEM`!
 
-**Note** that we need to use the `Leader` object before any other that adds or
-changes key behaviour! Failing to do so may result in unpredictable behaviour.
-
 ## Plugin methods
 
 The plugin provides the `Leader` object, with the following methods and properties:
@@ -80,7 +77,7 @@ The plugin provides the `Leader` object, with the following methods and properti
 > are final actions, where one does not wish to continue the leader sequence
 > further in the hopes of finding a longer match.
 
-### `.time_out`
+### `.setTimeout(ms)`
 
 > The number of milliseconds to wait before a sequence times out. Once the
 > sequence timed out, if there is a partial match with an action, that will be

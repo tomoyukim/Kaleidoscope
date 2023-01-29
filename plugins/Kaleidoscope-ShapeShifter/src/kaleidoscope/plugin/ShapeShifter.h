@@ -17,29 +17,26 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
 class ShapeShifter : public kaleidoscope::Plugin {
  public:
-  typedef struct {
+  struct dictionary_t {
     Key original, replacement;
-  } dictionary_t;
+  };
 
-  ShapeShifter(void) {}
+  const dictionary_t *dictionary = nullptr;
 
-  static const dictionary_t *dictionary;
-
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
-  EventHandlerResult beforeReportingState();
-
- private:
-  static bool mod_active_;
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 };
-}
 
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::ShapeShifter ShapeShifter;

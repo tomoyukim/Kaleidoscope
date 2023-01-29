@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/storage/Base.h"
+#include "kaleidoscope/driver/storage/Base.h"  // for Base, BaseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -31,6 +31,6 @@ namespace storage {
  */
 class None : public kaleidoscope::driver::storage::Base<BaseProps> {};
 
-}
-}
-}
+}  // namespace storage
+}  // namespace driver
+}  // namespace kaleidoscope

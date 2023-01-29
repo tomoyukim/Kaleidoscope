@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
+#include <cstdint>  // for uint16_t, uint32_t, uint8_t, int8_t
+#include <vector>   // for vector
 
-#include "DeviceAPIs/AbsoluteMouseAPI.h"
-#include "HID-Settings.h"
+#include "DeviceAPIs/AbsoluteMouseAPI.h"  // for HID_MouseAbsoluteReport_Data_t
+#include "HID-Settings.h"                 // for HID_REPORTID_MOUSE_ABSOLUTE
 
 namespace kaleidoscope {
 namespace testing {
@@ -31,7 +31,7 @@ class AbsoluteMouseReport {
 
   static constexpr uint8_t kHidReportType = HID_REPORTID_MOUSE_ABSOLUTE;
 
-  AbsoluteMouseReport(const void* data);
+  AbsoluteMouseReport(const void *data);
 
   uint32_t Timestamp() const;
   std::vector<uint8_t> Buttons() const;
@@ -45,4 +45,4 @@ class AbsoluteMouseReport {
 };
 
 }  // namespace testing
-}  // namespce kaleidoscope
+}  // namespace kaleidoscope

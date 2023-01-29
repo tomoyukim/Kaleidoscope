@@ -17,37 +17,34 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 class GhostInTheFirmware : public kaleidoscope::Plugin {
  public:
-  typedef struct {
-    byte row;
-    byte col;
-    uint16_t pressTime;
+  struct GhostKey {
+    KeyAddr addr;
+    uint16_t press_time;
     uint16_t delay;
-  } GhostKey;
-  static const GhostKey *ghost_keys;
+  };
+  const GhostKey *ghost_keys;
 
-  GhostInTheFirmware(void) {}
+  void activate();
 
-  static void activate(void);
-
-  EventHandlerResult beforeReportingState();
+  EventHandlerResult afterEachCycle();
 
  private:
-  static bool is_active_;
-  static bool is_pressed_;
-  static uint16_t current_pos_;
-  static uint32_t start_time_;
-  static uint16_t press_timeout_;
-  static uint16_t delay_timeout_;
-
-  static void loopHook(bool is_post_clear);
+  bool is_active_       = false;
+  uint16_t current_pos_ = 0;
+  uint16_t start_time_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::GhostInTheFirmware GhostInTheFirmware;

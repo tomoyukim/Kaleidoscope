@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Colormap -- Per-layer colormap effect
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2016-2022  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -15,11 +15,18 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "kaleidoscope/plugin/Colormap.h"
 
-#include <Kaleidoscope-Colormap.h>
-#include <Kaleidoscope-EEPROM-Settings.h>
-#include <Kaleidoscope-FocusSerial.h>
-#include "kaleidoscope/layers.h"
+#include <Arduino.h>                         // for F, PSTR, __FlashStringHelper
+#include <Kaleidoscope-FocusSerial.h>        // for Focus, FocusSerial
+#include <Kaleidoscope-LED-Palette-Theme.h>  // for LEDPaletteTheme
+#include <stdint.h>                          // for uint8_t, uint16_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/layers.h"                // for Layer, Layer_
+#include "kaleidoscope/plugin/LEDControl.h"     // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
@@ -33,10 +40,25 @@ void ColormapEffect::max_layers(uint8_t max_) {
     return;
 
   max_layers_ = max_;
-  map_base_ = ::LEDPaletteTheme.reserveThemes(max_layers_);
+  map_base_   = ::LEDPaletteTheme.reserveThemes(max_layers_);
 }
 
-void ColormapEffect::TransientLEDMode::onActivate(void) {
+EventHandlerResult ColormapEffect::onNameQuery() {
+  return ::Focus.sendName(F("ColormapEffect"));
+}
+
+bool ColormapEffect::isUninitialized() {
+  return ::LEDPaletteTheme.isThemeUninitialized(map_base_, max_layers_);
+}
+
+void ColormapEffect::updateColorIndexAtPosition(uint8_t layer, uint16_t position, uint8_t palette_index) {
+  if (layer >= max_layers_) return;
+
+  uint16_t index = Runtime.device().led_count * layer + position;
+  ::LEDPaletteTheme.updateColorIndexAtPosition(map_base_, index, palette_index);
+}
+
+void ColormapEffect::TransientLEDMode::onActivate() {
   if (!Runtime.has_leds)
     return;
 
@@ -56,12 +78,11 @@ EventHandlerResult ColormapEffect::onLayerChange() {
   return EventHandlerResult::OK;
 }
 
-EventHandlerResult ColormapEffect::onFocusEvent(const char *command) {
-  return ::LEDPaletteTheme.themeFocusEvent(command, PSTR("colormap.map"),
-                                           map_base_, max_layers_);
+EventHandlerResult ColormapEffect::onFocusEvent(const char *input) {
+  return ::LEDPaletteTheme.themeFocusEvent(input, PSTR("colormap.map"), map_base_, max_layers_);
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::ColormapEffect ColormapEffect;

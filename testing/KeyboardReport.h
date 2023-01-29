@@ -16,11 +16,11 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
+#include <cstdint>  // for uint8_t, uint32_t
+#include <vector>   // for vector
 
-#include "HID-Settings.h"
-#include "MultiReport/Keyboard.h"
+#include "HID-Settings.h"          // for HID_REPORTID_NKRO_KEYBOARD
+#include "MultiReport/Keyboard.h"  // for HID_KeyboardReport_Data_t
 
 namespace kaleidoscope {
 namespace testing {
@@ -31,7 +31,7 @@ class KeyboardReport {
 
   static constexpr uint8_t kHidReportType = HID_REPORTID_NKRO_KEYBOARD;
 
-  KeyboardReport(const void* data);
+  KeyboardReport(const void *data);
 
   uint32_t Timestamp() const;
   std::vector<uint8_t> ActiveKeycodes() const;

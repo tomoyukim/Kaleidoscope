@@ -16,15 +16,18 @@
 
 #pragma once
 
-#include "Kaleidoscope-LEDControl.h"
+#include <stdint.h>  // for uint8_t, int8_t, uint16_t
+
+#include "kaleidoscope/Runtime.h"                  // for Runtime, Runtime_
+#include "kaleidoscope/plugin.h"                   // for Plugin
+#include "kaleidoscope/plugin/LEDMode.h"           // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"  // for LEDModeInterface
 
 namespace kaleidoscope {
 namespace plugin {
 class LEDChaseEffect : public Plugin,
-  public LEDModeInterface {
+                       public LEDModeInterface {
  public:
-  LEDChaseEffect(void) {}
-
   uint8_t update_delay() {
     return update_delay_;
   }
@@ -42,7 +45,6 @@ class LEDChaseEffect : public Plugin,
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
@@ -51,23 +53,22 @@ class LEDChaseEffect : public Plugin,
       : parent_(parent), last_update_(Runtime.millisAtCycleStart()) {}
 
    protected:
-
     void update() final;
 
    private:
-
     const LEDChaseEffect *parent_;
 
-    uint8_t pos_ = uint8_t(0);
+    uint8_t pos_      = uint8_t(0);
     int8_t direction_ = 1;
     uint16_t last_update_;
   };
 
  private:
-  uint8_t distance_ = 5;
+  uint8_t distance_     = 5;
   uint8_t update_delay_ = 150;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LEDChaseEffect LEDChaseEffect;

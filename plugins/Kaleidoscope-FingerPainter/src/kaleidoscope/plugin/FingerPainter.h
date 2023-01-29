@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-FingerPainter -- On-the-fly keyboard painting.
- * Copyright (C) 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2017-2021  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,12 @@
 
 #pragma once
 
-#include <Kaleidoscope-LEDControl.h>
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin/LEDMode.h"        // for LEDMode
 
 namespace kaleidoscope {
 namespace plugin {
@@ -28,23 +33,23 @@ namespace plugin {
 //
 class FingerPainter : public LEDMode {
  public:
-  FingerPainter(void) {}
+  void toggle();
 
-  static void toggle(void);
-
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult onFocusEvent(const char *input);
   EventHandlerResult onSetup();
+  EventHandlerResult onNameQuery();
 
  protected:
-  void update(void) final;
+  void update() final;
   void refreshAt(KeyAddr key_addr) final;
 
  private:
-  static uint16_t color_base_;
-  static bool edit_mode_;
+  uint16_t color_base_;
+  bool edit_mode_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::FingerPainter FingerPainter;

@@ -17,20 +17,26 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/KeyAddr.h"                        // for KeyAddr
+#include "kaleidoscope/KeyEvent.h"                       // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"           // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"                       // for Key
+#include "kaleidoscope/plugin.h"                         // for Plugin
+#include "kaleidoscope/plugin/AccessTransientLEDMode.h"  // for AccessTransientLEDMode
+#include "kaleidoscope/plugin/LEDMode.h"                 // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"        // for LEDModeInterface
 
 namespace kaleidoscope {
 namespace plugin {
 class AlphaSquareEffect : public Plugin,
-  public LEDModeInterface,
-  public AccessTransientLEDMode {
+                          public LEDModeInterface,
+                          public AccessTransientLEDMode {
  public:
-  AlphaSquareEffect(void) {}
-
   static uint16_t length;
 
-  EventHandlerResult onKeyswitchEvent(Key &mappedKey, KeyAddr key_addr, uint8_t keyState);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 
   // This class' instance has dynamic lifetime
   //
@@ -39,7 +45,7 @@ class AlphaSquareEffect : public Plugin,
     explicit TransientLEDMode(AlphaSquareEffect *parent);
 
    protected:
-    void update(void) final;
+    void update() final;
     void refreshAt(KeyAddr key_addr) final;
 
    private:
@@ -49,7 +55,8 @@ class AlphaSquareEffect : public Plugin,
     friend class AlphaSquareEffect;
   };
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::AlphaSquareEffect AlphaSquareEffect;

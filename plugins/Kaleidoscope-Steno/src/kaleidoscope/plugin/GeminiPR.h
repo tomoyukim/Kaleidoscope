@@ -1,6 +1,6 @@
 /* Kaleidoscope-Steno -- Steno protocols for Kaleidoscope
  * Copyright (C) 2017  Joseph Wasson
- * Copyright (C) 2017, 2018  Keyboard.io, Inc.
+ * Copyright (C) 2017-2021  Keyboard.io, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,19 +17,23 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
+#include <Kaleidoscope-Ranges.h>  // for STENO_FIRST
+#include <stdint.h>               // for uint8_t
 
 #define S(n) Key(kaleidoscope::plugin::steno::geminipr::n)
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
+
 
 namespace kaleidoscope {
 namespace plugin {
 namespace steno {
 class GeminiPR : public kaleidoscope::Plugin {
  public:
-  GeminiPR(void) {}
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t keyState);
  private:
   static uint8_t keys_held_;
   static uint8_t state_[6];
@@ -40,14 +44,14 @@ enum {
   START = kaleidoscope::ranges::STENO_FIRST,
   FN    = START,
   NUM,
-  N1    = NUM,
+  N1 = NUM,
   N2,
   N3,
   N4,
   N5,
   N6,
   SL,
-  S1    = SL,
+  S1 = SL,
   S2,
   TL,
   KL,
@@ -58,12 +62,12 @@ enum {
   A,
   O,
   STR,
-  ST1   = STR,
+  ST1 = STR,
   ST2,
   RES1,
-  RE1   = RES1,
+  RE1 = RES1,
   RES2,
-  RE2   = RES2,
+  RE2 = RES2,
   PWR,
   ST3,
   ST4,
@@ -85,11 +89,11 @@ enum {
   NB,
   NC,
   ZR,
-  END   = ZR,
+  END = ZR,
 };
-}
-}
-}
-}
+}  // namespace geminipr
+}  // namespace steno
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::steno::GeminiPR GeminiPR;

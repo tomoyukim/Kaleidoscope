@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Qukeys -- Assign two keycodes to a single key
- * Copyright (C) 2017-2019  Michael Richters
+ * Copyright (C) 2017-2020  Michael Richters
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,25 +18,43 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
-#include "kaleidoscope/plugin/Qukeys/KeyAddrEventQueue.h"
+#include <Arduino.h>              // for PROGMEM
+#include <Kaleidoscope-Ranges.h>  // for DUL_FIRST, DUM_FIRST
+#include <stdint.h>               // for uint8_t, uint16_t, int8_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/KeyAddrEventQueue.h"     // for KeyAddrEventQueue
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/KeyEventTracker.h"       // for KeyEventTracker
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key, Key_Transparent
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+// IWYU pragma: no_include "HIDAliases.h"
 
 // DualUse Key definitions for Qukeys in the keymap
-#define MT(mod, key) Key(                                               \
-    kaleidoscope::ranges::DUM_FIRST +                                   \
-    (((Key_ ## mod).getKeyCode() - Key_LeftControl.getKeyCode()) << 8) +          \
-    (Key_ ## key).getKeyCode()                                               \
-)
-#define SFT_T(key) MT(LeftShift, key)
-#define CTL_T(key) MT(LeftControl, key)
-#define ALT_T(key) MT(LeftAlt, key)
-#define GUI_T(key) MT(LeftGui, key)
+#define MT(mod, key)   kaleidoscope::plugin::ModTapKey(Key_##mod, Key_##key)
 
-#define LT(layer, key) Key(kaleidoscope::ranges::DUL_FIRST + (layer << 8) + (Key_ ## key).getKeyCode())
+#define SFT_T(key)     MT(LeftShift, key)
+#define CTL_T(key)     MT(LeftControl, key)
+#define ALT_T(key)     MT(LeftAlt, key)
+#define GUI_T(key)     MT(LeftGui, key)
+
+#define LT(layer, key) kaleidoscope::plugin::LayerTapKey(layer, Key_##key)
 
 namespace kaleidoscope {
 namespace plugin {
+
+constexpr Key ModTapKey(Key mod_key, Key tap_key) {
+  uint8_t mod = mod_key.getKeyCode() - HID_KEYBOARD_FIRST_MODIFIER;
+  return Key(kaleidoscope::ranges::DUM_FIRST +
+             (mod << 8) + tap_key.getKeyCode());
+}
+
+constexpr Key LayerTapKey(uint8_t layer, Key tap_key) {
+  return Key(kaleidoscope::ranges::DUL_FIRST +
+             (layer << 8) + tap_key.getKeyCode());
+}
 
 // Data structure for an individual qukey
 struct Qukey {
@@ -50,13 +68,11 @@ struct Qukey {
   // This is the constructor that should be used when creating a Qukey object in
   // the PROGMEM array that will be used by Qukeys (i.e. in the `QUKEYS()`
   // macro).
-  constexpr
-  Qukey(int8_t layer, KeyAddr k, Key alternate_key)
+  constexpr Qukey(int8_t layer, KeyAddr k, Key alternate_key)
     : layer(layer), addr(k), alternate_key(alternate_key) {}
   // This constructor is here so that we can create an empty Qukey object in RAM
   // into which we can copy the values from a PROGMEM Qukey object.
   Qukey() = default;
-
 };
 
 
@@ -79,6 +95,17 @@ class Qukeys : public kaleidoscope::Plugin {
   // value is a modifier -- i.e. a SpaceCadet type key).
   void setHoldTimeout(uint16_t hold_timeout) {
     hold_timeout_ = hold_timeout;
+  }
+
+  // Set the timeout (in milliseconds) for the tap-repeat feature. If a qukey is
+  // tapped twice in a row in less time than this amount, it will allow the user
+  // to hold the key with its primary value (unless it's a SpaceCadet type key,
+  // in which case it will repeat the alternate value instead). This requires a
+  // quick tap immediately followed by a press and hold, and will result in a
+  // single press-and-hold on the host system. If a double tap is done instead,
+  // it will result in two independent taps.
+  void setMaxIntervalForTapRepeat(uint8_t ttl) {
+    tap_repeat_.timeout = ttl;
   }
 
   // Set the percentage of the duration of a subsequent key's press that must
@@ -116,9 +143,9 @@ class Qukeys : public kaleidoscope::Plugin {
   // template function that takes as its sole argument an array reference of
   // size `_qukeys_count`, so there's no need to use `sizeof` to calculate the
   // correct size, and pass it as a separate parameter.
-  template <uint8_t _qukeys_count>
-  void configureQukeys(Qukey const(&qukeys)[_qukeys_count]) {
-    qukeys_ = qukeys;
+  template<uint8_t _qukeys_count>
+  void configureQukeys(Qukey const (&qukeys)[_qukeys_count]) {
+    qukeys_       = qukeys;
     qukeys_count_ = _qukeys_count;
   }
 
@@ -127,14 +154,13 @@ class Qukeys : public kaleidoscope::Plugin {
   static constexpr int8_t layer_wildcard{-1};
 
   // Kaleidoscope hook functions.
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key,
-                                      KeyAddr key_addr,
-                                      uint8_t key_state);
-  EventHandlerResult beforeReportingState();
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onKeyswitchEvent(KeyEvent &event);
+  EventHandlerResult afterEachCycle();
 
  private:
   // An array of Qukey objects in PROGMEM.
-  Qukey const * qukeys_{nullptr};
+  Qukey const *qukeys_{nullptr};
   uint8_t qukeys_count_{0};
 
   // The maximum number of events in the queue at a time.
@@ -173,7 +199,7 @@ class Qukeys : public kaleidoscope::Plugin {
   // This is a guard against re-processing events when qukeys flushes them from
   // its event queue. We can't just use an "injected" key state flag, because
   // that would cause other plugins to also ignore the event.
-  bool flushing_queue_{false};
+  KeyEventTracker event_tracker_;
 
   // A cache of the current qukey's primary and alternate key values, so we
   // don't have to keep looking them up from PROGMEM.
@@ -189,6 +215,14 @@ class Qukeys : public kaleidoscope::Plugin {
   bool isDualUseKey(Key key);
   bool releaseDelayed(uint16_t overlap_start, uint16_t overlap_end) const;
   bool isKeyAddrInQueueBeforeIndex(KeyAddr k, uint8_t index) const;
+
+  // Tap-repeat feature support.
+  struct {
+    KeyAddr addr{KeyAddr::invalid_state};
+    uint16_t start_time;
+    uint8_t timeout{200};
+  } tap_repeat_;
+  bool shouldWaitForTapRepeat();
 };
 
 // This function returns true for any key that we expect to be used chorded with
@@ -196,8 +230,8 @@ class Qukeys : public kaleidoscope::Plugin {
 // shift keys. Used for determining if a qukey is a SpaceCadet-type key.
 bool isModifierKey(Key key);
 
-} // namespace plugin {
-} // namespace kaleidoscope {
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::Qukeys Qukeys;
 
@@ -205,9 +239,9 @@ extern kaleidoscope::plugin::Qukeys Qukeys;
 // guarantee that the count is set correctly. This is considerably less
 // important than it used to be, with the `configureQukeys()` function taking
 // care of guaranteeing the correct count setting.
-#define QUKEYS(qukey_defs...) {                                         \
-    static kaleidoscope::plugin::Qukey const qk_table[] PROGMEM = {     \
-      qukey_defs                                                        \
-    };                                                                  \
-    Qukeys.configureQukeys(qk_table);                                   \
-}
+#define QUKEYS(qukey_defs...)                                       \
+  {                                                                 \
+    static kaleidoscope::plugin::Qukey const qk_table[] PROGMEM = { \
+      qukey_defs};                                                  \
+    Qukeys.configureQukeys(qk_table);                               \
+  }

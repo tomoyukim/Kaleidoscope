@@ -1,5 +1,5 @@
 /* Kaleidoscope-Macros - Macro keys for Kaleidoscope.
- * Copyright (C) 2017-2019  Keyboard.io, Inc.
+ * Copyright (C) 2017-2022  Keyboard.io, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -14,69 +14,54 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-Macros.h"
-#include "kaleidoscope/keyswitch_state.h"
-#include "kaleidoscope/key_events.h"
+#include "kaleidoscope/plugin/Macros.h"
 
+#include <Arduino.h>                   // for pgm_read_byte, delay, F, PROGMEM, __F...
+#include <Kaleidoscope-FocusSerial.h>  // for Focus, FocusSerial
+#include <Kaleidoscope-Ranges.h>       // for MACRO_FIRST
+#include <stdint.h>                    // for uint8_t
+
+#include "kaleidoscope/KeyEvent.h"                  // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"      // for EventHandlerResult, EventHandlerResul...
+#include "kaleidoscope/key_defs.h"                  // for Key, LSHIFT, Key_NoKey, Key_0, Key_1
+#include "kaleidoscope/keyswitch_state.h"           // for keyToggledOff
+#include "kaleidoscope/plugin/Macros/MacroSteps.h"  // for macro_t, MACRO_NONE, MACRO_ACTION_END
+
+// =============================================================================
+// Default `macroAction()` function definitions
 __attribute__((weak))
-const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
+const macro_t *
+macroAction(uint8_t macro_id, KeyEvent &event) {
   return MACRO_NONE;
 }
 
+// =============================================================================
+// `Macros` plugin code
 namespace kaleidoscope {
 namespace plugin {
 
-MacroKeyEvent Macros_::active_macros[];
-byte Macros_::active_macro_count;
-KeyAddr Macros_::key_addr;
+// -----------------------------------------------------------------------------
+// Public helper functions
 
-void playMacroKeyswitchEvent(Key key, uint8_t keyswitch_state, bool explicit_report) {
-  handleKeyswitchEvent(key, UnknownKeyswitchLocation, keyswitch_state | INJECTED);
-
-  if (explicit_report)
-    return;
-
-  kaleidoscope::Runtime.hid().keyboard().sendReport();
-  kaleidoscope::Runtime.hid().mouse().sendReport();
-}
-
-static void playKeyCode(Key key, uint8_t keyStates, bool explicit_report) {
-  if (keyIsPressed(keyStates)) {
-    playMacroKeyswitchEvent(key, IS_PRESSED, explicit_report);
-  }
-  if (keyWasPressed(keyStates)) {
-    playMacroKeyswitchEvent(key, WAS_PRESSED, explicit_report);
-  }
-}
-
-static void readKeyCodeAndPlay(const macro_t *macro_p, uint8_t flags, uint8_t keyStates, bool explicit_report) {
-  Key key(pgm_read_byte(macro_p++), // key_code
-          flags);
-
-  playKeyCode(key, keyStates, explicit_report);
-}
-
-void Macros_::play(const macro_t *macro_p) {
-  macro_t macro = MACRO_ACTION_END;
+void Macros::play(const macro_t *macro_p) {
+  macro_t macro    = MACRO_ACTION_END;
   uint8_t interval = 0;
-  uint8_t flags;
-  bool explicit_report = false;
+  Key key;
 
-  if (!macro_p)
+  if (macro_p == MACRO_NONE)
     return;
 
   while (true) {
     switch (macro = pgm_read_byte(macro_p++)) {
+    // These are unlikely to be useful now that we have KeyEvent. I think the
+    // whole `explicit_report` came about as a result of scan-order bugs.
     case MACRO_ACTION_STEP_EXPLICIT_REPORT:
-      explicit_report = true;
-      break;
     case MACRO_ACTION_STEP_IMPLICIT_REPORT:
-      explicit_report = false;
-      break;
     case MACRO_ACTION_STEP_SEND_REPORT:
-      kaleidoscope::Runtime.hid().keyboard().sendReport();
-      kaleidoscope::Runtime.hid().mouse().sendReport();
       break;
+    // End legacy macro step commands
+
+    // Timing
     case MACRO_ACTION_STEP_INTERVAL:
       interval = pgm_read_byte(macro_p++);
       break;
@@ -85,46 +70,59 @@ void Macros_::play(const macro_t *macro_p) {
       delay(wait);
       break;
     }
+
     case MACRO_ACTION_STEP_KEYDOWN:
-      flags = pgm_read_byte(macro_p++);
-      readKeyCodeAndPlay(macro_p++, flags, IS_PRESSED, explicit_report);
+      key.setFlags(pgm_read_byte(macro_p++));
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      press(key);
       break;
     case MACRO_ACTION_STEP_KEYUP:
-      flags = pgm_read_byte(macro_p++);
-      readKeyCodeAndPlay(macro_p++, flags, WAS_PRESSED, explicit_report);
+      key.setFlags(pgm_read_byte(macro_p++));
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      release(key);
       break;
     case MACRO_ACTION_STEP_TAP:
-      flags = pgm_read_byte(macro_p++);
-      readKeyCodeAndPlay(macro_p++, flags, IS_PRESSED | WAS_PRESSED, false);
+      key.setFlags(pgm_read_byte(macro_p++));
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      tap(key);
       break;
 
     case MACRO_ACTION_STEP_KEYCODEDOWN:
-      readKeyCodeAndPlay(macro_p++, 0, IS_PRESSED, explicit_report);
+      key.setFlags(0);
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      press(key);
       break;
     case MACRO_ACTION_STEP_KEYCODEUP:
-      readKeyCodeAndPlay(macro_p++, 0, WAS_PRESSED, explicit_report);
+      key.setFlags(0);
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      release(key);
       break;
     case MACRO_ACTION_STEP_TAPCODE:
-      readKeyCodeAndPlay(macro_p++, 0, IS_PRESSED | WAS_PRESSED, false);
+      key.setFlags(0);
+      key.setKeyCode(pgm_read_byte(macro_p++));
+      tap(key);
       break;
 
     case MACRO_ACTION_STEP_TAP_SEQUENCE: {
-      uint8_t keyCode;
-      do {
-        flags = pgm_read_byte(macro_p++);
-        keyCode = pgm_read_byte(macro_p++);
-        playKeyCode(Key(keyCode, flags), IS_PRESSED | WAS_PRESSED, false);
+      while (true) {
+        key.setFlags(pgm_read_byte(macro_p++));
+        key.setKeyCode(pgm_read_byte(macro_p++));
+        if (key == Key_NoKey)
+          break;
+        tap(key);
         delay(interval);
-      } while (!(flags == 0 && keyCode == 0));
+      }
       break;
     }
     case MACRO_ACTION_STEP_TAP_CODE_SEQUENCE: {
-      uint8_t keyCode;
-      do {
-        keyCode = pgm_read_byte(macro_p++);
-        playKeyCode(Key(keyCode, 0), IS_PRESSED | WAS_PRESSED, false);
+      while (true) {
+        key.setFlags(0);
+        key.setKeyCode(pgm_read_byte(macro_p++));
+        if (key.getKeyCode() == 0)
+          break;
+        tap(key);
         delay(interval);
-      } while (keyCode != 0);
+      }
       break;
     }
 
@@ -136,6 +134,26 @@ void Macros_::play(const macro_t *macro_p) {
     delay(interval);
   }
 }
+
+const macro_t *Macros::type(const char *string) const {
+  while (true) {
+    uint8_t ascii_code = pgm_read_byte(string++);
+    if (ascii_code == 0)
+      break;
+
+    Key key = lookupAsciiCode(ascii_code);
+
+    if (key == Key_NoKey)
+      continue;
+
+    tap(key);
+  }
+
+  return MACRO_NONE;
+}
+
+// -----------------------------------------------------------------------------
+// Translation from ASCII to keycodes
 
 static const Key ascii_to_key_map[] PROGMEM = {
   // 0x21 - 0x30
@@ -180,8 +198,7 @@ static const Key ascii_to_key_map[] PROGMEM = {
   LSHIFT(Key_Backtick),
 };
 
-
-Key Macros_::lookupAsciiCode(uint8_t ascii_code) {
+Key Macros::lookupAsciiCode(uint8_t ascii_code) const {
   Key key = Key_NoKey;
 
   switch (ascii_code) {
@@ -223,63 +240,50 @@ Key Macros_::lookupAsciiCode(uint8_t ascii_code) {
   return key;
 }
 
-const macro_t *Macros_::type(const char *string) {
-  while (true) {
-    uint8_t ascii_code = pgm_read_byte(string++);
-    if (!ascii_code)
-      break;
+// -----------------------------------------------------------------------------
+// Event handlers
 
-    Key key = lookupAsciiCode(ascii_code);
-
-
-    if (key == Key_NoKey)
-      continue;
-
-    playMacroKeyswitchEvent(key, IS_PRESSED, false);
-    playMacroKeyswitchEvent(key, WAS_PRESSED, false);
-
-  }
-
-  return MACRO_NONE;
-}
-
-bool Macros_::isMacroKey(Key key) {
-  if (key >= ranges::MACRO_FIRST && key <= ranges::MACRO_LAST)
-    return true;
-  return false;
-}
-
-EventHandlerResult Macros_::onKeyswitchEvent(Key &mappedKey, KeyAddr key_addr, uint8_t keyState) {
-  if (! isMacroKey(mappedKey))
+EventHandlerResult Macros::onKeyEvent(KeyEvent &event) {
+  // Ignore everything except Macros keys
+  if (!isMacrosKey(event.key))
     return EventHandlerResult::OK;
 
-  uint8_t macro_index = mappedKey.getRaw() - ranges::MACRO_FIRST;
-  addActiveMacroKey(macro_index, key_addr.toInt(), keyState);
+  // Decode the macro ID from the Macros `Key` value.
+  uint8_t macro_id = event.key.getRaw() - ranges::MACRO_FIRST;
 
-  return EventHandlerResult::EVENT_CONSUMED;
-}
+  // Call the new `macroAction(event)` function.
+  const macro_t *macro_ptr = macroAction(macro_id, event);
 
-EventHandlerResult Macros_::afterEachCycle() {
-  active_macro_count = 0;
+  // Play back the macro pointed to by `macroAction()`
+  play(macro_ptr);
 
-  return EventHandlerResult::OK;
-}
-
-EventHandlerResult Macros_::beforeReportingState() {
-  for (byte i = 0; i < active_macro_count; ++i) {
-    if (active_macros[i].key_id == 0xFF) {
-      key_addr = UnknownKeyswitchLocation;
-    } else {
-      key_addr = KeyAddr(active_macros[i].key_id);
-    }
-    const macro_t *m = macroAction(active_macros[i].key_code,
-                                   active_macros[i].key_state);
-    Macros.play(m);
+  if (keyToggledOff(event.state) || !isMacrosKey(event.key)) {
+    // If a Macros key toggled off or if the value of `event.key` has been
+    // changed by the user-defined `macroAction()` function, we clear the array
+    // of active macro keys so that they won't get "stuck on".  There won't be a
+    // subsequent event that Macros will recognize as actionable, so we need to
+    // do it here.
+    clear();
   }
+
+  // Return `OK` to let Kaleidoscope finish processing this event as normal.
+  // This is so that, if the user-defined `macroAction(id, &event)` function
+  // changes the value of `event.key`, it will take effect properly.  Note that
+  // we're counting on other plugins to not subsequently change the value of
+  // `event.key` if a Macros key has toggled on, because that would leave any
+  // keys in the supplemental array "stuck on".  We could return
+  // `EVENT_CONSUMED` if `event.key` is still a Macros key, but that would lead
+  // to other undesirable plugin interactions (e.g. OneShot keys wouldn't be
+  // triggered to turn off when a Macros key toggles on, assuming that Macros
+  // comes first in `KALEIDOSCOPE_INIT_PLUGINS()`).
   return EventHandlerResult::OK;
 }
 
-}
+EventHandlerResult Macros::onNameQuery() {
+  return ::Focus.sendName(F("Macros"));
 }
 
-kaleidoscope::plugin::Macros_ Macros;
+}  // namespace plugin
+}  // namespace kaleidoscope
+
+kaleidoscope::plugin::Macros Macros;

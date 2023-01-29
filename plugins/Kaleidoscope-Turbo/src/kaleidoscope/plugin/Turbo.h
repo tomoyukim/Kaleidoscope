@@ -15,20 +15,23 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdint.h>
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
-
 #pragma once
 
-#define Key_Turbo Key{kaleidoscope::ranges::TURBO }
+#include <Kaleidoscope-Ranges.h>  // for TURBO
+#include <stdint.h>               // for uint16_t, uint32_t
+
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/device/device.h"         // for cRGB, CRGB
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+constexpr Key Key_Turbo = Key(kaleidoscope::ranges::TURBO);
 
 namespace kaleidoscope {
 namespace plugin {
 class Turbo : public kaleidoscope::Plugin {
  public:
-  Turbo() {}
-
   uint16_t interval();
   void interval(uint16_t newVal);
 
@@ -44,26 +47,24 @@ class Turbo : public kaleidoscope::Plugin {
   cRGB activeColor();
   void activeColor(cRGB newVal);
 
-  EventHandlerResult onSetup();
-  EventHandlerResult onLayerChange();
-  EventHandlerResult onKeyswitchEvent(Key &key, KeyAddr key_addr, uint8_t key_state);
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onKeyEvent(KeyEvent &event);
   EventHandlerResult afterEachCycle();
+  EventHandlerResult beforeSyncingLeds();
+
  private:
-  void findKeyPositions();
+  uint16_t interval_       = 10;
+  uint16_t flash_interval_ = 69;
+  bool sticky_             = false;
+  bool flash_              = true;
+  cRGB active_color_       = CRGB(160, 0, 0);
 
-  static uint16_t interval_;
-  static uint16_t flashInterval_;
-  static bool sticky_;
-  static bool flash_;
-  static cRGB activeColor_;
-
-  static bool enable;
-  static uint32_t startTime;
-  static uint32_t flashStartTime;
-  static KeyAddr keyPositions[4];
-  static uint16_t numKeys;
+  bool active_               = false;
+  uint32_t start_time_       = 0;
+  uint32_t flash_start_time_ = 0;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::Turbo Turbo;

@@ -34,10 +34,13 @@ class SAMD : public kaleidoscope::driver::mcu::Base<BaseProps> {
   void attachToHost() {
     USBDevice.attach();
   }
+  bool USBConfigured() {
+    return USBDevice.configured();
+  }
 };
 
-}
-}
-}
+}  // namespace mcu
+}  // namespace driver
+}  // namespace kaleidoscope
 
 #endif

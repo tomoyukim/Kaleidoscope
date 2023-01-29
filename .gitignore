@@ -1,14 +1,16 @@
 *~
+.DS_Store
 .arduino
+.vscode
 /.docker_xfer
 .#*
 /output/
 /examples/*/output/
 /out/
+/docs/plugins
 /docs/generated
 /docs/doxyoutput
 /docs/api
 /_build/
 /results/
 generated-testcase.cpp
-.arduino

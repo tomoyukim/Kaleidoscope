@@ -27,7 +27,7 @@
 
 #ifdef ARDUINO_AVR_ERGODOX
 
-#include <Arduino.h>
+#include <stdint.h>
 
 namespace kaleidoscope {
 namespace device {
@@ -35,8 +35,6 @@ namespace ez {
 
 class ErgoDoxScanner {
  public:
-  ErgoDoxScanner() {}
-
   void begin();
   void toggleATMegaRow(int row);
   void selectExtenderRow(int row);
@@ -50,8 +48,8 @@ class ErgoDoxScanner {
   uint8_t initExpander();
 };
 
-}
-}
-}
+}  // namespace ez
+}  // namespace device
+}  // namespace kaleidoscope
 
 #endif

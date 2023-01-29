@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-OneShot -- One-shot modifiers and layers
- * Copyright (C) 2016-2019  Keyboard.io, Inc.
+ * Copyright (C) 2016-2022  Keyboard.io, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,96 +17,257 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
+#include <Kaleidoscope-Ranges.h>  // for OSL_FIRST, OSM_FIRST, OS_FIRST, OS_LAST
+#include <stdint.h>               // for uint16_t, uint8_t, int16_t
 
-#define OSM(kc) Key(kaleidoscope::ranges::OSM_FIRST + (Key_ ## kc).getKeyCode() - Key_LeftControl.getKeyCode())
-#define OSL(n) Key(kaleidoscope::ranges::OSL_FIRST + n)
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/KeyAddrBitfield.h"       // for KeyAddrBitfield
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+// IWYU pragma: no_include "HIDAliases.h"
+
+// ----------------------------------------------------------------------------
+// Keymap macros
+
+#define OSM(k) ::kaleidoscope::plugin::OneShotModifierKey(Key_##k)
+#define OSL(n) ::kaleidoscope::plugin::OneShotLayerKey(n)
 
 namespace kaleidoscope {
 namespace plugin {
 
+constexpr Key OneShotModifierKey(Key mod_key) {
+  return Key(kaleidoscope::ranges::OSM_FIRST +
+             mod_key.getKeyCode() - HID_KEYBOARD_FIRST_MODIFIER);
+}
+
+constexpr Key OneShotLayerKey(uint8_t layer) {
+  return Key(kaleidoscope::ranges::OSL_FIRST + layer);
+}
+
 class OneShot : public kaleidoscope::Plugin {
  public:
-  OneShot(void) {
-    for (uint8_t i = 0; i < ONESHOT_KEY_COUNT; i++) {
-      state_[i].stickable = true;
-    }
-  }
+  // --------------------------------------------------------------------------
+  // Configuration functions
 
-  static bool isOneShotKey(Key key) {
-    return (key.getRaw() >= kaleidoscope::ranges::OS_FIRST && key.getRaw() <= kaleidoscope::ranges::OS_LAST);
-  }
-  static bool isActive(void);
-  static bool isActive(Key key);
-  static bool isPressed();
-  static bool isSticky();
-  static bool isSticky(Key key);
-  static void cancel(bool with_stickies = false);
-
-  static uint16_t time_out;
-  static int16_t double_tap_time_out;
-  static uint16_t hold_time_out;
-
-  static inline void enableStickablity() {}
-  static void enableStickability(Key key);
-  template <typename... Keys>
-  static void enableStickability(Key key, Keys&&... keys) {
+  void enableStickablity() {}
+  void enableStickability(Key key);
+  template<typename... Keys>
+  void enableStickability(Key key, Keys &&...keys) {
     enableStickability(key);
     enableStickability(keys...);
   }
-  static void enableStickabilityForModifiers();
-  static void enableStickabilityForLayers();
+  void enableStickabilityForModifiers();
+  void enableStickabilityForLayers();
 
-  static inline void disableStickability() {}
-  static void disableStickability(Key key);
-  template <typename... Keys>
-  static void disableStickability(Key key, Keys&&... keys) {
+  void disableStickability() {}
+  void disableStickability(Key key);
+  template<typename... Keys>
+  void disableStickability(Key key, Keys &&...keys) {
     disableStickability(key);
     disableStickability(keys...);
   }
-  static void disableStickabilityForModifiers();
-  static void disableStickabilityForLayers();
+  void disableStickabilityForModifiers();
+  void disableStickabilityForLayers();
 
-  static bool isStickable(Key key);
+  void enableAutoModifiers() {
+    settings_.auto_modifiers = true;
+  }
+  void enableAutoLayers() {
+    settings_.auto_layers = true;
+  }
+  void enableAutoOneShot() {
+    enableAutoModifiers();
+    enableAutoLayers();
+  }
 
-  static bool isModifierActive(Key key);
+  void disableAutoModifiers() {
+    settings_.auto_modifiers = false;
+  }
+  void disableAutoLayers() {
+    settings_.auto_layers = false;
+  }
+  void disableAutoOneShot() {
+    disableAutoModifiers();
+    disableAutoLayers();
+  }
 
-  EventHandlerResult beforeReportingState();
+  void toggleAutoModifiers() {
+    settings_.auto_modifiers = !settings_.auto_modifiers;
+  }
+  void toggleAutoLayers() {
+    settings_.auto_layers = !settings_.auto_layers;
+  }
+  void toggleAutoOneShot() {
+    if (settings_.auto_modifiers || settings_.auto_layers) {
+      disableAutoOneShot();
+    } else {
+      enableAutoOneShot();
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Global test functions
+
+  bool isActive() const;
+  bool isSticky() const;
+
+  // --------------------------------------------------------------------------
+  // Single-key test functions
+  bool isOneShotKey(Key key) const {
+    return (key.getRaw() >= kaleidoscope::ranges::OS_FIRST &&
+            key.getRaw() <= kaleidoscope::ranges::OS_LAST);
+  }
+
+  /// Determine if the given `key` is allowed to become sticky.
+  bool isStickable(Key key) const;
+
+  bool isStickableDefault(Key key) const;
+
+  bool isTemporary(KeyAddr key_addr) const;  // inline?
+  bool isPending(KeyAddr key_addr) const;
+  bool isSticky(KeyAddr key_addr) const;  // inline?
+  bool isActive(KeyAddr key_addr) const;  // inline?
+
+  // --------------------------------------------------------------------------
+  // Public OneShot state control
+
+  /// Put a key in the "pending" OneShot state.
+  ///
+  /// This function puts the key at `key_addr` in the "pending" OneShot state.
+  /// This is appropriate to use when a key toggles on and you want it to behave
+  /// like a OneShot key starting with the current event, and lasting until the
+  /// key becomes inactive (cancelled by a subsequent keypress).
+  void setPending(KeyAddr key_addr);
+
+  /// Put a key directly in the "one-shot" state.
+  ///
+  /// This function puts the key at `key_addr` in the "one-shot" state.  This is
+  /// usually the state of a OneShot key after it is released, but before it is
+  /// cancelled by a subsequent keypress.  In most cases, you probably want to
+  /// use `setPending()` instead, rather than calling this function explicitly,
+  /// as OneShot will automatically cause any key in the "pending" state to
+  /// progress to this state when it is (physically) released.
+  void setOneShot(KeyAddr key_addr);
+
+  /// Put a key in the "sticky" OneShot state.
+  ///
+  /// This function puts the key at `key_addr` in the "sticky" OneShot state.
+  /// It will remain active until it is pressed again.
+  void setSticky(KeyAddr key_addr);
+
+  /// Clear any OneShot state for a key.
+  ///
+  /// This function clears any OneShot state of the key at `key_addr`.  It does
+  /// not, however, release the key if it is held.
+  void clear(KeyAddr key_addr);
+
+  // --------------------------------------------------------------------------
+  // Utility function for other plugins to cancel OneShot keys
+  void cancel(bool with_stickies = false);
+
+  // --------------------------------------------------------------------------
+  // Timeout onfiguration functions
+  void setTimeout(uint16_t ttl) {
+    settings_.timeout = ttl;
+  }
+  uint16_t getTimeout() {
+    return settings_.timeout;
+  }
+  void setHoldTimeout(uint16_t ttl) {
+    settings_.hold_timeout = ttl;
+  }
+  uint16_t getHoldTimeout() {
+    return settings_.hold_timeout;
+  }
+  void setDoubleTapTimeout(int16_t ttl) {
+    settings_.double_tap_timeout = ttl;
+  }
+  int16_t getDoubleTapTimeout() {
+    return settings_.double_tap_timeout;
+  }
+
+  // --------------------------------------------------------------------------
+  // Plugin hook functions
+
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult afterReportingState(const KeyEvent &event);
   EventHandlerResult afterEachCycle();
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t keyState);
 
-  void inject(Key mapped_key, uint8_t key_state);
+  friend class OneShotConfig;
 
  private:
-  static constexpr uint8_t ONESHOT_KEY_COUNT = 16;
-  typedef struct {
-    bool active: 1;
-    bool pressed: 1;
-    bool stickable: 1;
-    bool sticky: 1;
-    uint8_t __reserved: 4;
-    uint8_t position;
-  } key_state_t;
-  static key_state_t state_[ONESHOT_KEY_COUNT];
+  // --------------------------------------------------------------------------
+  // Constants
+  static constexpr uint8_t oneshot_key_count         = 16;
+  static constexpr uint8_t oneshot_mod_count         = 8;
+  static constexpr uint8_t oneshot_layer_count       = oneshot_key_count - oneshot_mod_count;
+  static constexpr uint16_t stickable_modifiers_mask = uint16_t(uint16_t(-1) >> oneshot_layer_count);
+  static constexpr uint16_t stickable_layers_mask    = uint16_t(uint16_t(-1) << oneshot_mod_count);
+  static constexpr KeyAddr invalid_key_addr          = KeyAddr(KeyAddr::invalid_state);
 
-  static uint16_t start_time_;
-  static Key prev_key_;
-  static bool should_cancel_;
-  static bool should_cancel_stickies_;
+  // --------------------------------------------------------------------------
+  // Configuration variables
+  struct Settings {
+    uint16_t timeout           = 2500;
+    uint16_t hold_timeout      = 250;
+    int16_t double_tap_timeout = -1;
 
-  static void injectNormalKey(uint8_t idx, uint8_t key_state);
-  static void activateOneShot(uint8_t idx);
-  static void cancelOneShot(uint8_t idx);
+    uint16_t stickable_keys = -1;
+    bool auto_modifiers     = false;
+    bool auto_layers        = false;
+  };
+  Settings settings_;
 
-  static bool isOneShotKey_(Key key) {
-    return key.getRaw() >= ranges::OS_FIRST && key.getRaw() <= ranges::OS_LAST;
+  // --------------------------------------------------------------------------
+  // State variables
+  KeyAddrBitfield temp_addrs_;
+  KeyAddrBitfield glue_addrs_;
+
+  uint16_t start_time_   = 0;
+  KeyAddr prev_key_addr_ = invalid_key_addr;
+
+  // --------------------------------------------------------------------------
+  // Internal utility functions
+  bool hasTimedOut(uint16_t ttl) const {
+    return Runtime.hasTimeExpired(start_time_, ttl);
   }
-  static bool hasTimedOut() {
-    return Runtime.hasTimeExpired(start_time_, time_out);
+  bool hasDoubleTapTimedOut() const {
+    // Derive the true double-tap timeout value if we're using the default.
+    uint16_t dtto = (settings_.double_tap_timeout < 0)
+                      ? settings_.timeout
+                      : settings_.double_tap_timeout;
+    return hasTimedOut(dtto);
   }
+  uint8_t getOneShotKeyIndex(Key oneshot_key) const;
+  uint8_t getKeyIndex(Key key) const;
+  Key decodeOneShotKey(Key oneshot_key) const;
+
+  void pressKey(KeyAddr key_addr, Key oneshot_key);
+  void holdKey(KeyAddr key_addr) const;
+  void releaseKey(KeyAddr key_addr);
 };
-}
-}
+
+// =============================================================================
+// Plugin for configuration of OneShot via Focus and persistent storage of
+// settins in EEPROM (i.e. Chrysalis).
+class OneShotConfig : public Plugin {
+ public:
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onSetup();
+  EventHandlerResult onFocusEvent(const char *command);
+
+ private:
+  // The base address in persistent storage for configuration data:
+  uint16_t settings_addr_;
+};
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::OneShot OneShot;
+extern kaleidoscope::plugin::OneShotConfig OneShotConfig;

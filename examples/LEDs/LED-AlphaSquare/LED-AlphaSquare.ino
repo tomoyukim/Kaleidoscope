@@ -20,7 +20,7 @@
 #include <Kaleidoscope-LED-AlphaSquare.h>
 #include <Kaleidoscope-Macros.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -40,13 +40,13 @@ KEYMAPS(
     Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
     Key_skip),
 )
-// *INDENT-ON*
+// clang-format on
 
-const macro_t *macroAction(uint8_t macro_index, uint8_t key_state) {
-  if (!keyToggledOn(key_state))
+const macro_t *macroAction(uint8_t macro_id, KeyEvent &event) {
+  if (!keyToggledOn(event.state))
     return MACRO_NONE;
 
-  if (macro_index == 0) {
+  if (macro_id == 0) {
     for (uint8_t i = Key_A.getKeyCode(); i <= Key_0.getKeyCode(); i++) {
       LEDControl.set_all_leds_to(0, 0, 0);
       LEDControl.syncLeds();
@@ -57,12 +57,12 @@ const macro_t *macroAction(uint8_t macro_index, uint8_t key_state) {
         col = 10;
 
       for (uint8_t step = 0; step <= 0xf0; step += 8) {
-        AlphaSquare.color = { step, step, step };
+        AlphaSquare.color = {step, step, step};
         AlphaSquare.display({i, 0}, col);
         delay(10);
       }
       for (uint8_t step = 0xff; step >= 8; step -= 8) {
-        AlphaSquare.color = { step, step, step };
+        AlphaSquare.color = {step, step, step};
         AlphaSquare.display({i, 0}, col);
         delay(10);
       }
@@ -74,14 +74,14 @@ const macro_t *macroAction(uint8_t macro_index, uint8_t key_state) {
     delay(100);
 
     for (uint8_t step = 0; step <= 0xf0; step += 8) {
-      AlphaSquare.color = { step, step, step };
+      AlphaSquare.color = {step, step, step};
       AlphaSquare.display(kaleidoscope::plugin::alpha_square::symbols::Lambda, 2);
       AlphaSquare.display(kaleidoscope::plugin::alpha_square::symbols::Lambda, 10);
       delay(10);
     }
 
     for (uint8_t step = 0xff; step >= 8; step -= 8) {
-      AlphaSquare.color = { step, step, step };
+      AlphaSquare.color = {step, step, step};
       AlphaSquare.display(kaleidoscope::plugin::alpha_square::symbols::Lambda, 2);
       AlphaSquare.display(kaleidoscope::plugin::alpha_square::symbols::Lambda, 10);
       delay(10);
@@ -102,7 +102,7 @@ KALEIDOSCOPE_INIT_PLUGINS(LEDControl,
 void setup() {
   Kaleidoscope.setup();
 
-  AlphaSquare.color = { 0xcb, 0xc0, 0xff };
+  AlphaSquare.color = {0xcb, 0xc0, 0xff};
 }
 
 void loop() {

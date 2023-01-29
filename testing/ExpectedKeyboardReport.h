@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <set>
-#include <string>
+#include <cstdint>  // for uint8_t, uint32_t
+#include <set>      // for set
+
+#include "testing/iostream.h"  // for string
 
 namespace kaleidoscope {
 namespace testing {
@@ -27,14 +27,14 @@ namespace testing {
 class ExpectedKeyboardReport {
  public:
   ExpectedKeyboardReport(uint32_t timestamp,
-                         const std::set<uint8_t> & keycodes,
+                         const std::set<uint8_t> &keycodes,
                          std::string message = "");
 
-  const std::set<uint8_t> & Keycodes() const;
+  const std::set<uint8_t> &Keycodes() const;
 
   uint32_t Timestamp() const;
 
-  const std::string & Message() const;
+  const std::string &Message() const;
 
  private:
   uint32_t timestamp_;

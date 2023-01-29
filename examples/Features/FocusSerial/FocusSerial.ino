@@ -18,7 +18,7 @@
 #include <Kaleidoscope.h>
 #include <Kaleidoscope-FocusSerial.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (Key_NoKey,         Key_1, Key_2, Key_3, Key_4, Key_5, Key_NoKey,
@@ -37,20 +37,20 @@ KEYMAPS(
    Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
    Key_skip),
 )
-// *INDENT-OFF*
+// clang-format on
 
 namespace kaleidoscope {
 class FocusTestCommand : public Plugin {
  public:
   FocusTestCommand() {}
 
-  EventHandlerResult onFocusEvent(const char *command) {
+  EventHandlerResult onFocusEvent(const char *input) {
     const char *cmd = PSTR("test");
 
-    if (::Focus.handleHelp(command, cmd))
-      return EventHandlerResult::OK;
+    if (::Focus.inputMatchesHelp(input))
+      return ::Focus.printHelp(cmd);
 
-    if (strcmp_P(command, cmd) == 0) {
+    if (::Focus.inputMatchesCommand(input, cmd)) {
       ::Focus.send(F("ok!"));
       return EventHandlerResult::EVENT_CONSUMED;
     }
@@ -63,14 +63,15 @@ class FocusHelpCommand : public Plugin {
  public:
   FocusHelpCommand() {}
 
-  EventHandlerResult onFocusEvent(const char *command) {
-    ::Focus.handleHelp(command, PSTR("help"));
+  EventHandlerResult onFocusEvent(const char *input) {
+    if (::Focus.inputMatchesHelp(input))
+      return ::Focus.printHelp(PSTR("help"));
 
     return EventHandlerResult::OK;
   }
 };
 
-}
+}  // namespace kaleidoscope
 
 kaleidoscope::FocusTestCommand FocusTestCommand;
 kaleidoscope::FocusHelpCommand FocusHelpCommand;

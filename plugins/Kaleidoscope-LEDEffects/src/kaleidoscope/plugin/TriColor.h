@@ -17,22 +17,24 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include "kaleidoscope/device/device.h"            // for cRGB
+#include "kaleidoscope/plugin.h"                   // for Plugin
+#include "kaleidoscope/plugin/LEDMode.h"           // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"  // for LEDModeInterface
 
 namespace kaleidoscope {
 namespace plugin {
 class TriColor : public Plugin,
-  public LEDModeInterface {
+                 public LEDModeInterface {
  public:
   TriColor(cRGB base_color, cRGB mod_color, cRGB esc_color);
-  TriColor(cRGB base_color, cRGB mod_color) : TriColor(base_color, mod_color, mod_color) {}
+  TriColor(cRGB base_color, cRGB mod_color)
+    : TriColor(base_color, mod_color, mod_color) {}
 
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
@@ -41,11 +43,9 @@ class TriColor : public Plugin,
       : parent_(parent) {}
 
    protected:
-
-    void update(void) final;
+    void update() final;
 
    private:
-
     const TriColor *parent_;
   };
 
@@ -54,5 +54,6 @@ class TriColor : public Plugin,
   cRGB mod_color_;
   cRGB esc_color_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope

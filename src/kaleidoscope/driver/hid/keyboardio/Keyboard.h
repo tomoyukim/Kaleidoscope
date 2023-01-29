@@ -16,10 +16,12 @@
  */
 
 #pragma once
-#include <Arduino.h>
-#include <KeyboardioHID.h>
 
-#include "kaleidoscope/driver/hid/base/Keyboard.h"
+#include <KeyboardioHID.h>  // for BootKeyboard, BootKeyboard_, Keyboard
+#include <stdint.h>         // for uint8_t, uint16_t
+
+// From Kaleidoscope:
+#include "kaleidoscope/driver/hid/base/Keyboard.h"  // for Keyboard, KeyboardProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -41,49 +43,56 @@ class BootKeyboardWrapper {
  public:
   BootKeyboardWrapper() {}
   void begin() {
-    BootKeyboard.begin();
+    BootKeyboard().begin();
   }
 
   uint8_t getProtocol() {
-    return BootKeyboard.getProtocol();
+    return BootKeyboard().getProtocol();
   }
   void setProtocol(uint8_t protocol) {
-    BootKeyboard.setProtocol(protocol);
+    BootKeyboard().setProtocol(protocol);
   }
   void setDefaultProtocol(uint8_t protocol) {
-    BootKeyboard.default_protocol = protocol;
+    BootKeyboard().default_protocol = protocol;
     setProtocol(protocol);
   }
 
   void sendReport() {
-    BootKeyboard.sendReport();
+    BootKeyboard().sendReport();
   }
 
   void press(uint8_t code) {
-    BootKeyboard.press(code);
+    BootKeyboard().press(code);
   }
   void release(uint8_t code) {
-    BootKeyboard.release(code);
+    BootKeyboard().release(code);
   }
   void releaseAll() {
-    BootKeyboard.releaseAll();
+    BootKeyboard().releaseAll();
   }
 
+  bool isKeyPressed(uint8_t code) {
+    return BootKeyboard().isKeyPressed(code);
+  }
   bool isModifierActive(uint8_t code) {
-    return BootKeyboard.isModifierActive(code);
+    return BootKeyboard().isModifierActive(code);
   }
   bool wasModifierActive(uint8_t code) {
-    return BootKeyboard.wasModifierActive(code);
+    return BootKeyboard().wasModifierActive(code);
   }
   bool isAnyModifierActive() {
-    return BootKeyboard.isAnyModifierActive();
+    return BootKeyboard().isAnyModifierActive();
   }
   bool wasAnyModifierActive() {
-    return BootKeyboard.wasAnyModifierActive();
+    return BootKeyboard().wasAnyModifierActive();
   }
 
   uint8_t getLeds() {
-    return BootKeyboard.getLeds();
+    return BootKeyboard().getLeds();
+  }
+
+  void onUSBReset() {
+    BootKeyboard().onUSBReset();
   }
 };
 
@@ -108,6 +117,9 @@ class NKROKeyboardWrapper {
     Keyboard.releaseAll();
   }
 
+  bool isKeyPressed(uint8_t code) {
+    return Keyboard.isKeyPressed(code);
+  }
   bool isModifierActive(uint8_t code) {
     return Keyboard.isModifierActive(code);
   }
@@ -163,17 +175,17 @@ class SystemControlWrapper {
   }
 };
 
-struct KeyboardProps: public base::KeyboardProps {
+struct KeyboardProps : public base::KeyboardProps {
   typedef BootKeyboardWrapper BootKeyboard;
   typedef NKROKeyboardWrapper NKROKeyboard;
   typedef ConsumerControlWrapper ConsumerControl;
   typedef SystemControlWrapper SystemControl;
 };
 
-template <typename _Props>
-class Keyboard: public base::Keyboard<_Props> {};
+template<typename _Props>
+class Keyboard : public base::Keyboard<_Props> {};
 
-}
-}
-}
-}
+}  // namespace keyboardio
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

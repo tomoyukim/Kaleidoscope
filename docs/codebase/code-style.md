@@ -21,9 +21,11 @@ Our style guide is based on the [Google C++ style guide][goog:c++-guide] which w
   - [Header Files](#header-files)
     - [Self-contained Headers](#self-contained-headers)
     - [Header Guards](#header-guards)
+    - [Include What You Use](#include-what-you-use)
     - [Forward Declarations](#forward-declarations)
     - [Inline Functions](#inline-functions)
-    - [Names and Order of Includes](#names-and-order-of-includes)
+    - [Organization of Includes](#organization-of-includes)
+    - [Top-level Arduino Library Headers](#top-level-arduino-library-headers)
   - [Scoping](#scoping)
     - [Namespaces](#namespaces)
     - [Unnamed Namespaces and Static Variables](#unnamed-namespaces-and-static-variables)
@@ -130,6 +132,7 @@ Our style guide is based on the [Google C++ style guide][goog:c++-guide] which w
     - [Vertical Whitespace](#vertical-whitespace)
   - [Exceptions to the Rules](#exceptions-to-the-rules)
     - [Existing Non-conformant Code](#existing-non-conformant-code)
+  - [Maintenance Tools](#maintenance-tools)
   - [Parting Words](#parting-words)
 
 ## Background
@@ -258,6 +261,12 @@ There are rare cases where a file designed to be included is not self-contained.
 
 All header files should have `#pragma once` guards at the top to prevent multiple inclusion.
 
+### Include What You Use
+
+If a source or header file refers to a symbol defined elsewhere, the file should directly include a header file which provides a declaration or definition of that symbol.
+
+Do not rely on transitive inclusions.  This allows maintainers to remove no-longer-needed `#include` statements from their headers without breaking clients code.  This also applies to directly associated headers - `foo.cpp` should include `bar.h` if it uses a symbol defined there, even if `foo.h` (currently) includes `bar.h`.
+
 ### Forward Declarations
 
 > Avoid using forward declarations where possible. Just `#include` the headers you need.
@@ -311,49 +320,34 @@ Another useful rule of thumb: it's typically not cost effective to inline functi
 
 It is important to know that functions are not always inlined even if they are declared as such; for example, virtual and recursive functions are not normally inlined. Usually recursive functions should not be inline. The main reason for making a virtual function inline is to place its definition in the class, either for convenience or to document its behavior, e.g., for accessors and mutators.
 
-### Names and Order of Includes
+### Organization of Includes
 
-<!-- TODO: This section could be simplified, and clarified, I believe. -->
+> Use standard order for readability and to avoid hidden dependencies:
+> - The header associated with this source file, if any
+> - System headers and Arduino library headers (including other Kaleidoscope plugins, but not Kaleidoscope itself)
+> - Kaleidoscope headers and headers for the individual plugin (other than the associated header above)
 
-> Use standard order for readability and to avoid hidden dependencies: Related header, Arduino libraries, other libraries' `.h`, your project's `.h`.
+These three sections should be separated by single blank lines, and should be sorted alphabetically.
 
-All libraries must have at least one header in their top-level `src/` directory, to be included without any path components. This is the way Arduino finds libraries, and a limitation we must adhere to. These headers should - in general - include any other headers they may need, so that the consumer of the library only has to include one header. The name of this header must be the same as the name of the library.
+When including system headers and Arduino library headers (including Kaleidoscope plugins), use angle brackets to indicate that those sources are external.
 
-The recommended naming is to prefix the library name with `Kaleidoscope-`.
+For headers inside the current library and for Kaleidoscope core headers, use double quotes and a full pathname (starting below the `src/` directory).  This applies to the source file's associated header, as well; don't use a pathname relative to the source file's directory.
 
-If there is more than one header, they should be listed as descendants of the project's source directory without use of UNIX directory shortcuts `.` (the current directory) or `..` (the parent directory), and live in a `Kaleidoscope` subdirectory. For example, if we have a plugin named `Kaleidoscope-Something`, which has an additional header file other than `Kaleidoscope-Something.h`, it should be in `src/Kaleidoscope/Something-Other.h`, and be included as:
+For the sake of clarity, the above sections can be further divided to make it clear where each included header file can be found, but this is probably not necessary in most cases, because the path name of a header usually indicates which library it is located in.
 
-```c++
-#include "Kaleidoscope-Something.h"
-#include "Kaleidoscope/Something-Other.h"
-```
-
-Having more than one level of subdirectories is not recommended.
-
-In `dir/foo.cpp` or `dir/foo_test.cpp`, whose main purpose is to implement or test the stuff in `dir2/foo2.h`, order your includes as follows:
-
-1. `dir2/foo2.h`
-2. Arduino libraries.
-3. Other libraries' `.h` files.
-4. Your project's `.h` files.
-
-With the preferred ordering, if `dir2/foo2.h` omits any necessary includes, the build of `dir/foo.cpp` or `dir/foo_test.cpp` will break. Thus, this rule ensures that build breakages show up first for the people working on these files, not for innocent people in other packages.
-
-`dir/foo.cc` and `dir2/foo2.h` are usually in the same directory (e.g. `Kaleidoscope/Something_test.cpp` and `Kaleidoscope/Something.h`), but may sometimes be in different directories too.
-
-Within each section the includes should be ordered alphabetically.
-
-You should include all the headers that define the symbols you rely upon, except in the unusual case of [forward declarations](#forward-declarations). If you rely on symbols from `bar.h`, don't count on the fact that you included `foo.h` which (currently) includes `bar.h`: include `bar.h` yourself, unless `foo.h` explicitly demonstrates its intent to provide you the symbols of `bar.h`. However, any includes present in the related header do not need to be included again in the related `cc` (i.e., `foo.cc` can rely on `foo.h`'s includes).
-
-For example, the includes in `Kaleidoscope-Something/src/Kaleidoscope/Something.cpp` might look like this:
+For example, the includes in `Kaleidoscope-Something/src/kaleidoscope/Something.cpp` might look like this:
 
 ```c++
-#include "Kaleidoscope/Something.h"
+#include "kaleidoscope/Something.h"
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Kaleidoscope-Ranges.h>
+#include <stdint.h>
 
-#include "Kaleidoscope-LEDControl.h"
-#include "Kaleidoscope-Focus.h"
+#include "kaleidoscope/KeyAddr.h"
+#include "kaleidoscope/KeyEvent.h"
+#include "kaleidoscope/key_defs.h"
+#include "kaleidoscope/plugin/something/utils.h"
 ```
 
 **Exception**
@@ -361,16 +355,45 @@ For example, the includes in `Kaleidoscope-Something/src/Kaleidoscope/Something.
 Sometimes, system-specific code needs conditional includes. Such code can put conditional includes after other includes. Of course, keep your system-specific code small and localized. Example:
 
 ```c++
-#include "Kaleidoscope.h"
-
 #if defined(ARDUINO_AVR_MODEL01)
-#include "Kaleidoscope/Something-AVR-Model01.h"
+#include "kaleidoscope/Something-AVR-Model01.h"
 #endif
 
 #if defined(ARDUINO_AVR_SHORTCUT)
-#include "Kaleidoscope/Something-AVR-Shortcut.h"
+#include "kaleidoscope/Something-AVR-Shortcut.h"
 #endif
 ```
+
+### Top-level Arduinio Library Headers
+
+All libraries must have at least one header in their top-level `src/` directory, to be included without any path components. This is the way Arduino finds libraries, and a limitation we must adhere to. These headers should - in general - include any other headers they may need, so that the consumer of the library only has to include one header. The name of this header must be the same as the name of the library.
+
+The naming convention for Kaleidoscope plugins is to use the `Kaleidoscope-` prefix: e.g. `Kaleidoscope-Something`, which would have a top-level header named `Kaleidoscope-Something.h` in its `src/` directory.
+
+In the case of Kaleidoscope plugin libraries, the number of source and header files tends to be very small (usually just one `*.cpp` file and its associated header, in addition to the library's top-level header).  When one plugin depends on another, we therefore only include the top-level header of the dependency.  For example, if `Kaleidoscope-OtherThing` depends on `Kaleidoscope-Something`, the file `kaleidoscope/plugin/OtherThing.h` will contain the line:
+
+```c++
+#include <Kaleidoscope-Something.h>
+```
+
+…and `Kaleidoscope-Something.h` will look like this:
+
+```c++
+#include "kaleidoscope/plugin/Something.h"
+```
+
+This both makes it clearer where to find the included code, and allows the restructuring of that code without breaking the dependent library (assuming the symbols haven't changed as well).
+
+If a plugin library has symbols meant to be exported, and more than one header file in which those symbols are defined, all such header files should be included in the top-level header for the library.  For example, if `Kaleidoscope-Something` defines types `kaleidoscope::plugin::Something` and `kaleidoscope::plugin::something::Helper`, both of which are meant to be accessible by `Kaleidoscope-OtherThing`, the top-level header `Kaleidoscope-Something.h` should look like this:
+
+```c++
+#include "kaleidoscope/plugin/Something.h"
+#include "kaleidoscope/plugin/something/Helper.h"
+```
+
+### Automated header includes checking
+
+We have an automated wrapper for the `include-what-you-use` program from LLVM that processes most Kaleidoscope source files and updates their header includes to comply with the style guide.  It requires at least version 0.18 of `include-what-you-use` in order to function properly (because earlier versions do not return a useful exit code, so determining if there was an error was difficult).  It can be run by using the `make check-includes` target in the Kaleidoscope Makefile.
 
 <!-- TODO: Finish converting the rest... -->
 
@@ -2380,7 +2403,7 @@ New code should not contain calls to deprecated interface points. Use the new in
 
 Coding style and formatting are pretty arbitrary, but a project is much easier to follow if everyone uses the same style. Individuals may not agree with every aspect of the formatting rules, and some of the rules may take some getting used to, but it is important that all project contributors follow the style rules so that they can all read and understand everyone's code easily.
 
-To help you format code correctly, we use "Artistic Style" 3.0. The `make astyle` target is available in the Kaleidoscope and plugin Makefiles. Our CI infrastructure enforces `astyle`'s decisions.
+To help format code in compliance with this style guide, we use `clang-format`, which many editors can be configured to call automatically.  There is also `make format` target available in the Kaleidoscope Makefile that will use `clang-format` to format all the core and plugin code.  Our CI infrastructure checks to ensure that code has been formatted to these specifications.
 
 ### Line Length
 
@@ -3132,6 +3155,40 @@ The coding conventions described above are mandatory. However, like all good rul
 > You may diverge from the rules when dealing with code that does not conform to this style guide.
 
 If you find yourself modifying code that was written to specifications other than those presented by this guide, you may have to diverge from these rules in order to stay consistent with the local conventions in that code. If you are in doubt about how to do this, ask the original author or the person currently responsible for the code. Remember that *consistency* includes local consistency, too.
+
+## Maintenance Tools
+
+Kaleidoscope uses some automated tools to enforce compliance with this code style guide.  Primarily, we use `clang-format` to format source files, `cpplint` to check for potential problems, and `include-what-you-use` to update header includes.  These are invoked using python scripts that supply all of the necessary command-line parameters to both utilities.  For convenience, there are also some shell scripts and makefile targets that further simplify the process of running these utilities properly.
+
+### Code Formatting
+
+We use `clang-format`(version 12 or higher) to automatically format Kaleidoscope source files.  There is a top-level `.clang-format` config file that contains the settings that best match the style described in this guide.  However, there are some files in the repository that are, for one reason or another, exempt from formatting in this way, so we use a wrapper script, `format-code.py`, instead of invoking it directly.
+
+`format-code.py` takes a list of target filenames, either as command-line parameters or from standard input (if reading from a pipe, with each line treated as a filename), and formats those files.  If given a directory target, it will recursively search that directory for source files, and format all of the ones it finds.
+
+By default, `format-code.py` will first check for unstaged changes in the Kaleidoscope git working tree, and exit before formatting source files if any are found.  This is meant to make it easier for developers to see the changes made by the formatter in isolation.  It can be given the `--force` option to skip this check.
+
+It also has a `--check` option, which will cause `format-code.py` to check for unstaged git working tree changes after running `clang-format` on the target source files, and return an error code if there are any, allowing us to automatically verify that code submitted complies with the formatting rules.
+
+The easiest way to invoke the formatter on the whole repository is by running `make format` at the top level of the Kaleidoscope repository.
+
+For automated checking of PRs in a CI tool, there is also `make check-code-style`.
+
+### Linting
+
+We use a copy of `cpplint.py` (with a modification that allows us to set the config file) to check for potential problems in the code.  This can be invoked by running `make cpplint` at the top level of the Kaleidoscope repository.
+
+### Header Includes
+
+We use `include-what-you-use` (version 18 or higher) to automatically manage header includes in Kaleidoscope source files.  Because of the peculiarities of Kaleidoscope's build system, we use a wrapper script, `iwyu.py`, instead of invoking it directly.
+
+`iwyu.py` takes a list of target filenames, either as command-line parameters or from standard input (if reading from a pipe, with each line treated as a filename), and makes changes to the header includes.  If given a directory target, it will recursively search that directory for source files, and run `include-what-you-use` on all of the ones it finds.
+
+A number of files can't be processed this way, and are enumerated in `.iwyu_ignore`.  Files in the `testing` directory (for the test simulator) require different include path items, so cannot be combined in the same call to `iwyu.py`.
+
+The easiest way to invoke `iwyu.py` is by running `make check-includes`, which will check all files that differ between the git working tree and the current master branch of the main Kaleidoscope repository, update their headers, and return a non-zero exit code if there were any errors processing the file(s) or any changes made.
+
+For automated checking of header includes in a CI tool, there is also `make check-all-includes`, that checks the whole repository, not just the current branch's changes.
 
 ## Parting Words
 

@@ -31,14 +31,16 @@
  * generated code in an entirely different namespace.
  */
 
+// clang-format off
+
 #pragma once
 
-#include "kaleidoscope/macro_helpers.h"
-#include "kaleidoscope/plugin.h"
-#include "kaleidoscope/hooks.h"
-#include "kaleidoscope_internal/eventhandler_signature_check.h"
-#include "kaleidoscope/event_handlers.h"
-#include "kaleidoscope_internal/sketch_exploration/sketch_exploration.h"
+#include "kaleidoscope/event_handlers.h"                                  // for _FOR_EACH_EVENT...
+#include "kaleidoscope/macro_helpers.h"                                   // for __NL__, UNWRAP
+#include "kaleidoscope/plugin.h"  // IWYU pragma: keep
+#include "kaleidoscope_internal/eventhandler_signature_check.h"           // for _PREPARE_EVENT_...
+#include "kaleidoscope_internal/sketch_exploration/plugin_exploration.h"  // for _INIT_PLUGIN_EX...
+#include "kaleidoscope_internal/sketch_exploration/sketch_exploration.h"  // IWYU pragma: keep
 
 // Some words about the design of hook routing:
 //
@@ -80,7 +82,7 @@
 
 #define _REGISTER_EVENT_HANDLER(                                                 \
     HOOK_NAME, HOOK_VERSION, DEPRECATION_TAG,                                    \
-    SHOULD_ABORT_ON_CONSUMED_EVENT,                                              \
+    SHOULD_EXIT_IF_RESULT_NOT_OK,                                                \
     TMPL_PARAM_TYPE_LIST, TMPL_PARAM_LIST, TMPL_DUMMY_ARGS_LIST,                 \
     SIGNATURE, ARGS_LIST)                                                 __NL__ \
                                                                           __NL__ \
@@ -116,8 +118,8 @@
    MAKE_TEMPLATE_SIGNATURE(UNWRAP TMPL_PARAM_TYPE_LIST)                   __NL__ \
    struct _NAME4(EventHandler_, HOOK_NAME, _v, HOOK_VERSION) {            __NL__ \
                                                                           __NL__ \
-      static bool shouldAbortOnConsumedEvent() {                          __NL__ \
-        return SHOULD_ABORT_ON_CONSUMED_EVENT;                            __NL__ \
+      static bool shouldExitIfResultNotOk() {                             __NL__ \
+        return SHOULD_EXIT_IF_RESULT_NOT_OK;                              __NL__ \
       }                                                                   __NL__ \
                                                                           __NL__ \
       template<typename Plugin__,                                         __NL__ \
@@ -166,8 +168,8 @@
                                                                      __NL__ \
    result = EventHandler__::call(PLUGIN, hook_args...);              __NL__ \
                                                                      __NL__ \
-   if (EventHandler__::shouldAbortOnConsumedEvent() &&               __NL__ \
-       result == kaleidoscope::EventHandlerResult::EVENT_CONSUMED) { __NL__ \
+   if (EventHandler__::shouldExitIfResultNotOk() &&                  __NL__ \
+       result != kaleidoscope::EventHandlerResult::OK) {             __NL__ \
       return result;                                                 __NL__ \
    }                                                                 __NL__
 

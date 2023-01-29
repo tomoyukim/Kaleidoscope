@@ -17,15 +17,24 @@
 
 #ifdef ARDUINO_AVR_MODEL01
 
-#include "Arduino.h"                                 // for PROGMEM
-#include "kaleidoscope/device/keyboardio/Model01.h"  // for Model01LEDDriver...
-#include "kaleidoscope/key_events.h"
-#include "kaleidoscope/driver/keyscanner/Base_Impl.h"
+#include "kaleidoscope/device/keyboardio/Model01.h"
+
+// Arduino headers
+#include <Arduino.h>  // for PROGMEM
+// System headers
+#include <stdint.h>  // for uint8_t
 
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #include <KeyboardioHID.h>
 #include <avr/wdt.h>
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+
+// Kaleidoscope headers
+#include "kaleidoscope/driver/keyscanner/Base_Impl.h"  // IWYU pragma: keep
+// IWYU pragma: no_include "kaleidoscope/device/device.h"
+
+// Kaleidoscope-Hardware-Keyboardio-Model01 headers
+#include "kaleidoscope/driver/keyboardio/Model01Side.h"  // IWYU pragma: keep
 
 namespace kaleidoscope {
 namespace device {
@@ -47,15 +56,15 @@ struct Model01Hands {
 driver::keyboardio::Model01Side Model01Hands::leftHand(0);
 driver::keyboardio::Model01Side Model01Hands::rightHand(3);
 
-void Model01Hands::setup(void) {
+void Model01Hands::setup() {
   // This lets the keyboard pull up to 1.6 amps from the host.
   // That violates the USB spec. But it sure is pretty looking
   DDRE |= _BV(6);
   PORTE &= ~_BV(6);
 
   // Set B4, the overcurrent check to an input with an internal pull-up
-  DDRB &= ~_BV(4);	// set bit, input
-  PORTB &= ~_BV(4);	// set bit, enable pull-up resistor
+  DDRB &= ~_BV(4);   // set bit, input
+  PORTB &= ~_BV(4);  // set bit, enable pull-up resistor
 }
 
 /********* LED Driver *********/
@@ -125,7 +134,7 @@ void Model01LEDDriver::syncLeds() {
   isLEDChanged = false;
 }
 
-boolean Model01LEDDriver::ledPowerFault() {
+bool Model01LEDDriver::ledPowerFault() {
   if (PINB & _BV(4)) {
     return true;
   } else {
@@ -140,7 +149,7 @@ driver::keyboardio::keydata_t Model01KeyScanner::rightHandState;
 driver::keyboardio::keydata_t Model01KeyScanner::previousLeftHandState;
 driver::keyboardio::keydata_t Model01KeyScanner::previousRightHandState;
 
-void Model01KeyScanner::enableScannerPower(void) {
+void Model01KeyScanner::enableScannerPower() {
   // Turn on power to the LED net
   DDRC |= _BV(7);
   PORTC |= _BV(7);
@@ -154,7 +163,7 @@ void Model01KeyScanner::setup() {
 
 void Model01KeyScanner::readMatrix() {
   //scan the Keyboard matrix looking for connections
-  previousLeftHandState = leftHandState;
+  previousLeftHandState  = leftHandState;
   previousRightHandState = rightHandState;
 
   if (Model01Hands::leftHand.readKeys()) {
@@ -166,24 +175,24 @@ void Model01KeyScanner::readMatrix() {
   }
 }
 
-void Model01KeyScanner::actOnHalfRow(byte row, byte colState, byte colPrevState, byte startPos) {
+void Model01KeyScanner::actOnHalfRow(uint8_t row, uint8_t colState, uint8_t colPrevState, uint8_t startPos) {
   if ((colState != colPrevState) || (colState != 0)) {
-    for (byte col = 0; col < 8; col++) {
+    for (uint8_t col = 0; col < 8; col++) {
       // Build up the key state for row, col
       uint8_t keyState = ((bitRead(colPrevState, 0) << 0) |
-                          (bitRead(colState,     0) << 1));
+                          (bitRead(colState, 0) << 1));
       if (keyState)
         ThisType::handleKeyswitchEvent(Key_NoKey, KeyAddr(row, startPos - col), keyState);
 
       // Throw away the data we've just used, so we can read the next column
-      colState = colState >> 1;
+      colState     = colState >> 1;
       colPrevState = colPrevState >> 1;
     }
   }
 }
 
 void Model01KeyScanner::actOnMatrixScan() {
-  for (byte row = 0; row < 4; row++) {
+  for (uint8_t row = 0; row < 4; row++) {
     actOnHalfRow(row, leftHandState.rows[row], previousLeftHandState.rows[row], 7);
     actOnHalfRow(row, rightHandState.rows[row], previousRightHandState.rows[row], 15);
   }
@@ -234,7 +243,7 @@ void Model01::setup() {
   Model01Hands::setup();
   kaleidoscope::device::Base<Model01Props>::setup();
 
-  TWBR = 12; // This is 400mhz, which is the fastest we can drive the ATTiny
+  TWBR = 12;  // This is 400mhz, which is the fastest we can drive the ATTiny
 }
 
 void Model01::enableHardwareTestMode() {
@@ -248,7 +257,8 @@ void Model01::enableHardwareTestMode() {
 
 #endif
 
-}
-}
-}
+}  // namespace keyboardio
+}  // namespace device
+}  // namespace kaleidoscope
+
 #endif

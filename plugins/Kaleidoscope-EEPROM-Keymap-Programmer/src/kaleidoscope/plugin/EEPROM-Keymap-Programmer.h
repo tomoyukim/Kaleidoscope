@@ -17,8 +17,12 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-EEPROM-Keymap.h>
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
@@ -28,18 +32,16 @@ class EEPROMKeymapProgrammer : public kaleidoscope::Plugin {
     CODE,
     COPY,
   } mode_t;
-  static mode_t mode;
+  mode_t mode;
 
-  EEPROMKeymapProgrammer(void) {}
-
-  static void activate(void) {
+  void activate() {
     nextState();
   }
-  static void nextState(void);
-  static void cancel(void);
+  void nextState();
+  void cancel();
 
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult onFocusEvent(const char *input);
 
  private:
   typedef enum {
@@ -48,12 +50,13 @@ class EEPROMKeymapProgrammer : public kaleidoscope::Plugin {
     WAIT_FOR_CODE,
     WAIT_FOR_SOURCE_KEY,
   } state_t;
-  static state_t state_;
+  state_t state_;
 
-  static uint16_t update_position_;  // layer, row, col
-  static Key new_key_;
+  uint16_t update_position_;  // layer, row, col
+  Key new_key_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::EEPROMKeymapProgrammer EEPROMKeymapProgrammer;

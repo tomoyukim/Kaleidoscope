@@ -18,7 +18,7 @@
 #include <Kaleidoscope.h>
 #include <Kaleidoscope-CycleTimeReport.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -38,13 +38,22 @@ KEYMAPS(
     Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
     Key_skip),
 )
-// *INDENT-ON*
+// clang-format on
+
+// Override CycleTimeReport's reporting function:
+void kaleidoscope::plugin::CycleTimeReport::report(uint16_t mean_cycle_time) {
+  Serial.print(F("average loop time = "));
+  Serial.println(mean_cycle_time, DEC);
+}
 
 KALEIDOSCOPE_INIT_PLUGINS(CycleTimeReport);
 
 void setup() {
   Kaleidoscope.serialPort().begin(9600);
   Kaleidoscope.setup();
+
+  // Change the report interval to 2 seconds:
+  CycleTimeReport.setReportInterval(2000);
 }
 
 void loop() {

@@ -24,7 +24,7 @@ the box, without any further configuration:
 
 KALEIDOSCOPE_INIT_PLUGINS(EEPROMSettings, TypingBreaks);
 
-void setup (void) {
+void setup () {
   Kaleidoscope.setup ();
 
   TypingBreaks.settings.idle_time_limit = 60;
@@ -95,6 +95,18 @@ properties. All times are in seconds.
 ### `typingbreaks.rightMaxKeys [max]`
 
 > Get or set the `.settings.right_hand_max_keys` property.
+
+### `typingbreaks.leftKeys`
+
+> Get the current counter of keys pressed on the left half of the keyboard.
+
+### `typingbreaks.rightKeys`
+
+> Get the current counter of keys pressed on the right half of the keyboard.
+
+### `typingbreaks.lockSecsRemaining`
+
+> Get the duration the keyboard remains locked in seconds.
 
 ## Dependencies
 

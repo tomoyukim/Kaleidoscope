@@ -17,35 +17,40 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include <stdint.h>  // for uint8_t, uint16_t
 
-#define STALKER(v, ...) ({static kaleidoscope::plugin::stalker::v _effect __VA_ARGS__; &_effect;})
+#include "kaleidoscope/KeyEvent.h"                       // for KeyEvent
+#include "kaleidoscope/Runtime.h"                        // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"                  // for cRGB, CRGB, Device
+#include "kaleidoscope/event_handler_result.h"           // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                         // for Plugin
+#include "kaleidoscope/plugin/AccessTransientLEDMode.h"  // for AccessTransientLEDMode
+#include "kaleidoscope/plugin/LEDMode.h"                 // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"        // for LEDModeInterface
+
+#define STALKER(v, ...) ({static kaleidoscope::plugin::stalker::v _effect __VA_ARGS__; &_effect; })
 
 namespace kaleidoscope {
 namespace plugin {
 class StalkerEffect : public Plugin,
-  public LEDModeInterface,
-  public AccessTransientLEDMode {
+                      public LEDModeInterface,
+                      public AccessTransientLEDMode {
  public:
   class ColorComputer {
    public:
     virtual cRGB compute(uint8_t *step) = 0;
   };
 
-  StalkerEffect(void) {}
-
   static ColorComputer *variant;
   static uint16_t step_length;
   static cRGB inactive_color;
 
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t keyState);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 
   // This class' instance has dynamic lifetime
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
@@ -53,11 +58,9 @@ class StalkerEffect : public Plugin,
     explicit TransientLEDMode(const StalkerEffect *parent);
 
    protected:
-
     void update() final;
 
    private:
-
     const StalkerEffect *parent_;
 
     uint16_t step_start_time_;
@@ -72,29 +75,31 @@ namespace stalker {
 class Haunt : public StalkerEffect::ColorComputer {
  public:
   explicit Haunt(const cRGB highlight_color);
-  Haunt(void) : Haunt(CRGB(0x40, 0x80, 0x80)) {}
+  Haunt()
+    : Haunt(CRGB(0x40, 0x80, 0x80)) {}
 
   cRGB compute(uint8_t *step) final;
+
  private:
   static cRGB highlight_color_;
 };
 
 class BlazingTrail : public StalkerEffect::ColorComputer {
  public:
-  BlazingTrail(void);
+  BlazingTrail();
 
   cRGB compute(uint8_t *step) final;
 };
 
 class Rainbow : public StalkerEffect::ColorComputer {
  public:
-  Rainbow(void);
+  Rainbow();
 
   cRGB compute(uint8_t *step) final;
 };
 
-}
-}
-}
+}  // namespace stalker
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::StalkerEffect StalkerEffect;

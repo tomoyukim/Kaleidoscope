@@ -17,10 +17,12 @@
 
 #pragma once
 
+#include <stdint.h>  // for uint16_t, uint8_t
 #if defined(__AVR__) || defined(KALEIDOSCOPE_VIRTUAL_BUILD)
 
-#include "kaleidoscope/driver/storage/Base.h"
-#include <EEPROM.h>
+#include <EEPROM.h>  // for EEPROM, EEPROMClass
+
+#include "kaleidoscope/driver/storage/Base.h"  // for Base, BaseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -30,16 +32,16 @@ struct AVREEPROMProps : kaleidoscope::driver::storage::BaseProps {
   static constexpr uint16_t length = 0;
 };
 
-template <typename _StorageProps>
+template<typename _StorageProps>
 class AVREEPROM : public kaleidoscope::driver::storage::Base<_StorageProps> {
  public:
   template<typename T>
-  static T& get(uint16_t offset, T& t) {
+  static T &get(uint16_t offset, T &t) {
     return EEPROM.get(offset, t);
   }
 
   template<typename T>
-  static const T& put(uint16_t offset, T& t) {
+  static const T &put(uint16_t offset, T &t) {
     return EEPROM.put(offset, t);
   }
 
@@ -54,10 +56,18 @@ class AVREEPROM : public kaleidoscope::driver::storage::Base<_StorageProps> {
   void update(int idx, uint8_t val) {
     EEPROM.update(idx, val);
   }
+
+  bool isSliceUninitialized(uint16_t offset, uint16_t size) {
+    for (uint16_t o = offset; o < offset + size; o++) {
+      if (this->read(o) != _StorageProps::uninitialized_byte)
+        return false;
+    }
+    return true;
+  }
 };
 
-}
-}
-}
+}  // namespace storage
+}  // namespace driver
+}  // namespace kaleidoscope
 
 #endif

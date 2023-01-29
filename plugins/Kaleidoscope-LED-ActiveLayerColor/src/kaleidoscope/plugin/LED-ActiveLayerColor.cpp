@@ -15,8 +15,16 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-LED-ActiveLayerColor.h>
-#include "kaleidoscope/layers.h"
+#include "kaleidoscope/plugin/LED-ActiveLayerColor.h"
+
+#include <Arduino.h>  // for pgm_read_byte
+#include <stdint.h>   // for uint8_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/Runtime.h"               // for Runtime, Runtime_
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/layers.h"                // for Layer, Layer_
+#include "kaleidoscope/plugin/LEDControl.h"     // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
@@ -26,8 +34,7 @@ const cRGB *LEDActiveLayerColorEffect::colormap_;
 LEDActiveLayerColorEffect::TransientLEDMode::TransientLEDMode(
   const LEDActiveLayerColorEffect *parent)
   : parent_(parent),
-    active_color_{0, 0, 0}
-{}
+    active_color_{0, 0, 0} {}
 
 void LEDActiveLayerColorEffect::setColormap(const cRGB colormap[]) {
   colormap_ = colormap;
@@ -45,7 +52,7 @@ cRGB LEDActiveLayerColorEffect::TransientLEDMode::getActiveColor() {
   return color;
 }
 
-void LEDActiveLayerColorEffect::TransientLEDMode::onActivate(void) {
+void LEDActiveLayerColorEffect::TransientLEDMode::onActivate() {
   if (!Runtime.has_leds)
     return;
 
@@ -64,7 +71,7 @@ EventHandlerResult LEDActiveLayerColorEffect::onLayerChange() {
   return EventHandlerResult::OK;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::LEDActiveLayerColorEffect LEDActiveLayerColorEffect;

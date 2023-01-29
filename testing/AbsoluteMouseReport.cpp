@@ -16,19 +16,18 @@
 
 #include "testing/AbsoluteMouseReport.h"
 
-#include "Kaleidoscope.h"
-#include "testing/fix-macros.h"
+#include <cstring>  // for memcpy
+#include <vector>   // for vector
 
-#include <cstring>
-
-#include "MouseButtons.h"
+#include "MouseButtons.h"          // for MOUSE_LEFT, MOUSE_MIDDLE, MOUSE_NEXT, MOUSE_PREV, MOUS...
+#include "kaleidoscope/Runtime.h"  // for Runtime, Runtime_
 
 namespace kaleidoscope {
 namespace testing {
 
-AbsoluteMouseReport::AbsoluteMouseReport(const void* data) {
-  const ReportData& report_data =
-    *static_cast<const ReportData*>(data);
+AbsoluteMouseReport::AbsoluteMouseReport(const void *data) {
+  const ReportData &report_data =
+    *static_cast<const ReportData *>(data);
   memcpy(&report_data_, &report_data, sizeof(report_data_));
   timestamp_ = Runtime.millisAtCycleStart();
 }

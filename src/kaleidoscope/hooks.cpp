@@ -14,10 +14,10 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "kaleidoscope/event_handler_result.h"
-#include "kaleidoscope/event_handlers.h"
-#include "kaleidoscope/macro_helpers.h"
-#include "kaleidoscope/hooks.h"
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/event_handlers.h"        // for _FOR_EACH_EVENT_HANDLER
+#include "kaleidoscope/hooks.h"                 // for Hooks
+#include "kaleidoscope/macro_helpers.h"         // for __NL__, MAKE_TEMPLATE_SIGNATURE, UNWRAP
 
 namespace kaleidoscope {
 
@@ -30,9 +30,10 @@ namespace kaleidoscope {
 // that we can compile sketches that use no plugins, without them having to use
 // KALEIDOSCOPE_INIT_PLUGINS() with a dummy plugin.
 
+// clang-format off
 #define INSTANTIATE_WEAK_HOOK_FUNCTION(                                        \
     HOOK_NAME, HOOK_VERSION, DEPRECATION_TAG,                                  \
-    SHOULD_ABORT_ON_CONSUMED_EVENT,                                            \
+    SHOULD_EXIT_IF_RESULT_NOT_OK,                                              \
     TMPL_PARAM_TYPE_LIST, TMPL_PARAM_LIST, TMPL_DUMMY_ARGS_LIST,               \
     SIGNATURE, ARGS_LIST)                                               __NL__ \
                                                                         __NL__ \
@@ -43,6 +44,7 @@ namespace kaleidoscope {
    }
 
 _FOR_EACH_EVENT_HANDLER(INSTANTIATE_WEAK_HOOK_FUNCTION)
+// clang-format on
 
 #undef INSTANTIATE_WEAK_HOOK_FUNCTION
 
@@ -55,9 +57,9 @@ class Sketch;
 //
 template<>
 __attribute__((weak))
-EventHandlerResult Hooks::exploreSketch
-<sketch_exploration::Sketch>() {
+EventHandlerResult
+Hooks::exploreSketch<sketch_exploration::Sketch>() {
   return EventHandlerResult::OK;
 }
 
-} // namespace kaleidoscope
+}  // namespace kaleidoscope

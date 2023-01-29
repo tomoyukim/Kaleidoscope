@@ -15,24 +15,29 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-WinKeyToggle.h>
+#include "kaleidoscope/plugin/WinKeyToggle.h"
+
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult, EventHandlerResult::OK
+#include "kaleidoscope/key_defs.h"              // for Key, Key_LeftGui, Key_RightGui
 
 namespace kaleidoscope {
 namespace plugin {
 
 bool WinKeyToggle::enabled_;
 
-EventHandlerResult WinKeyToggle::onKeyswitchEvent(Key &key, KeyAddr key_addr, uint8_t key_state) {
+EventHandlerResult WinKeyToggle::onKeyEvent(KeyEvent &event) {
   if (!enabled_)
     return EventHandlerResult::OK;
 
-  if (key == Key_LeftGui || key == Key_RightGui)
-    return EventHandlerResult::EVENT_CONSUMED;
+  if (event.key == Key_LeftGui || event.key == Key_RightGui) {
+    return EventHandlerResult::ABORT;
+  }
 
   return EventHandlerResult::OK;
 }
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::WinKeyToggle WinKeyToggle;

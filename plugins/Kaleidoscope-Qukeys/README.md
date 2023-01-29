@@ -40,7 +40,10 @@ KALEIDOSCOPE_INIT_PLUGINS(Qukeys);
   columns are left to right:
 
 - For the Keyboardio Model 01, key coordinates refer to [this header
-  file](https://github.com/keyboardio/Kaleidoscope/blob/master/src/kaleidoscope/device/keyboardio/Model01.h#L167-L179).
+  file](https://github.com/keyboardio/Kaleidoscope/blob/master/plugins/Kaleidoscope-Hardware-Keyboardio-Model01/src/kaleidoscope/device/keyboardio/Model01.h#L153).
+  
+- For the Keyboardio Model 100, key coordinates refer to [this header
+  file](https://github.com/keyboardio/Kaleidoscope/blob/master/plugins/Kaleidoscope-Hardware-Keyboardio-Model100/src/kaleidoscope/device/keyboardio/Model100.h#L175).
 
 ```
 QUKEYS(
@@ -74,6 +77,22 @@ likely to generate errors and out-of-order events.
 > pointing device (i.e. `shift` + `click`).
 >
 > Defaults to `250`.
+
+### `.setMaxIntervalForTapRepeat(timeout)`
+
+> Sets the time (in milliseconds) that limits the tap-repeat window. If the same
+> qukey is pressed, released, and pressed again within this timeframe, then
+> held, Qukeys will turn it into a single press and hold event, using the
+> primary key value (which cannot otherwise be held). If the second press is
+> also a tap, and the two _release_ events occur within the same timeframe, it
+> will instead be treated as a double tap (of the primary key value).
+>
+> To effectively shut off the tap-repeat feature, set this value to `0`. The
+> maximum value is `255`; anything higher than `250` could result in key repeat
+> being triggered on the host before Qukeys determines whether it's a tap-repeat
+> or a double-tap sequence, because most systems delay the key repeat by 500 ms.
+>
+> Defaults to `200`.
 
 ### `.setOverlapThreshold(percentage)`
 
@@ -203,6 +222,16 @@ There is a special value (`Qukeys::layer_wildcard`) that can be used in place of
 the layer number in the definition of a `Qukey`. This will define a qukey with
 the given alternate value on all layers, regardless of what the primary value is
 for that key on the top currently active layer.
+
+
+### Tap-Repeat Behaviour
+
+If a qukey is tapped, then immediately pressed and held, Qukeys will turn that
+sequence of events into a single press and hold of the primary key value
+(whereas merely holding the key yeilds the alternate value). This is
+particularly useful on macOS apps that use Apple's Cocoa input system, where
+holding a key gives the user access to a menu of accented characters, rather
+than merely repeating the same character until the key is released.
 
 
 ## Design & Implementation

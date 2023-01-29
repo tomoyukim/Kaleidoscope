@@ -17,10 +17,12 @@
 
 #pragma once
 
-#include <Arduino.h>
-#include <KeyboardioHID.h>
+#include <KeyboardioHID.h>  // for SingleAbsoluteMouse_, SingleAbso...
+#include <stdint.h>         // for uint8_t, int8_t, uint16_t
 
-#include "kaleidoscope/driver/hid/base/AbsoluteMouse.h"
+#include "kaleidoscope/driver/hid/base/AbsoluteMouse.h"  // for AbsoluteMouse, AbsoluteMouseProps
+
+// IWYU pragma: no_include "DeviceAPIs/AbsoluteMouseAPI.hpp"
 
 namespace kaleidoscope {
 namespace driver {
@@ -62,14 +64,14 @@ class AbsoluteMouseWrapper {
   }
 };
 
-struct AbsoluteMouseProps: public base::AbsoluteMouseProps {
+struct AbsoluteMouseProps : public base::AbsoluteMouseProps {
   typedef AbsoluteMouseWrapper AbsoluteMouse;
 };
 
-template <typename _Props>
-class AbsoluteMouse: public base::AbsoluteMouse<_Props> {};
+template<typename _Props>
+class AbsoluteMouse : public base::AbsoluteMouse<_Props> {};
 
-}
-}
-}
-}
+}  // namespace keyboardio
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

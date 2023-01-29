@@ -29,13 +29,13 @@ namespace raise {
 
 class Focus : public kaleidoscope::Plugin {
  public:
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onFocusEvent(const char *input);
 };
 
-}
-}
-}
-}
+}  // namespace raise
+}  // namespace dygma
+}  // namespace device
+}  // namespace kaleidoscope
 
 extern kaleidoscope::device::dygma::raise::Focus RaiseFocus;
 

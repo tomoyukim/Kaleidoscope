@@ -16,10 +16,11 @@
  */
 
 #include <Kaleidoscope.h>
+#include <Kaleidoscope-LEDControl.h>
 #include <Kaleidoscope-LEDEffect-Rainbow.h>
 #include <Kaleidoscope-Macros.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -39,22 +40,22 @@ KEYMAPS(
     Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
     M(1)),
 )
-// *INDENT-ON*
+// clang-format on
 
 KALEIDOSCOPE_INIT_PLUGINS(LEDControl,
                           Macros,
                           LEDRainbowWaveEffect);
 
-const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
-  if (keyToggledOn(keyState)) {
+const macro_t *macroAction(uint8_t macro_id, KeyEvent &event) {
+  if (keyToggledOn(event.state)) {
     uint8_t brightness = LEDControl.getBrightness();
 
-    if (macroIndex == 0) {
+    if (macro_id == 0) {
       if (brightness > 10)
         brightness -= 10;
       else
         brightness = 0;
-    } else if (macroIndex == 1) {
+    } else if (macro_id == 1) {
       if (brightness < 245)
         brightness += 10;
       else

@@ -17,23 +17,21 @@
 
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>  // for uint16_t, uint8_t
 
-#include "kaleidoscope/macro_helpers.h"
-#include "kaleidoscope/driver/keyscanner/Base.h"
-#include "kaleidoscope/driver/keyscanner/None.h"
-
-#include "kaleidoscope/device/avr/pins_and_ports.h"
+#include "kaleidoscope/device/avr/pins_and_ports.h"  // IWYU pragma: keep
+#include "kaleidoscope/driver/keyscanner/Base.h"     // for BaseProps
+#include "kaleidoscope/driver/keyscanner/None.h"     // for None
 
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #include <avr/wdt.h>
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 
 namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
-struct ATmegaProps: kaleidoscope::driver::keyscanner::BaseProps {
+struct ATmegaProps : kaleidoscope::driver::keyscanner::BaseProps {
   static const uint16_t keyscan_interval = 1500;
   typedef uint16_t RowState;
 
@@ -47,8 +45,8 @@ struct ATmegaProps: kaleidoscope::driver::keyscanner::BaseProps {
 
 
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-template <typename _KeyScannerProps>
-class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
+template<typename _KeyScannerProps>
+class ATmega : public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
  private:
   typedef ATmega<_KeyScannerProps> ThisType;
 
@@ -56,12 +54,10 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   void setup() {
     static_assert(
       sizeof(_KeyScannerProps::matrix_row_pins) > 0,
-      "The key scanner description has an empty array of matrix row pins."
-    );
+      "The key scanner description has an empty array of matrix row pins.");
     static_assert(
       sizeof(_KeyScannerProps::matrix_col_pins) > 0,
-      "The key scanner description has an empty array of matrix column pins."
-    );
+      "The key scanner description has an empty array of matrix column pins.");
 
     wdt_disable();
 
@@ -90,13 +86,12 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
 
     const uint32_t cycles = (F_CPU / 2000000) * c;
 
-    ICR1 = cycles;
+    ICR1   = cycles;
     TCCR1B = _BV(WGM13) | _BV(CS10);
     TIMSK1 = _BV(TOIE1);
   }
 
-  __attribute__((optimize(3)))
-  void readMatrix(void) {
+  __attribute__((optimize(3))) void readMatrix(void) {
     typename _KeyScannerProps::RowState any_debounced_changes = 0;
 
     for (uint8_t current_row = 0; current_row < _KeyScannerProps::matrix_rows; current_row++) {
@@ -123,8 +118,8 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   void __attribute__((optimize(3))) actOnMatrixScan() {
-    for (byte row = 0; row < _KeyScannerProps::matrix_rows; row++) {
-      for (byte col = 0; col < _KeyScannerProps::matrix_columns; col++) {
+    for (uint8_t row = 0; row < _KeyScannerProps::matrix_rows; row++) {
+      for (uint8_t col = 0; col < _KeyScannerProps::matrix_columns; col++) {
         uint8_t keyState = (bitRead(matrix_state_[row].previous, col) << 0) | (bitRead(matrix_state_[row].current, col) << 1);
         if (keyState) {
           ThisType::handleKeyswitchEvent(Key_NoKey, typename _KeyScannerProps::KeyAddr(row, col), keyState);
@@ -170,8 +165,8 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
     and the state in debounced_state[0].
   */
   struct debounce_t {
-    typename _KeyScannerProps::RowState db0;    // counter bit 0
-    typename _KeyScannerProps::RowState db1;    // counter bit 1
+    typename _KeyScannerProps::RowState db0;              // counter bit 0
+    typename _KeyScannerProps::RowState db1;              // counter bit 1
     typename _KeyScannerProps::RowState debounced_state;  // debounced state
   };
 
@@ -199,10 +194,11 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
    * Do not remove the attribute!
    */
   __attribute__((optimize("no-unroll-loops")))
-  typename _KeyScannerProps::RowState readCols() {
+  typename _KeyScannerProps::RowState
+  readCols() {
     typename _KeyScannerProps::RowState hot_pins = 0;
     for (uint8_t i = 0; i < _KeyScannerProps::matrix_columns; i++) {
-      asm("NOP"); // We need to pause a beat before reading or we may read before the pin is hot
+      asm("NOP");  // We need to pause a beat before reading or we may read before the pin is hot
       hot_pins |= (!READ_PIN(_KeyScannerProps::matrix_col_pins[i]) << i);
     }
 
@@ -210,8 +206,7 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
   }
 
   static inline typename _KeyScannerProps::RowState debounce(
-    typename _KeyScannerProps::RowState sample, debounce_t *debouncer
-  ) {
+    typename _KeyScannerProps::RowState sample, debounce_t *debouncer) {
     typename _KeyScannerProps::RowState delta, changes;
 
     // Use xor to detect changes from last stable state:
@@ -234,11 +229,11 @@ class ATmega: public kaleidoscope::driver::keyscanner::Base<_KeyScannerProps> {
     return changes;
   }
 };
-#else // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-template <typename _KeyScannerProps>
+#else   // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+template<typename _KeyScannerProps>
 class ATmega : public keyscanner::None {};
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 
-}
-}
-}
+}  // namespace keyscanner
+}  // namespace driver
+}  // namespace kaleidoscope

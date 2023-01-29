@@ -16,21 +16,23 @@
 
 #pragma once
 
-#include "Kaleidoscope-LEDControl.h"
+#include <stdint.h>  // for uint8_t, uint16_t
+
+#include "kaleidoscope/plugin.h"                   // for Plugin
+#include "kaleidoscope/plugin/LEDMode.h"           // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"  // for LEDModeInterface
 
 namespace kaleidoscope {
 namespace plugin {
 class LEDRainbowEffect : public Plugin,
-  public LEDModeInterface {
+                         public LEDModeInterface {
  public:
-  LEDRainbowEffect(void) {}
-
-  void brightness(byte);
-  byte brightness(void) {
+  void brightness(uint8_t);
+  uint8_t brightness() {
     return rainbow_value;
   }
-  void update_delay(byte);
-  byte update_delay(void) {
+  void update_delay(uint8_t);
+  uint8_t update_delay() {
     return rainbow_update_delay;
   }
 
@@ -38,7 +40,6 @@ class LEDRainbowEffect : public Plugin,
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
@@ -49,33 +50,30 @@ class LEDRainbowEffect : public Plugin,
     void update() final;
 
    private:
-
     const LEDRainbowEffect *parent_;
 
-    uint16_t rainbow_hue = 0;   //  stores 0 to 614
+    uint16_t rainbow_hue = 0;  //  stores 0 to 614
 
-    uint8_t rainbow_steps = 1;  //  number of hues we skip in a 360 range per update
+    uint8_t rainbow_steps       = 1;  //  number of hues we skip in a 360 range per update
     uint8_t rainbow_last_update = 0;
 
-    byte rainbow_saturation = 255;
+    uint8_t rainbow_saturation = 255;
   };
 
  private:
-  uint8_t rainbow_update_delay = 40; // delay between updates (ms)
-  byte rainbow_value = 50;
+  uint8_t rainbow_update_delay = 40;  // delay between updates (ms)
+  uint8_t rainbow_value        = 50;
 };
 
 
 class LEDRainbowWaveEffect : public Plugin, public LEDModeInterface {
  public:
-  LEDRainbowWaveEffect(void) {}
-
-  void brightness(byte);
-  byte brightness(void) {
+  void brightness(uint8_t);
+  uint8_t brightness() {
     return rainbow_value;
   }
-  void update_delay(byte);
-  byte update_delay(void) {
+  void update_delay(uint8_t);
+  uint8_t update_delay() {
     return rainbow_update_delay;
   }
 
@@ -83,7 +81,6 @@ class LEDRainbowWaveEffect : public Plugin, public LEDModeInterface {
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
@@ -94,22 +91,22 @@ class LEDRainbowWaveEffect : public Plugin, public LEDModeInterface {
     void update() final;
 
    private:
-
     const LEDRainbowWaveEffect *parent_;
 
     uint16_t rainbow_hue = 0;  //  stores 0 to 614
 
-    uint8_t rainbow_wave_steps = 1;  //  number of hues we skip in a 360 range per update
+    uint8_t rainbow_wave_steps  = 1;  //  number of hues we skip in a 360 range per update
     uint8_t rainbow_last_update = 0;
 
-    byte rainbow_saturation = 255;
+    uint8_t rainbow_saturation = 255;
   };
 
-  uint8_t rainbow_update_delay = 40; // delay between updates (ms)
-  byte rainbow_value = 50;
+  uint8_t rainbow_update_delay = 40;  // delay between updates (ms)
+  uint8_t rainbow_value        = 50;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LEDRainbowEffect LEDRainbowEffect;
 extern kaleidoscope::plugin::LEDRainbowWaveEffect LEDRainbowWaveEffect;

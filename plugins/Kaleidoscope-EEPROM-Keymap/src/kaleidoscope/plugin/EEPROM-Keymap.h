@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-EEPROM-Keymap -- EEPROM-based keymap support.
- * Copyright (C) 2017, 2018, 2019  Keyboard.io, Inc
+ * Copyright (C) 2017, 2018, 2019, 2021  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,8 +17,12 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-EEPROM-Settings.h>
+#include <stdint.h>  // for uint8_t, uint16_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
@@ -29,16 +33,15 @@ class EEPROMKeymap : public kaleidoscope::Plugin {
     EXTEND
   };
 
-  EEPROMKeymap(void) {}
-
   EventHandlerResult onSetup();
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onFocusEvent(const char *input);
 
   static void setup(uint8_t max);
 
   static void max_layers(uint8_t max);
 
-  static uint16_t keymap_base(void);
+  static uint16_t keymap_base();
 
   static Key getKey(uint8_t layer, KeyAddr key_addr);
   static Key getKeyExtended(uint8_t layer, KeyAddr key_addr);
@@ -50,11 +53,12 @@ class EEPROMKeymap : public kaleidoscope::Plugin {
   static uint8_t max_layers_;
   static uint8_t progmem_layers_;
 
-  static Key parseKey(void);
+  static Key parseKey();
   static void printKey(Key key);
-  static void dumpKeymap(uint8_t layers, Key(*getkey)(uint8_t, KeyAddr));
+  static void dumpKeymap(uint8_t layers, Key (*getkey)(uint8_t, KeyAddr));
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::EEPROMKeymap EEPROMKeymap;

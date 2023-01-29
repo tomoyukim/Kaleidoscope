@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * kaleidoscope::device::Base -- Kaleidoscope device Base class
- * Copyright (C) 2017, 2018, 2019  Keyboard.io, Inc
+ * Copyright (C) 2017-2021  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -15,22 +15,26 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// IWYU pragma: private, include "kaleidoscope/device/device.h"
+
 /** @file kaleidoscope/device/Base.h
  * Base class for Kaleidoscope device libraries.
  */
 
 #pragma once
 
-#include "kaleidoscope/MatrixAddr.h"
-#include "kaleidoscope_internal/deprecations.h"
-#include "kaleidoscope/macro_helpers.h"
+#include <stdint.h>  // for uint8_t, int8_t, uint32_t
+#include <string.h>  // for size_t, strlen, memcpy
 
-#include "kaleidoscope/driver/hid/Keyboardio.h"
-#include "kaleidoscope/driver/keyscanner/None.h"
-#include "kaleidoscope/driver/led/None.h"
-#include "kaleidoscope/driver/mcu/None.h"
-#include "kaleidoscope/driver/bootloader/None.h"
-#include "kaleidoscope/driver/storage/None.h"
+#include "kaleidoscope/driver/bootloader/None.h"  // for None
+#include "kaleidoscope/driver/hid/Base.h"         // for Base, BaseProps
+#include "kaleidoscope/driver/keyscanner/Base.h"  // for BaseProps
+#include "kaleidoscope/driver/keyscanner/None.h"  // for None
+#include "kaleidoscope/driver/led/None.h"         // for cRGB, BaseProps, CRGB, None
+#include "kaleidoscope/driver/mcu/Base.h"         // for BaseProps
+#include "kaleidoscope/driver/mcu/None.h"         // for None
+#include "kaleidoscope/driver/storage/Base.h"     // for BaseProps
+#include "kaleidoscope/driver/storage/None.h"     // for None
 
 #ifndef CRGB
 #error cRGB and CRGB *must* be defined before including this header!
@@ -53,8 +57,8 @@ namespace kaleidoscope {
 namespace device {
 
 struct BaseProps {
-  typedef kaleidoscope::driver::hid::KeyboardioProps HIDProps;
-  typedef kaleidoscope::driver::hid::Keyboardio<HIDProps> HID;
+  typedef kaleidoscope::driver::hid::BaseProps HIDProps;
+  typedef kaleidoscope::driver::hid::Base<HIDProps> HID;
   typedef kaleidoscope::driver::keyscanner::BaseProps KeyScannerProps;
   typedef kaleidoscope::driver::keyscanner::None KeyScanner;
   typedef kaleidoscope::driver::led::BaseProps LEDDriverProps;
@@ -73,9 +77,28 @@ class Base {
   class NoOpSerial {
    public:
     NoOpSerial() {}
+    void begin(uint32_t baud) {}
+    size_t print(...) {
+      return 0;
+    }
+    size_t println(...) {
+      return 0;
+    }
+    int peek() {
+      return 0;
+    }
+    long parseInt() {  // NOLINT(runtime/int)
+      return 0;
+    }
+    int available() {
+      return 0;
+    }
+    int read() {
+      return 0;
+    }
   };
 
-  static NoOpSerial noop_serial_;
+  NoOpSerial noop_serial_;
 
  public:
   Base() {}
@@ -95,9 +118,9 @@ class Base {
   typedef typename _DeviceProps::StorageProps StorageProps;
   typedef typename _DeviceProps::Storage Storage;
 
-  static constexpr uint8_t matrix_rows = KeyScannerProps::matrix_rows;
+  static constexpr uint8_t matrix_rows    = KeyScannerProps::matrix_rows;
   static constexpr uint8_t matrix_columns = KeyScannerProps::matrix_columns;
-  static constexpr uint8_t led_count = LEDDriverProps::led_count;
+  static constexpr uint8_t led_count      = LEDDriverProps::led_count;
   static constexpr auto LEDs() -> decltype(LEDDriver::LEDs()) & {
     return LEDDriver::LEDs();
   }
@@ -282,6 +305,16 @@ class Base {
   /** @} */
 
   /**
+   * Poll the USB device for a USB reset.
+   *
+   * @return true if a USB reset has occurred
+   * @return false if a USB reset has not occurred
+   */
+  bool pollUSBReset() {
+    return mcu_.pollUSBReset();
+  }
+
+  /**
    * @defgroup kaleidoscope_hardware_keyswitch_state Kaleidoscope::Hardware/Key-switch state
    *
    * These methods offer a way to peek at the key switch states, for those cases
@@ -403,8 +436,8 @@ class Base {
   Storage storage_;
 };
 
-}
-}
+}  // namespace device
+}  // namespace kaleidoscope
 
 // EXPORT_DEVICE exports a device type from a specific namespace to
 // the 'kaleidoscope' namespace as type 'Device'. The corresponding
@@ -416,10 +449,10 @@ class Base {
 // e.g. Model01 as device and Model01Props as properties class.
 //
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-#define EXPORT_DEVICE(DEVICE)                                                  \
-  typedef DEVICE##Props DeviceProps;                                           \
+#define EXPORT_DEVICE(DEVICE)        \
+  typedef DEVICE##Props DeviceProps; \
   typedef DEVICE Device;
-#else // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-#define EXPORT_DEVICE(DEVICE)                                                  \
+#else  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#define EXPORT_DEVICE(DEVICE) \
   typedef DEVICE##Props DeviceProps;
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD

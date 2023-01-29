@@ -14,12 +14,16 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-LEDEffect-SolidColor.h"
+#include "kaleidoscope/plugin/LEDEffect-SolidColor.h"
+
+#include "kaleidoscope/KeyAddr.h"            // for KeyAddr
+#include "kaleidoscope/device/device.h"      // for CRGB
+#include "kaleidoscope/plugin/LEDControl.h"  // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
 
-void LEDSolidColor::TransientLEDMode::onActivate(void) {
+void LEDSolidColor::TransientLEDMode::onActivate() {
   ::LEDControl.set_all_leds_to(parent_->r_,
                                parent_->g_,
                                parent_->b_);
@@ -32,5 +36,5 @@ void LEDSolidColor::TransientLEDMode::refreshAt(KeyAddr key_addr) {
                               parent_->b_));
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope

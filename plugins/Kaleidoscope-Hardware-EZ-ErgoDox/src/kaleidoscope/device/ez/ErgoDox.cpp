@@ -27,36 +27,32 @@
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #ifdef ARDUINO_AVR_ERGODOX
 
-#include "kaleidoscope/Runtime.h"
 #include <avr/wdt.h>
+
+#include "kaleidoscope/KeyEvent.h"
+#include "kaleidoscope/Runtime.h"
 #include "kaleidoscope/device/ez/ErgoDox/ErgoDoxScanner.h"
-#include "kaleidoscope/key_events.h"
+#include "kaleidoscope/keyswitch_state.h"
 
 namespace kaleidoscope {
 namespace device {
 namespace ez {
 
-ErgoDoxScanner ErgoDox::scanner_;
-uint8_t ErgoDox::previousKeyState_[matrix_rows];
-uint8_t ErgoDox::keyState_[matrix_rows];
-uint8_t ErgoDox::debounce_matrix_[matrix_rows][matrix_columns];
-uint8_t ErgoDox::debounce = 5;
-
 static bool do_scan_ = 1;
 
-void ErgoDox::setup(void) {
+void ErgoDox::setup() {
   wdt_disable();
   delay(100);
 
   TCCR1A = 0b10101001;
   TCCR1B = 0b00001001;
 
-  DDRB  &= ~(1 << 4);
+  DDRB &= ~(1 << 4);
   PORTB &= ~(1 << 4);
 
-  DDRC  &= ~(1 << 7);
-  DDRD  &= ~(1 << 5 | 1 << 4);
-  DDRE  &= ~(1 << 6);
+  DDRC &= ~(1 << 7);
+  DDRD &= ~(1 << 5 | 1 << 4);
+  DDRE &= ~(1 << 6);
   PORTC |= (1 << 7);
   PORTD |= (1 << 5 | 1 << 4);
   PORTE |= (1 << 6);
@@ -73,7 +69,7 @@ void ErgoDox::setup(void) {
 
   const uint32_t cycles = (F_CPU / 2000000) * 1700;
 
-  ICR1 = cycles;
+  ICR1   = cycles;
   TCCR1B = _BV(WGM13) | _BV(CS10);
   TIMSK1 = _BV(TOIE1);
 
@@ -110,12 +106,14 @@ void __attribute__((optimize(3))) ErgoDox::readMatrix() {
 }
 
 void __attribute__((optimize(3))) ErgoDox::actOnMatrixScan() {
-  for (byte row = 0; row < matrix_rows; row++) {
-    for (byte col = 0; col < matrix_columns; col++) {
-      uint8_t keyState = (bitRead(previousKeyState_[row], col) << 0) |
-                         (bitRead(keyState_[row], col) << 1);
-      if (keyState)
-        handleKeyswitchEvent(Key_NoKey, KeyAddr(row, col), keyState);
+  for (uint8_t row = 0; row < matrix_rows; row++) {
+    for (uint8_t col = 0; col < matrix_columns; col++) {
+      uint8_t key_state = (bitRead(previousKeyState_[row], col) << 0) |
+                          (bitRead(keyState_[row], col) << 1);
+      if (keyToggledOn(key_state) || keyToggledOff(key_state)) {
+        auto event = KeyEvent::next(KeyAddr(row, col), key_state);
+        kaleidoscope::Runtime.handleKeyswitchEvent(event);
+      }
     }
     previousKeyState_[row] = keyState_[row];
   }
@@ -144,9 +142,8 @@ void ErgoDox::setStatusLED(uint8_t led, bool state) {
 }
 
 void ErgoDox::setStatusLEDBrightness(uint8_t led, uint8_t brightness) {
-  (led == 1) ? (OCR1A = brightness) :
-  (led == 2) ? (OCR1B = brightness) :
-  (OCR1C = brightness);
+  (led == 1) ? (OCR1A = brightness) : (led == 2) ? (OCR1B = brightness)
+                                                 : (OCR1C = brightness);
 }
 
 uint8_t ErgoDox::debounceMaskForRow(uint8_t row) {
@@ -206,9 +203,9 @@ uint8_t ErgoDox::pressedKeyswitchCount() {
   return count;
 }
 
-}
-}
-}
+}  // namespace ez
+}  // namespace device
+}  // namespace kaleidoscope
 
 #endif
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD

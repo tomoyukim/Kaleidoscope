@@ -16,17 +16,24 @@
 
 #pragma once
 
-#include <cstddef>
+// IWYU pragma: no_include <__memory/unique_ptr.h>
 
-#include "testing/ExpectedKeyboardReport.h"
-#include "testing/SimHarness.h"
-#include "testing/State.h"
+#include <cstddef>           // for size_t
+#include <cstdint>           // for uint32_t, int8_t, uint8_t
+#include <initializer_list>  // for initializer_list
+#include <memory>            // IWYU pragma: keep
+#include <set>               // for set
+#include <vector>            // for vector
 
-// Out of order due to macro conflicts.
-#include "testing/fix-macros.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include <memory>
+#include "kaleidoscope/KeyAddr.h"            // for KeyAddr
+#include "kaleidoscope/key_defs.h"           // for Key
+#include "testing/ExpectedKeyboardReport.h"  // for ExpectedKeyboardReport
+#include "testing/ExpectedMouseReport.h"     // for ExpectedMouseReport
+#include "testing/HIDState.h"                // for HIDState
+#include "testing/SimHarness.h"              // for SimHarness
+#include "testing/State.h"                   // for State
+#include "testing/gtest.h"                   // for Test
+#include "testing/iostream.h"                // for string
 
 namespace kaleidoscope {
 namespace testing {
@@ -37,16 +44,19 @@ namespace testing {
 // differentiated types for those polymorphic functions.
 class AddKeycodes : public std::set<Key> {
  public:
-  AddKeycodes(std::initializer_list<Key> list) : std::set<Key>(list) {}
+  AddKeycodes(std::initializer_list<Key> list)
+    : std::set<Key>(list) {}
 };
 class RemoveKeycodes : public std::set<Key> {
  public:
-  RemoveKeycodes(std::initializer_list<Key> list) : std::set<Key>(list) {}
+  RemoveKeycodes(std::initializer_list<Key> list)
+    : std::set<Key>(list) {}
 };
 
 class Keycodes : public std::set<Key> {
  public:
-  Keycodes(std::initializer_list<Key> list) : std::set<Key>(list) {}
+  Keycodes(std::initializer_list<Key> list)
+    : std::set<Key>(list) {}
 };
 
 
@@ -77,7 +87,7 @@ class VirtualDeviceTest : public ::testing::Test {
   void ClearState();
 
   // Get a pointer to the current list of observed HID reports
-  const HIDState* HIDReports() const;
+  const HIDState *HIDReports() const;
 
   // Get the timestamp of a logged Keyboard HID report
   uint32_t ReportTimestamp(size_t index) const;
@@ -103,28 +113,33 @@ class VirtualDeviceTest : public ::testing::Test {
   // keycode changes in a single report; others only a single keycode. Some run
   // the simulator for a specified number of milliseconds or cycles first. These
   // expected-value reports are all stored in a vector:
-  std::vector<ExpectedKeyboardReport> expected_reports_ = {};
+  std::vector<ExpectedKeyboardReport> expected_keyboard_reports_ = {};
 
-  void ExpectReport(AddKeycodes added_keys,
-                    RemoveKeycodes removed_keys,
-                    std::string description);
+  void ExpectKeyboardReport(AddKeycodes added_keys,
+                            RemoveKeycodes removed_keys,
+                            std::string description);
 
-  void ExpectReport(Keycodes added_keys, std::string description);
-  void ExpectReport(AddKeycodes added_keys, std::string description);
-  void ExpectReport(RemoveKeycodes removed_keys, std::string description);
+  void ExpectKeyboardReport(Keycodes added_keys, std::string description);
+  void ExpectKeyboardReport(AddKeycodes added_keys, std::string description);
+  void ExpectKeyboardReport(RemoveKeycodes removed_keys, std::string description);
+
+  std::vector<ExpectedMouseReport> expected_mouse_reports_ = {};
+
+  void ExpectMouseReport(uint8_t buttons, int8_t x, int8_t y, int8_t v, int8_t h, std::string description);
 
   // ---------------------------------------------------------------------------
   std::set<uint8_t> current_keyboard_keycodes_ = {};
   // Manage the set of keycodes expected in the next report
-  void ClearReport();
-  void AddToReport(Key key);
-  void RemoveFromReport(Key key);
+  void ClearKeyboardReport();
+  void AddToKeyboardReport(Key key);
+  void RemoveFromKeyboardReport(Key key);
 
   // ---------------------------------------------------------------------------
   // Compare accumulated observed and expected reports, matching both timestamps
   // and keycodes.
   void CheckReports() const;
-
+  void CheckKeyboardReports() const;
+  void CheckMouseReports() const;
 };
 
 }  // namespace testing

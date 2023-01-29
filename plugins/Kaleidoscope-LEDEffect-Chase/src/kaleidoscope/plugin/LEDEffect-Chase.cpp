@@ -14,12 +14,18 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-LEDEffect-Chase.h"
+#include "kaleidoscope/plugin/LEDEffect-Chase.h"
+
+#include <stdint.h>  // for uint16_t, uint8_t
+
+#include "kaleidoscope/Runtime.h"            // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"      // for CRGB, Device, Base<>::LEDRangeIterator
+#include "kaleidoscope/plugin/LEDControl.h"  // for LEDControl
 
 namespace kaleidoscope {
 namespace plugin {
 
-void LEDChaseEffect::TransientLEDMode::update(void) {
+void LEDChaseEffect::TransientLEDMode::update() {
   if (!Runtime.has_leds)
     return;
 
@@ -63,7 +69,7 @@ void LEDChaseEffect::TransientLEDMode::update(void) {
     ::LEDControl.setCrgbAt(pos2, CRGB(0, 0, 255));
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::LEDChaseEffect LEDChaseEffect;

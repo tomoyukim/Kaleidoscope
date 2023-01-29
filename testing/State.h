@@ -16,15 +16,11 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <vector>
+// IWYU pragma: no_include <__memory/unique_ptr.h>
 
-#include "testing/HIDState.h"
+#include <memory>  // IWYU pragma: keep
 
-// Out of order due to macro conflicts.
-#include "testing/fix-macros.h"
-#include <memory>
+#include "testing/HIDState.h"  // for HIDState
 
 namespace kaleidoscope {
 namespace testing {
@@ -33,7 +29,7 @@ class State {
  public:
   static std::unique_ptr<State> Snapshot();
 
-  const HIDState* HIDReports() const;
+  const HIDState *HIDReports() const;
 
  private:
   std::unique_ptr<HIDState> hid_state_;

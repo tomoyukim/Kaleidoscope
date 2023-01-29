@@ -16,50 +16,63 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef ARDUINO_AVR_MODEL01
+#if defined(ARDUINO_AVR_MODEL01) || defined(ARDUINO_keyboardio_model_100)
 
-#include <Kaleidoscope-LED-Wavepool.h>
-#include "kaleidoscope/keyswitch_state.h"
+#include "kaleidoscope/plugin/LED-Wavepool.h"
+
+#include <Arduino.h>  // for pgm_read_byte, PROGMEM, abs
+#include <stdint.h>   // for int8_t, uint8_t, int16_t, intptr_t
+
+#include "kaleidoscope/KeyAddr.h"                     // for MatrixAddr, KeyAddr, MatrixAddr<>::...
+#include "kaleidoscope/KeyEvent.h"                    // for KeyEvent
+#include "kaleidoscope/Runtime.h"                     // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"               // for Device, cRGB
+#include "kaleidoscope/event_handler_result.h"        // for EventHandlerResult, EventHandlerRes...
+#include "kaleidoscope/keyswitch_state.h"             // for keyIsPressed
+#include "kaleidoscope/plugin/LEDControl.h"           // for LEDControl
+#include "kaleidoscope/plugin/LEDControl/LEDUtils.h"  // for hsvToRgb
 
 namespace kaleidoscope {
 namespace plugin {
 
-#define INTERPOLATE 1 // smoother, slower animation
-#define MS_PER_FRAME 40  // 40 = 25 fps
+#define INTERPOLATE     1    // smoother, slower animation
+#define MS_PER_FRAME    40   // 40 = 25 fps
 #define FRAMES_PER_DROP 120  // max time between raindrops during idle animation
 
-uint16_t WavepoolEffect::idle_timeout = 5000;  // 5 seconds
-int16_t WavepoolEffect::ripple_hue = WavepoolEffect::rainbow_hue; // automatic hue
+uint16_t WavepoolEffect::idle_timeout = 5000;                         // 5 seconds
+int16_t WavepoolEffect::ripple_hue    = WavepoolEffect::rainbow_hue;  // automatic hue
 
 // map native keyboard coordinates (16x4) into geometric space (14x5)
 PROGMEM const uint8_t WavepoolEffect::TransientLEDMode::rc2pos[Runtime.device().numKeys()] = {
+  // clang-format off
   0,  1,  2,  3,  4,  5,  6,     59, 66,    7,  8,  9, 10, 11, 12, 13,
   14, 15, 16, 17, 18, 19, 34,    60, 65,   35, 22, 23, 24, 25, 26, 27,
   28, 29, 30, 31, 32, 33, 48,    61, 64,   49, 36, 37, 38, 39, 40, 41,
   42, 43, 44, 45, 46, 47,     58, 62, 63, 67,    50, 51, 52, 53, 54, 55,
+  // clang-format on
 };
 
 WavepoolEffect::TransientLEDMode::TransientLEDMode(const WavepoolEffect *parent)
   : frames_since_event_(0),
     surface_{},
-    page_(0)
-{}
+    page_(0) {}
 
-EventHandlerResult WavepoolEffect::onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state) {
-  if (!key_addr.isValid())
+EventHandlerResult WavepoolEffect::onKeyEvent(KeyEvent &event) {
+  if (!event.addr.isValid())
     return EventHandlerResult::OK;
 
   if (::LEDControl.get_mode_index() != led_mode_id_)
     return EventHandlerResult::OK;
 
-  return ::LEDControl.get_mode<TransientLEDMode>()
-         ->onKeyswitchEvent(mapped_key, key_addr, key_state);
+  return ::LEDControl.get_mode<TransientLEDMode>()->onKeyEvent(event);
 }
 
-EventHandlerResult WavepoolEffect::TransientLEDMode::onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state) {
-  if (keyIsPressed(key_state)) {
-    surface_[page_][pgm_read_byte(rc2pos + key_addr.toInt())] = 0x7f;
-    frames_since_event_ = 0;
+EventHandlerResult WavepoolEffect::TransientLEDMode::onKeyEvent(KeyEvent &event) {
+  // It might be better to trigger on both toggle-on and toggle-off, but maybe
+  // just the former.
+  if (keyIsPressed(event.state)) {
+    surface_[page_][pgm_read_byte(rc2pos + event.addr.toInt())] = 0x7f;
+    frames_since_event_                                         = 0;
   }
 
   return EventHandlerResult::OK;
@@ -79,15 +92,15 @@ void WavepoolEffect::TransientLEDMode::raindrop(uint8_t x, uint8_t y, int8_t *pa
 // and still looks random-ish
 uint8_t WavepoolEffect::TransientLEDMode::wp_rand() {
   static intptr_t offset = 0x400;
-  offset = ((offset + 1) & 0x4fff) | 0x400;
+  offset                 = ((offset + 1) & 0x4fff) | 0x400;
   return (Runtime.millisAtCycleStart() / MS_PER_FRAME) + pgm_read_byte((const uint8_t *)offset);
 }
 
-void WavepoolEffect::TransientLEDMode::update(void) {
+void WavepoolEffect::TransientLEDMode::update() {
 
   // limit the frame rate; one frame every 64 ms
   static uint8_t prev_time = 0;
-  uint8_t now = Runtime.millisAtCycleStart() / MS_PER_FRAME;
+  uint8_t now              = Runtime.millisAtCycleStart() / MS_PER_FRAME;
   if (now != prev_time) {
     prev_time = now;
   } else {
@@ -98,9 +111,9 @@ void WavepoolEffect::TransientLEDMode::update(void) {
   // (side note: it's weird that this is a 16-bit int instead of 8-bit,
   //  but that's what the library function wants)
   static uint8_t current_hue = 0;
-  current_hue ++;
+  current_hue++;
 
-  frames_since_event_ ++;
+  frames_since_event_++;
 
   // needs two pages of height map to do the calculations
   int8_t *newpg = &surface_[page_ ^ 1][0];
@@ -108,8 +121,8 @@ void WavepoolEffect::TransientLEDMode::update(void) {
 
   // rain a bit while idle
   static uint8_t frames_till_next_drop = 0;
-  static int8_t prev_x = -1;
-  static int8_t prev_y = -1;
+  static int8_t prev_x                 = -1;
+  static int8_t prev_y                 = -1;
 #ifdef INTERPOLATE
   // even frames: water movement and page flipping
   // odd frames: raindrops and tweening
@@ -123,11 +136,9 @@ void WavepoolEffect::TransientLEDMode::update(void) {
       raindrop(prev_x, prev_y, oldpg);
       prev_x = prev_y = -1;
     }
-    if (frames_since_event_
-        >= (frames_till_next_drop
-            + (idle_timeout / MS_PER_FRAME))) {
+    if (frames_since_event_ >= (frames_till_next_drop + (idle_timeout / MS_PER_FRAME))) {
       frames_till_next_drop = 4 + (wp_rand() % FRAMES_PER_DROP);
-      frames_since_event_ = idle_timeout / MS_PER_FRAME;
+      frames_since_event_   = idle_timeout / MS_PER_FRAME;
 
       uint8_t x = wp_rand() % WP_WID;
       uint8_t y = wp_rand() % WP_HGT;
@@ -150,11 +161,14 @@ void WavepoolEffect::TransientLEDMode::update(void) {
         uint8_t offset = (y * WP_WID) + x;
 
         int16_t value;
-        int8_t offsets[] = { -WP_WID,    WP_WID,
-                             -1,         1,
-                             -WP_WID - 1, -WP_WID + 1,
-                             WP_WID - 1,  WP_WID + 1
-                           };
+        int8_t offsets[] = {
+          // clang-format off
+          -WP_WID,      WP_WID,
+          -1,           1,
+          -WP_WID - 1,  -WP_WID + 1,
+          WP_WID - 1,   WP_WID + 1
+          // clang-format on
+        };
         // don't wrap around edges or go out of bounds
         if (y == 0) {
           offsets[0] = 0;
@@ -199,10 +213,10 @@ void WavepoolEffect::TransientLEDMode::update(void) {
     }
 #endif
 
-    uint8_t intensity = abs(height) * 2;
+    uint8_t intensity  = abs(height) * 2;
     uint8_t saturation = 0xff - intensity;
-    uint8_t value = (intensity >= 128) ? 255 : intensity << 1;
-    int16_t hue = ripple_hue;
+    uint8_t value      = (intensity >= 128) ? 255 : intensity << 1;
+    int16_t hue        = ripple_hue;
 
     if (ripple_hue == WavepoolEffect::rainbow_hue) {
       // color starts white but gets dimmer and more saturated as it fades,
@@ -222,11 +236,10 @@ void WavepoolEffect::TransientLEDMode::update(void) {
   // swap pages every frame
   page_ ^= 1;
 #endif
-
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::WavepoolEffect WavepoolEffect;
 

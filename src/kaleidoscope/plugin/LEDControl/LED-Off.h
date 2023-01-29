@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include "Kaleidoscope-LEDControl.h"
+#include "kaleidoscope/KeyAddr.h"         // for KeyAddr
+#include "kaleidoscope/plugin/LEDMode.h"  // for LEDMode
 
 namespace kaleidoscope {
 namespace plugin {
@@ -26,13 +27,13 @@ namespace plugin {
 //
 class LEDOff : public LEDMode {
  public:
-  LEDOff(void) { }
+  LEDOff(void) {}
 
  protected:
   void onActivate(void) final;
   void refreshAt(KeyAddr key_addr) final;
 };
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LEDOff LEDOff;

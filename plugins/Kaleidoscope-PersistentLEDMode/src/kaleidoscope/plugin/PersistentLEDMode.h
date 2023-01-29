@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * kaleidoscope::plugin::PersistentLEDMode -- Persist the current LED mode to Storage
- * Copyright (C) 2019  Keyboard.io, Inc.
+ * Copyright (C) 2019-2022  Keyboard.io, Inc.
  * Copyright (C) 2019  Dygma, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -18,23 +18,28 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
+#include <stdint.h>  // for uint8_t, uint16_t
+
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
-class PersistentLEDMode: public kaleidoscope::Plugin {
+class PersistentLEDMode : public kaleidoscope::Plugin {
  public:
-  PersistentLEDMode() {}
-
   EventHandlerResult onSetup();
+  EventHandlerResult onNameQuery();
   EventHandlerResult onLEDModeChange();
+
  private:
   static uint16_t settings_base_;
-  static uint8_t cached_mode_index_;
+  static struct settings {
+    uint8_t default_mode_index;
+  } settings_;
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::PersistentLEDMode PersistentLEDMode;

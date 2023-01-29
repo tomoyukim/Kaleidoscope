@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Escape-OneShot -- Turn ESC into a key that cancels OneShots, if active.
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2016-2021  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -16,10 +16,12 @@
  */
 
 #include <Kaleidoscope.h>
+#include <Kaleidoscope-EEPROM-Settings.h>
 #include <Kaleidoscope-OneShot.h>
 #include <Kaleidoscope-Escape-OneShot.h>
+#include <Kaleidoscope-FocusSerial.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -59,10 +61,13 @@ KEYMAPS(
     ___
   ),
 )
-// *INDENT-ON*
+// clang-format on
 
-KALEIDOSCOPE_INIT_PLUGINS(OneShot,
-                          EscapeOneShot);
+KALEIDOSCOPE_INIT_PLUGINS(EEPROMSettings,
+                          Focus,
+                          OneShot,
+                          EscapeOneShot,
+                          EscapeOneShotConfig);
 
 void setup() {
   Kaleidoscope.setup();

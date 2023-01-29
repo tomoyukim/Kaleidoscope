@@ -17,17 +17,35 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/keyscanner/Base.h"
-#include "kaleidoscope/device/device.h"
+#include <stdint.h>  // for uint8_t
+
+#include "kaleidoscope/KeyEvent.h"                // for KeyEvent
+#include "kaleidoscope/Runtime.h"                 // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"           // for Device
+#include "kaleidoscope/driver/keyscanner/Base.h"  // for Base
+#include "kaleidoscope/key_defs.h"                // for Key
+#include "kaleidoscope/keyswitch_state.h"         // for keyToggledOff, keyToggledOn
 
 namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
 template<>
-void Base<kaleidoscope::Device::Props::KeyScannerProps>::handleKeyswitchEvent(Key mappedKey, kaleidoscope::Device::Props::KeyScannerProps::KeyAddr key_addr, uint8_t keyState) {
-  ::handleKeyswitchEvent(mappedKey, key_addr, keyState);
+void Base<kaleidoscope::Device::Props::KeyScannerProps>::handleKeyswitchEvent(
+  Key key __attribute__((unused)),
+  kaleidoscope::Device::Props::KeyScannerProps::KeyAddr key_addr,
+  uint8_t key_state) {
+
+  // Because the `KeyEvent` constructor invoked below assigns a new `EventId`
+  // each time it's called, and plugins that implement `onKeyswitchEvent()` and
+  // use those event ID numbers to determine whether or not an event is new,
+  // it's critical that we do the test for keyswitches toggling on or off first.
+  if (keyToggledOn(key_state) || keyToggledOff(key_state)) {
+    auto event = KeyEvent::next(key_addr, key_state);
+    kaleidoscope::Runtime.handleKeyswitchEvent(event);
+  }
 }
-} // namespace keyscanner
-} // namespace driver
-} // namespace kaleidoscope
+
+}  // namespace keyscanner
+}  // namespace driver
+}  // namespace kaleidoscope

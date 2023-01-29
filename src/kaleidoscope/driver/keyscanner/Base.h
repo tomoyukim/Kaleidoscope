@@ -17,22 +17,24 @@
 
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>  // for uint8_t
 
-#include "kaleidoscope/key_defs.h"
-#include "kaleidoscope/MatrixAddr.h"
+#include "kaleidoscope/MatrixAddr.h"  // IWYU pragma: keep
+#include "kaleidoscope/key_defs.h"    // for Key
+
+// IWYU pragma: no_include "kaleidoscope/KeyAddr.h"
 
 namespace kaleidoscope {
 namespace driver {
 namespace keyscanner {
 
 struct BaseProps {
-  static constexpr uint8_t matrix_rows = 0;
+  static constexpr uint8_t matrix_rows    = 0;
   static constexpr uint8_t matrix_columns = 0;
   typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
 };
 
-template <typename _KeyScannerProps>
+template<typename _KeyScannerProps>
 class Base {
  public:
   Base() {}
@@ -59,9 +61,8 @@ class Base {
   bool wasKeyswitchPressed(KeyAddr key_addr) {
     return false;
   }
-
 };
 
-}
-}
-}
+}  // namespace keyscanner
+}  // namespace driver
+}  // namespace kaleidoscope

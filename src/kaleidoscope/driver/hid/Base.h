@@ -16,12 +16,10 @@
  */
 
 #pragma once
-#include <Arduino.h>
-#include "kaleidoscope/key_defs.h"
 
-#include "base/Keyboard.h"
-#include "base/Mouse.h"
-#include "base/AbsoluteMouse.h"
+#include "base/AbsoluteMouse.h"  // for AbsoluteMouse, AbsoluteMouseProps
+#include "base/Keyboard.h"       // for Keyboard, KeyboardProps
+#include "base/Mouse.h"          // for Mouse, MouseProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -36,7 +34,7 @@ struct BaseProps {
   typedef base::AbsoluteMouse<AbsoluteMouseProps> AbsoluteMouse;
 };
 
-template <typename _Props>
+template<typename _Props>
 class Base {
  private:
   typename _Props::Keyboard keyboard_;
@@ -48,6 +46,10 @@ class Base {
 
   void setup() {
     keyboard().setup();
+  }
+
+  void onUSBReset() {
+    keyboard().onUSBReset();
   }
 
   auto keyboard() -> decltype(keyboard_) & {
@@ -63,6 +65,6 @@ class Base {
   }
 };
 
-}
-}
-}
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

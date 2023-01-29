@@ -15,14 +15,12 @@
  */
 
 namespace kaleidoscope {
-\
 namespace sketch_exploration {
 
 // This empty weak symbol is necessary if the KEYMAP(...) macro
 // is not used in the sketch.
 //
-__attribute__((weak))
-void pluginsExploreSketch() {}
+__attribute__((weak)) void pluginsExploreSketch() {}
 
-} // namespace sketch_exploration
-} // namespace kaleidoscope
+}  // namespace sketch_exploration
+}  // namespace kaleidoscope

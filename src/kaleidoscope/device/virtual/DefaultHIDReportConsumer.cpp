@@ -16,31 +16,39 @@
 
 #ifdef KALEIDOSCOPE_VIRTUAL_BUILD
 
-#include "DefaultHIDReportConsumer.h"
-#include "MultiReport/Keyboard.h"
-#include "Logging.h"
+#include "kaleidoscope/device/virtual/DefaultHIDReportConsumer.h"
 
-#include "virtual_io.h"
+// From KeyboardioHID:
+#include <HID-Settings.h>          // for HID_REPORTID_NKRO_KEYBOARD
+#include <MultiReport/Keyboard.h>  // for HID_KeyboardReport_Data_t, (anonymous u...
+// From system:
+#include <stdint.h>  // for uint8_t
+// From Arduino core:
+#include <virtual_io.h>  // for logUSBEvent_keyboard
+
+// From Kaleidoscope:
+#include "kaleidoscope/device/virtual/Logging.h"  // for log_info, logging
 
 #undef min
 #undef max
 
-#include <sstream>
+#include <sstream>  // for operator<<, stringstream, basic_ostream
+#include <string>   // for char_traits, operator+, basic_string
 
 namespace kaleidoscope {
 
-using namespace logging; // NOLINT(build/namespaces)
+using namespace logging;  // NOLINT(build/namespaces)
 
 // For each bit set in 'bitfield', output the corresponding string to 'stream'
 #define FOREACHBIT(bitfield, stream, str0, str1, str2, str3, str4, str5, str6, str7) \
-  if((bitfield) & 1<<0) stream << str0; \
-  if((bitfield) & 1<<1) stream << str1; \
-  if((bitfield) & 1<<2) stream << str2; \
-  if((bitfield) & 1<<3) stream << str3; \
-  if((bitfield) & 1<<4) stream << str4; \
-  if((bitfield) & 1<<5) stream << str5; \
-  if((bitfield) & 1<<6) stream << str6; \
-  if((bitfield) & 1<<7) stream << str7;
+  if ((bitfield)&1 << 0) stream << str0;                                             \
+  if ((bitfield)&1 << 1) stream << str1;                                             \
+  if ((bitfield)&1 << 2) stream << str2;                                             \
+  if ((bitfield)&1 << 3) stream << str3;                                             \
+  if ((bitfield)&1 << 4) stream << str4;                                             \
+  if ((bitfield)&1 << 5) stream << str5;                                             \
+  if ((bitfield)&1 << 6) stream << str6;                                             \
+  if ((bitfield)&1 << 7) stream << str7;
 
 void DefaultHIDReportConsumer::processHIDReport(
   uint8_t id, const void *data, int len, int result) {
@@ -49,21 +57,26 @@ void DefaultHIDReportConsumer::processHIDReport(
     return;
   }
 
-  const HID_KeyboardReport_Data_t &report_data
-    = *static_cast<const HID_KeyboardReport_Data_t *>(data);
+  const HID_KeyboardReport_Data_t &report_data = *static_cast<const HID_KeyboardReport_Data_t *>(data);
 
   std::stringstream keypresses;
   bool anything = false;
 
-  if (report_data.modifiers) anything = true;
-  else for (int i = 0; i < KEY_BYTES; i++) if (report_data.keys[i]) {
+  if (report_data.modifiers) {
+    anything = true;
+  } else {
+    for (int i = 0; i < KEY_BYTES; i++) {
+      if (report_data.keys[i]) {
         anything = true;
         break;
       }
+    }
+  }
 
   if (!anything) {
     keypresses << "none";
   } else {
+    // clang-format off
     FOREACHBIT(report_data.modifiers, keypresses,
                "lctrl ", "lshift ", "lalt ", "lgui ",
                "rctrl ", "rshift ", "ralt ", "rgui ")
@@ -106,6 +119,7 @@ void DefaultHIDReportConsumer::processHIDReport(
     FOREACHBIT(report_data.keys[16], keypresses,
                "volup ", "voldn ", "capslock_l ", "numlock_l ",
                "scrolllock_l ", "num, ", "num= ", "(other) ")
+    // clang-format on
 
     for (int i = 17; i < KEY_BYTES; i++) {
       // A little imprecise, in two ways:
@@ -120,6 +134,6 @@ void DefaultHIDReportConsumer::processHIDReport(
   logUSBEvent_keyboard("Keyboard HID report; pressed keys: " + keypresses.str());
 }
 
-} // namespace kaleidoscope
+}  // namespace kaleidoscope
 
-#endif // ifdef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifdef KALEIDOSCOPE_VIRTUAL_BUILD

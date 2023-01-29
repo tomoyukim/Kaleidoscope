@@ -21,7 +21,7 @@
 #include <Kaleidoscope-Syster.h>
 #include <Kaleidoscope-Unicode.h>
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -41,7 +41,7 @@ KEYMAPS(
     Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
     SYSTER),
 )
-// *INDENT-ON*
+// clang-format on
 
 void systerAction(kaleidoscope::plugin::Syster::action_t action, const char *symbol) {
   switch (action) {
@@ -49,10 +49,7 @@ void systerAction(kaleidoscope::plugin::Syster::action_t action, const char *sym
     Unicode.type(0x2328);
     break;
   case kaleidoscope::plugin::Syster::EndAction:
-    handleKeyswitchEvent(Key_Backspace, UnknownKeyswitchLocation, IS_PRESSED | INJECTED);
-    Kaleidoscope.hid().keyboard().sendReport();
-    handleKeyswitchEvent(Key_Backspace, UnknownKeyswitchLocation, WAS_PRESSED | INJECTED);
-    Kaleidoscope.hid().keyboard().sendReport();
+    kaleidoscope::eraseChars(1);
     break;
   case kaleidoscope::plugin::Syster::SymbolAction:
     Kaleidoscope.serialPort().print("systerAction: symbol=");

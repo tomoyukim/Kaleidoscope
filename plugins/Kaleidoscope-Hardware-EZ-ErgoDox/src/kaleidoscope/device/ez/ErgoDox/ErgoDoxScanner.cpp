@@ -27,21 +27,24 @@
 #ifdef ARDUINO_AVR_ERGODOX
 
 #include "kaleidoscope/device/ez/ErgoDox/ErgoDoxScanner.h"
+
+#include <Arduino.h>
 #include <avr/wdt.h>
+
 #include "kaleidoscope/device/avr/pins_and_ports.h"
 #include "kaleidoscope/device/ez/ErgoDox/i2cmaster.h"
 
-#define I2C_ADDR        0b0100000
-#define I2C_ADDR_WRITE  ( (I2C_ADDR<<1) | I2C_WRITE )
-#define I2C_ADDR_READ   ( (I2C_ADDR<<1) | I2C_READ  )
-#define IODIRA          0x00
-#define IODIRB          0x01
-#define GPPUA           0x0C
-#define GPPUB           0x0D
-#define GPIOA           0x12
-#define GPIOB           0x13
-#define OLATA           0x14
-#define OLATB           0x15
+#define I2C_ADDR       0b0100000
+#define I2C_ADDR_WRITE ((I2C_ADDR << 1) | I2C_WRITE)
+#define I2C_ADDR_READ  ((I2C_ADDR << 1) | I2C_READ)
+#define IODIRA         0x00
+#define IODIRB         0x01
+#define GPPUA          0x0C
+#define GPPUB          0x0D
+#define GPIOA          0x12
+#define GPIOB          0x13
+#define OLATA          0x14
+#define OLATB          0x15
 
 namespace kaleidoscope {
 namespace device {
@@ -87,20 +90,19 @@ out:
   return status;
 }
 
-void
-ErgoDoxScanner::begin() {
+void ErgoDoxScanner::begin() {
   expander_error_ = initExpander();
 
   // Init columns
-  DDRF  &= ~(1 << 7 | 1 << 6 | 1 << 5 | 1 << 4 | 1 << 1 | 1 << 0);
+  DDRF &= ~(1 << 7 | 1 << 6 | 1 << 5 | 1 << 4 | 1 << 1 | 1 << 0);
   PORTF |= (1 << 7 | 1 << 6 | 1 << 5 | 1 << 4 | 1 << 1 | 1 << 0);
 
   // Init rows
-  DDRB  |= (1 << 0 | 1 << 1 | 1 << 2 | 1 << 3);
+  DDRB |= (1 << 0 | 1 << 1 | 1 << 2 | 1 << 3);
   PORTB |= (1 << 0 | 1 << 1 | 1 << 2 | 1 << 3);
-  DDRD  |= (1 << 2 | 1 << 3);
+  DDRD |= (1 << 2 | 1 << 3);
   PORTD |= (1 << 2 | 1 << 3);
-  DDRC  |= (1 << 6);
+  DDRC |= (1 << 6);
   PORTC |= (1 << 6);
 }
 
@@ -115,13 +117,13 @@ void __attribute__((optimize(3))) ErgoDoxScanner::selectExtenderRow(int row) {
     expander_error_ = i2c_write(0xFF & ~(1 << row));
     if (expander_error_)
       goto out;
-out:
+  out:
     i2c_stop();
   }
 }
 
 void __attribute__((optimize(3))) ErgoDoxScanner::toggleATMegaRow(int row) {
-  static uint8_t row_pins[] = { PIN_B0, PIN_B1, PIN_B2, PIN_B3, PIN_D2, PIN_D3, PIN_C6 };
+  static uint8_t row_pins[] = {PIN_B0, PIN_B1, PIN_B2, PIN_B3, PIN_D2, PIN_D3, PIN_C6};
   OUTPUT_TOGGLE(row_pins[row]);
 }
 
@@ -145,7 +147,7 @@ ErgoDoxScanner::readCols(int row) {
 
     data = i2c_readNak();
     data = ~data;
-out:
+  out:
     i2c_stop();
     return data;
   } else {
@@ -153,8 +155,7 @@ out:
   }
 }
 
-void
-ErgoDoxScanner::reattachExpanderOnError() {
+void ErgoDoxScanner::reattachExpanderOnError() {
   static uint32_t start_time = millis();
 
   if (!expander_error_)
@@ -164,12 +165,12 @@ ErgoDoxScanner::reattachExpanderOnError() {
     return;
 
   expander_error_ = initExpander();
-  start_time = millis();
+  start_time      = millis();
 }
 
-}
-}
-}
+}  // namespace ez
+}  // namespace device
+}  // namespace kaleidoscope
 
 #endif
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD

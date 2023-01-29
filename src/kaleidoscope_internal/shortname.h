@@ -14,6 +14,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+
 #pragma once
 
 /*
@@ -26,7 +28,11 @@
  * this workaround.
  */
 
+#ifndef _INIT_HID_GETSHORTNAME
+
 #define _INIT_HID_GETSHORTNAME                        __NL__ \
   uint8_t HID_::getShortName(char *name) {            __NL__ \
     return Kaleidoscope.device().getShortName(name);  __NL__ \
   }
+
+#endif

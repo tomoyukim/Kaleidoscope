@@ -18,10 +18,10 @@
 
 #pragma once
 
-#if !defined(KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR) && \
+#if !defined(KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR) &&    \
   !defined(KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR_DOWN) && \
   !defined(KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_LEGACY_TEENSY2)
 #define KALEIDOSCOPE_HARDWARE_ATREUS_PINOUT_ASTAR 1
 #endif
 
-#include "kaleidoscope/device/technomancy/Atreus.h"
+#include "kaleidoscope/device/technomancy/Atreus.h"  // IWYU pragma: export

@@ -33,14 +33,15 @@ struct cRGB {
   uint8_t r, g, b;
 };
 
-#define CRGB(r,g,b) (cRGB){b, g, r}
+#define CRGB(r, g, b) \
+  (cRGB) { b, g, r }
 
-#include "kaleidoscope/driver/keyscanner/Base.h"
-#include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
 #include "kaleidoscope/device/ATmega32U4Keyboard.h"
+#include "kaleidoscope/driver/bootloader/avr/HalfKay.h"
+#include "kaleidoscope/driver/keyscanner/Base.h"
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 #include "kaleidoscope/device/ez/ErgoDox/ErgoDoxScanner.h"
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 
 namespace kaleidoscope {
 namespace device {
@@ -48,10 +49,9 @@ namespace ez {
 
 struct ErgoDoxProps : public kaleidoscope::device::ATmega32U4KeyboardProps {
   struct KeyScannerProps : kaleidoscope::driver::keyscanner::BaseProps {
-    static constexpr uint8_t matrix_rows = 14;
+    static constexpr uint8_t matrix_rows    = 14;
     static constexpr uint8_t matrix_columns = 6;
     typedef MatrixAddr<matrix_rows, matrix_columns> KeyAddr;
-
   };
   typedef kaleidoscope::driver::bootloader::avr::HalfKay Bootloader;
   static constexpr const char *short_name = "ErgoDox-EZ";
@@ -60,11 +60,9 @@ struct ErgoDoxProps : public kaleidoscope::device::ATmega32U4KeyboardProps {
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 class ErgoDox : public kaleidoscope::device::ATmega32U4Keyboard<ErgoDoxProps> {
  public:
-  ErgoDox(void) {}
-
-  void scanMatrix(void);
-  void readMatrix(void);
-  void actOnMatrixScan(void);
+  void scanMatrix();
+  void readMatrix();
+  void actOnMatrixScan();
   void setup();
 
   bool isKeyswitchPressed(KeyAddr key_addr);
@@ -80,21 +78,23 @@ class ErgoDox : public kaleidoscope::device::ATmega32U4Keyboard<ErgoDoxProps> {
   void setStatusLED(uint8_t led, bool state = true);
   void setStatusLEDBrightness(uint8_t led, uint8_t brightness);
 
-  static uint8_t debounce;
+  uint8_t debounce = 5;
 
  private:
-  static ErgoDoxScanner scanner_;
-  static uint8_t previousKeyState_[matrix_rows];
-  static uint8_t keyState_[matrix_rows];
-  static uint8_t debounce_matrix_[matrix_rows][matrix_columns];
+  ErgoDoxScanner scanner_;
+  uint8_t previousKeyState_[matrix_rows];  // NOLINT(runtime/arrays)
+  uint8_t keyState_[matrix_rows];          // NOLINT(runtime/arrays)
+  uint8_t debounce_matrix_[matrix_rows][matrix_columns];
 
-  static uint8_t debounceMaskForRow(uint8_t row);
-  static void debounceRow(uint8_t change, uint8_t row);
-  static void readMatrixRow(uint8_t row);
+  uint8_t debounceMaskForRow(uint8_t row);
+  void debounceRow(uint8_t change, uint8_t row);
+  void readMatrixRow(uint8_t row);
 };
-#else // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#else   // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 class ErgoDox;
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+
+// clang-format off
 
 #define PER_KEY_DATA_STACKED(dflt,                                    \
     /* left hand, spatial positions */                                  \
@@ -134,11 +134,12 @@ class ErgoDox;
     r0c11, r1c11, r2c11, r3c11, r4c11, r5c11,                           \
     r0c12, r1c12, r2c12, r3c12, r4c12, r5c12,                           \
     r0c13, r1c13, r2c13, r3c13, r4c13, dflt
-}
-}
+
+}  // namespace ez
+}  // namespace device
 
 EXPORT_DEVICE(kaleidoscope::device::ez::ErgoDox)
 
-}
+}  // namespace kaleidoscope
 
 #endif

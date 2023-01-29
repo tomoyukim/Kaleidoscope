@@ -1,7 +1,30 @@
+# Reset a bunch of historical GNU make implicit rules that we never
+# use, but which have a disastrous impact on performance
+#
+# --no-builtin-rules in MAKEFLAGS apparently came in with GNU Make 4,
+# which is newer than what Apple ships
+MAKEFLAGS += --no-builtin-rules
+
+# These lines reset the implicit rules we really care about
+%:: %,v
+
+%:: RCS/%,v
+
+%:: RCS/%
+
+%:: s.%
+
+%:: SCCS/s.%
+
+.SUFFIXES:
+
+
 mkfile_dir 	:= $(dir $(lastword ${MAKEFILE_LIST}))
 top_dir         := $(abspath $(mkfile_dir)../..)
 
 include $(mkfile_dir)/shared.mk
+
+include_plugins_dir := -I${top_dir}/plugins \
 
 build_dir := ${top_dir}/_build/${testcase}
 
@@ -41,21 +64,25 @@ endif
 
 TEST_OBJS=$(patsubst $(SRC_DIR)/%.cpp,${OBJ_DIR}/%.o,$(TEST_FILES))
 
-build: ${BIN_DIR}/${BIN_FILE} compile-sketch
+build: $(if $(HAS_KTEST_FILE), generate-testcase) compile-sketch
 
 all: run
 
 run: ${BIN_DIR}/${BIN_FILE}
+	$(info )
+	$(info Running test $(testcase))
 	$(QUIET) "${BIN_DIR}/${BIN_FILE}" -t -q
 
-${BIN_DIR}/${BIN_FILE}: ${TEST_OBJS} 
+${BIN_DIR}/${BIN_FILE}: compile-sketch
 
 # We force sketch recompiliation because otherwise, make won't pick up changes to...anything on the arduino side
+.PHONY: compile-sketch
 compile-sketch: ${TEST_OBJS}
 	@install -d "${BIN_DIR}" "${LIB_DIR}"
 	$(QUIET) env LIBONLY=yes VERBOSE=${VERBOSE}  \
 		OUTPUT_PATH="${LIB_DIR}" \
-		$(MAKE) -f ${top_dir}/testing/makefiles/delegate.mk compile
+		_ARDUINO_CLI_COMPILE_CUSTOM_FLAGS='--build-property upload.maximum_size=""' \
+		$(MAKE) -f ${top_dir}/etc/makefiles/sketch.mk compile
 	$(QUIET) $(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "${BIN_DIR}/${BIN_FILE}" \
 		-lpthread -g -w ${TEST_OBJS} \
 		-L"${COMMON_LIB_DIR}" -lcommon \
@@ -65,13 +92,14 @@ compile-sketch: ${TEST_OBJS}
 
 
 # If we have a test.ktest file, it should be processed into a c++ testcase
-
+.PHONY: generate-testcase
 generate-testcase: $(if $(HAS_KTEST_FILE), ${SRC_DIR}/generated-testcase.cpp)
-
 
 ${SRC_DIR}/generated-testcase.cpp: test.ktest
 ifneq (,$(wildcard test.ktest))
-	$(info Compiling ${testcase} ktest script into ${SRC_DIR}/generated-testcase.cpp)
+ifdef VERBOSE
+	$(QUIET) $(info Compiling ${testcase} ktest script into ${SRC_DIR}/generated-testcase.cpp)
+endif
 	$(QUIET) install -d "${SRC_DIR}"
 	$(QUIET) perl ${top_dir}/testing/bin/ktest-to-cxx \
 		--ktest=test.ktest \
@@ -81,7 +109,7 @@ endif
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.cpp
 	$(QUIET) install -d "${OBJ_DIR}"
 	$(QUIET) $(COMPILER_WRAPPER) $(call _arduino_prop,compiler.cpp.cmd) -o "$@" -c -std=c++14 \
-		${shared_includes} ${shared_defines} $<
+		${shared_includes} ${include_plugins_dir} ${shared_defines} $<
 
 clean:
 	$(QUIET) rm -f -- "${SRC_DIR}/generated-testcase.cpp"

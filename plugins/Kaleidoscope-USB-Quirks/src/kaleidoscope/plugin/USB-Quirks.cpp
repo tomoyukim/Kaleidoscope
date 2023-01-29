@@ -15,7 +15,14 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Kaleidoscope-USB-Quirks.h>
+#include "kaleidoscope/plugin/USB-Quirks.h"
+
+#include <Arduino.h>  // for delay
+#include <stdint.h>   // for uint8_t
+
+#include "kaleidoscope/Runtime.h"                         // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"                   // for Base<>::HID, VirtualProps::HID
+#include "kaleidoscope/driver/hid/keyboardio/Keyboard.h"  // for Keyboard
 
 namespace kaleidoscope {
 namespace plugin {
@@ -29,7 +36,7 @@ void USBQuirks::toggleKeyboardProtocol() {
   Runtime.attachToHost();
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::USBQuirks USBQuirks;

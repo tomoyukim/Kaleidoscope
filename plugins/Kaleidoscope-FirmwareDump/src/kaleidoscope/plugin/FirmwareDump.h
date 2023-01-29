@@ -23,23 +23,25 @@
 
 #ifdef __AVR__
 
-#include "kaleidoscope/Runtime.h"
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
 class FirmwareDump : public kaleidoscope::Plugin {
  public:
-  FirmwareDump() {}
-
   EventHandlerResult onSetup();
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onFocusEvent(const char *input);
+
  private:
   uint16_t bootloader_size_;
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::FirmwareDump FirmwareDump;
 

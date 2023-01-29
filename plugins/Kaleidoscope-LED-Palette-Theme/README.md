@@ -20,14 +20,11 @@ full extent, we need to create our own plugin on top of it.
 namespace example {
 
 class TestLEDMode : public LEDMode {
- public:
-  TestLEDMode() {}
-
  protected:
-  void setup(void) final;
-  void update(void) final;
+  void setup() final;
+  void update() final;
 
-  kaleidoscope::EventHandlerResult onFocusEvent(const char *command);
+  kaleidoscope::EventHandlerResult onFocusEvent(const char *input);
 
  private:
   static uint16_t map_base_;
@@ -35,17 +32,17 @@ class TestLEDMode : public LEDMode {
 
 uint16_t TestLEDMode::map_base_;
 
-void TestLEDMode::setup(void) {
+void TestLEDMode::setup() {
   map_base_ = LEDPaletteTheme.reserveThemes(1);
 }
 
-void TestLEDMode::update(void) {
+void TestLEDMode::update() {
   LEDPaletteTheme.updateHandler(map_base_, 0);
 }
 
 kaleidoscope::EventHandlerResult
-TestLEDMode::onFocusEvent(const char *command) {
-  return LEDPaletteTheme.themeFocusEvent(command, PSTR("testLedMode.map"), map_base_, 1);
+TestLEDMode::onFocusEvent(const char *input) {
+  return LEDPaletteTheme.themeFocusEvent(input, PSTR("testLedMode.map"), map_base_, 1);
 }
 
 }

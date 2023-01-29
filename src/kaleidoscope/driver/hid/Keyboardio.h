@@ -16,21 +16,17 @@
  */
 
 #pragma once
-#include <Arduino.h>
-#include <KeyboardioHID.h>
-#include "kaleidoscope/key_defs.h"
 
-#include "kaleidoscope/driver/hid/Base.h"
-
-#include "keyboardio/Keyboard.h"
-#include "keyboardio/Mouse.h"
-#include "keyboardio/AbsoluteMouse.h"
+#include "kaleidoscope/driver/hid/Base.h"                      // for Base, BaseProps
+#include "kaleidoscope/driver/hid/keyboardio/AbsoluteMouse.h"  // for AbsoluteMouse, AbsoluteMou...
+#include "kaleidoscope/driver/hid/keyboardio/Keyboard.h"       // for Keyboard, KeyboardProps
+#include "kaleidoscope/driver/hid/keyboardio/Mouse.h"          // for Mouse, MouseProps
 
 namespace kaleidoscope {
 namespace driver {
 namespace hid {
 
-struct KeyboardioProps: public BaseProps {
+struct KeyboardioProps : public BaseProps {
   typedef keyboardio::KeyboardProps KeyboardProps;
   typedef keyboardio::Keyboard<KeyboardProps> Keyboard;
   typedef keyboardio::MouseProps MouseProps;
@@ -39,9 +35,9 @@ struct KeyboardioProps: public BaseProps {
   typedef keyboardio::AbsoluteMouse<AbsoluteMouseProps> AbsoluteMouse;
 };
 
-template <typename _Props>
-class Keyboardio: public Base<_Props> {};
+template<typename _Props>
+class Keyboardio : public Base<_Props> {};
 
-}
-}
-}
+}  // namespace hid
+}  // namespace driver
+}  // namespace kaleidoscope

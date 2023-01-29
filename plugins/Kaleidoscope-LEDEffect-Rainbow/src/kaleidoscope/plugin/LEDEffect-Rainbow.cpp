@@ -14,12 +14,20 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-LEDEffect-Rainbow.h"
+#include "kaleidoscope/plugin/LEDEffect-Rainbow.h"
+
+#include <Arduino.h>  // for byte
+#include <stdint.h>   // for uint8_t, uint16_t
+
+#include "kaleidoscope/Runtime.h"                     // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"               // for Base<>::LEDRangeIterator, Base<>::L...
+#include "kaleidoscope/plugin/LEDControl.h"           // for LEDControl
+#include "kaleidoscope/plugin/LEDControl/LEDUtils.h"  // for hsvToRgb
 
 namespace kaleidoscope {
 namespace plugin {
 
-void LEDRainbowEffect::TransientLEDMode::update(void) {
+void LEDRainbowEffect::TransientLEDMode::update() {
   if (!Runtime.has_leds)
     return;
 
@@ -50,7 +58,7 @@ void LEDRainbowEffect::update_delay(byte delay) {
 
 // ---------
 
-void LEDRainbowWaveEffect::TransientLEDMode::update(void) {
+void LEDRainbowWaveEffect::TransientLEDMode::update() {
   if (!Runtime.has_leds)
     return;
 
@@ -88,8 +96,8 @@ void LEDRainbowWaveEffect::update_delay(byte delay) {
   rainbow_update_delay = delay;
 }
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::LEDRainbowEffect LEDRainbowEffect;
 kaleidoscope::plugin::LEDRainbowWaveEffect LEDRainbowWaveEffect;

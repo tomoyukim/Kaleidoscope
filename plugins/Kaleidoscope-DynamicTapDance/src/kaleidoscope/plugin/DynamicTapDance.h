@@ -1,5 +1,5 @@
 /* DynamicTapDance -- Dynamic TapDance support for Kaleidoscope
- * Copyright (C) 2019  Keyboard.io, Inc
+ * Copyright (C) 2019, 2021  Keyboard.io, Inc
  * Copyright (C) 2019  Dygma Lab S.L.
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -17,34 +17,37 @@
 
 #pragma once
 
-#include <Kaleidoscope.h>
-#include <Kaleidoscope-TapDance.h>
+#include <Kaleidoscope-Ranges.h>    // for TD_FIRST, TD_LAST
+#include <Kaleidoscope-TapDance.h>  // for TapDance, TapDance::ActionType
+#include <stdint.h>                 // for uint8_t, uint16_t
+
+#include "kaleidoscope/KeyAddr.h"               // for KeyAddr
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 namespace kaleidoscope {
 namespace plugin {
 
-class DynamicTapDance: public kaleidoscope::Plugin {
+class DynamicTapDance : public kaleidoscope::Plugin {
  public:
-  DynamicTapDance() {}
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onFocusEvent(const char *input);
 
-  EventHandlerResult onFocusEvent(const char *command);
+  void setup(uint8_t dynamic_offset, uint16_t size);
 
-  static void setup(uint8_t dynamic_offset, uint16_t size);
-
-  static bool dance(uint8_t tap_dance_index, KeyAddr key_addr, uint8_t tap_count,
-                    TapDance::ActionType tap_dance_action);
+  bool dance(uint8_t tap_dance_index, KeyAddr key_addr, uint8_t tap_count, TapDance::ActionType tap_dance_action);
 
  private:
-  static uint16_t storage_base_;
-  static uint16_t storage_size_;
+  uint16_t storage_base_;
+  uint16_t storage_size_;
   static constexpr uint8_t reserved_tap_dance_key_count_ = ranges::TD_LAST - ranges::TD_FIRST + 1;
-  static uint16_t map_[reserved_tap_dance_key_count_];
-  static uint8_t dance_count_;
-  static uint8_t offset_;
-  static void updateDynamicTapDanceCache();
+  uint16_t map_[reserved_tap_dance_key_count_];  // NOLINT(runtime/arrays)
+  uint8_t dance_count_;
+  uint8_t offset_;
+  void updateDynamicTapDanceCache();
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::DynamicTapDance DynamicTapDance;

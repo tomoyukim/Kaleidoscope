@@ -18,10 +18,19 @@
 
 #pragma once
 
-#ifdef ARDUINO_AVR_MODEL01
+#if defined(ARDUINO_AVR_MODEL01) || defined(ARDUINO_keyboardio_model_100)
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include <Arduino.h>  // for PROGMEM
+#include <stdint.h>   // for uint8_t, int16_t, int8_t, INT16_MAX
+
+#include "kaleidoscope/KeyEvent.h"                       // for KeyEvent
+#include "kaleidoscope/Runtime.h"                        // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"                  // for Device
+#include "kaleidoscope/event_handler_result.h"           // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                         // for Plugin
+#include "kaleidoscope/plugin/AccessTransientLEDMode.h"  // for AccessTransientLEDMode
+#include "kaleidoscope/plugin/LEDMode.h"                 // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"        // for LEDModeInterface
 
 #define WP_WID 14
 #define WP_HGT 5
@@ -29,12 +38,10 @@
 namespace kaleidoscope {
 namespace plugin {
 class WavepoolEffect : public Plugin,
-  public LEDModeInterface,
-  public AccessTransientLEDMode {
+                       public LEDModeInterface,
+                       public AccessTransientLEDMode {
  public:
-  WavepoolEffect(void) {}
-
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 
   // ms before idle animation starts after last keypress
   static uint16_t idle_timeout;
@@ -46,21 +53,18 @@ class WavepoolEffect : public Plugin,
   //
   class TransientLEDMode : public LEDMode {
    public:
-
     // Please note that storing the parent ptr is only required
     // for those LED modes that require access to
     // members of their parent class. Most LED modes can do without.
     //
     explicit TransientLEDMode(const WavepoolEffect *parent);
 
-    EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
+    EventHandlerResult onKeyEvent(KeyEvent &event);
 
    protected:
-
     void update() final;
 
    private:
-
     uint8_t frames_since_event_;
     int8_t surface_[2][WP_WID * WP_HGT];
     uint8_t page_;
@@ -73,8 +77,8 @@ class WavepoolEffect : public Plugin,
   };
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::WavepoolEffect WavepoolEffect;
 

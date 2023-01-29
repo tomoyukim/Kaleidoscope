@@ -14,9 +14,11 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+
 #pragma once
 
-#include "kaleidoscope/macro_helpers.h"
+#include "kaleidoscope/macro_helpers.h"  // for __NL__
 
 // The following code has been stolen from
 //

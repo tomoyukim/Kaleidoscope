@@ -17,7 +17,9 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/storage/AVREEPROM.h"
+#include <stdint.h>  // for uint16_t
+
+#include "kaleidoscope/driver/storage/AVREEPROM.h"  // for AVREEPROMProps
 
 namespace kaleidoscope {
 namespace driver {
@@ -27,6 +29,6 @@ struct ATmega32U4EEPROMProps : kaleidoscope::driver::storage::AVREEPROMProps {
   static constexpr uint16_t length = 1024;
 };
 
-}
-}
-}
+}  // namespace storage
+}  // namespace driver
+}  // namespace kaleidoscope

@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-Redial -- Redial support for Kaleidoscope
- * Copyright (C) 2018, 2019  Keyboard.io, Inc.
+ * Copyright (C) 2018-2021  Keyboard.io, Inc.
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,29 +17,30 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-Ranges.h>
+#include <Kaleidoscope-Ranges.h>  // for REDIAL
 
-#define Key_Redial Key(kaleidoscope::ranges::REDIAL)
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"              // for Key
+#include "kaleidoscope/plugin.h"                // for Plugin
+
+constexpr Key Key_Redial = Key(kaleidoscope::ranges::REDIAL);
 
 namespace kaleidoscope {
 namespace plugin {
 
 class Redial : public kaleidoscope::Plugin {
  public:
-  Redial(void) {}
-
   static bool shouldRemember(Key mappedKey);
 
-  EventHandlerResult onKeyswitchEvent(Key &mapped_key, KeyAddr key_addr, uint8_t key_state);
+  EventHandlerResult onNameQuery();
+  EventHandlerResult onKeyEvent(KeyEvent &event);
 
  private:
-  static Key key_to_redial_;
-  static Key last_key_;
-  static bool redial_held_;
+  Key last_key_;
 };
 
-}
-}
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::Redial Redial;

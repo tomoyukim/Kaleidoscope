@@ -1,6 +1,6 @@
 /* -*- mode: c++ -*-
  * Kaleidoscope-LED-ActiveModColor -- Light up the LEDs under the active modifiers
- * Copyright (C) 2016, 2017, 2018  Keyboard.io, Inc
+ * Copyright (C) 2016-2020  Keyboard.io, Inc
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -17,8 +17,11 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include <Kaleidoscope-LEDControl.h>
+#include "kaleidoscope/KeyAddrBitfield.h"       // for KeyAddrBitfield
+#include "kaleidoscope/KeyEvent.h"              // for KeyEvent
+#include "kaleidoscope/device/device.h"         // for cRGB
+#include "kaleidoscope/event_handler_result.h"  // for EventHandlerResult
+#include "kaleidoscope/plugin.h"                // for Plugin
 
 #define MAX_MODS_PER_LAYER 16
 
@@ -26,27 +29,33 @@ namespace kaleidoscope {
 namespace plugin {
 class ActiveModColorEffect : public kaleidoscope::Plugin {
  public:
-  ActiveModColorEffect(void) {}
-
-  static cRGB highlight_color;
-  static cRGB sticky_color;
+  static void setHighlightColor(cRGB color) {
+    highlight_color_ = color;
+  }
+  static void setOneShotColor(cRGB color) {
+    oneshot_color_ = color;
+  }
+  static void setStickyColor(cRGB color) {
+    sticky_color_ = color;
+  }
 
   static void highlightNormalModifiers(bool value) {
     highlight_normal_modifiers_ = value;
   }
 
-  EventHandlerResult beforeReportingState();
-  EventHandlerResult onLayerChange();
-  EventHandlerResult onSetup() {
-    return onLayerChange();
-  }
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult beforeSyncingLeds();
 
  private:
   static bool highlight_normal_modifiers_;
-  static KeyAddr mod_keys_[MAX_MODS_PER_LAYER];
-  static uint8_t mod_key_count_;
+  static KeyAddrBitfield mod_key_bits_;
+
+  static cRGB highlight_color_;
+  static cRGB oneshot_color_;
+  static cRGB sticky_color_;
 };
-}
-}
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::ActiveModColorEffect ActiveModColorEffect;

@@ -31,7 +31,7 @@ enum {
 
 #define MO(n) ShiftToLayer(n)
 
-/* *INDENT-OFF* */
+// clang-format off
 KEYMAPS(
 
 /* Qwerty
@@ -71,14 +71,15 @@ KEYMAPS(
   ,___          ,___   ,___   ,___   ,___       ,___      ,___   ,___   ,___   ,___   ,___
 )
 );
-/* *INDENT-ON* */
+// clang-format on
 
 KALEIDOSCOPE_INIT_PLUGINS(Macros);
 
-const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
-  switch (macroIndex) {
+const macro_t *macroAction(uint8_t macro_id, KeyEvent &event) {
+  switch (macro_id) {
   case RESET:
-    Kaleidoscope.rebootBootloader();
+    if (keyToggledOn(event.state))
+      Kaleidoscope.rebootBootloader();
     break;
   default:
     break;

@@ -16,19 +16,36 @@
 
 #pragma once
 
-#include "kaleidoscope/Runtime.h"
-#include "kaleidoscope/plugin/LEDMode.h"
+#include <stdint.h>  // for uint8_t, uint16_t
 
-#define LED_TOGGLE   B00000001  // Synthetic, internal
+#include "kaleidoscope/KeyAddr.h"                  // for KeyAddr
+#include "kaleidoscope/KeyEvent.h"                 // for KeyEvent
+#include "kaleidoscope/Runtime.h"                  // for Runtime, Runtime_
+#include "kaleidoscope/device/device.h"            // for cRGB, Device, Base<>::LEDDriver, Virtu...
+#include "kaleidoscope/event_handler_result.h"     // for EventHandlerResult
+#include "kaleidoscope/key_defs.h"                 // for Key, IS_INTERNAL, KEY_FLAGS, SYNTHETIC
+#include "kaleidoscope/plugin.h"                   // for Plugin
+#include "kaleidoscope/plugin/LEDMode.h"           // for LEDMode
+#include "kaleidoscope/plugin/LEDModeInterface.h"  // for LEDModeInterface
+// -----------------------------------------------------------------------------
+// Deprecation warning messages
+#include "kaleidoscope_internal/deprecations.h"  // for DEPRECATED
 
-#define Key_LEDEffectNext Key(0, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE)
-#define Key_LEDEffectPrevious Key(1, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE)
-#define Key_LEDToggle Key(2, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE)
+#define _DEPRECATED_MESSAGE_FOCUSLEDCOMMAND                                  \
+  "The `FocusLEDCommand` plugin is deprecated. For its most useful\n"        \
+  "functionality - led.brightness -, please see the `LEDBrightnessConfig`\n" \
+  "plugin.\n"                                                                \
+  "This plugin will be removed after 2023-01-01."
+// -----------------------------------------------------------------------------
+
+constexpr uint8_t LED_TOGGLE = 0b00000001;  // Synthetic, internal
+
+constexpr Key Key_LEDEffectNext     = Key(0, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE);
+constexpr Key Key_LEDEffectPrevious = Key(1, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE);
+constexpr Key Key_LEDToggle         = Key(2, KEY_FLAGS | SYNTHETIC | IS_INTERNAL | LED_TOGGLE);
 
 namespace kaleidoscope {
 namespace plugin {
-
-class LEDMode;
 
 class LEDControl : public kaleidoscope::Plugin {
  public:
@@ -53,15 +70,14 @@ class LEDControl : public kaleidoscope::Plugin {
   }
   static void set_mode(uint8_t mode_id);
   static uint8_t get_mode_index() {
-    return mode_id;
+    return mode_id_;
   }
   static LEDMode *get_mode() {
     return cur_led_mode_;
   }
   template<typename LEDMode__>
   static LEDMode__ *get_mode() {
-    return static_cast<LEDMode__*>(cur_led_mode_);
-
+    return static_cast<LEDMode__ *>(cur_led_mode_);
   }
 
   static void refreshAll() {
@@ -92,11 +108,13 @@ class LEDControl : public kaleidoscope::Plugin {
   //
   static void activate(LEDModeInterface *plugin);
 
-  static uint8_t syncDelay;
+  static void setSyncInterval(uint8_t interval) {
+    sync_interval_ = interval;
+  }
 
-  kaleidoscope::EventHandlerResult onSetup();
-  kaleidoscope::EventHandlerResult onKeyswitchEvent(Key &mappedKey, KeyAddr key_addr, uint8_t keyState);
-  kaleidoscope::EventHandlerResult beforeReportingState();
+  EventHandlerResult onSetup();
+  EventHandlerResult onKeyEvent(KeyEvent &event);
+  EventHandlerResult afterEachCycle();
 
   static void disable();
   static void enable();
@@ -112,24 +130,25 @@ class LEDControl : public kaleidoscope::Plugin {
   }
 
  private:
-  static uint16_t syncTimer;
-  static uint8_t mode_id;
+  static uint16_t last_sync_time_;
+  static uint8_t sync_interval_;
+  static uint8_t mode_id_;
   static uint8_t num_led_modes_;
   static LEDMode *cur_led_mode_;
   static bool enabled_;
-  static Key pending_next_prev_key_;
 };
 
+DEPRECATED(FOCUSLEDCOMMAND)
 class FocusLEDCommand : public Plugin {
  public:
   FocusLEDCommand() {}
 
-  EventHandlerResult onFocusEvent(const char *command);
+  EventHandlerResult onFocusEvent(const char *input);
 };
 
-}
+}  // namespace plugin
 
-}
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::LEDControl LEDControl;
 extern kaleidoscope::plugin::FocusLEDCommand FocusLEDCommand;

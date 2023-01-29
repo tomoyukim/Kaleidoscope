@@ -17,19 +17,19 @@
 
 #pragma once
 
-#include "kaleidoscope/driver/mcu/Base.h"
+#include "kaleidoscope/driver/mcu/Base.h"  // for Base, BaseProps
 
 namespace kaleidoscope {
 namespace driver {
 namespace mcu {
 
-struct ATmega32U4Props: public kaleidoscope::driver::mcu::BaseProps {
-  static constexpr bool disable_jtag = false;
+struct ATmega32U4Props : public kaleidoscope::driver::mcu::BaseProps {
+  static constexpr bool disable_jtag           = false;
   static constexpr bool disable_clock_division = false;
 };
 
 #ifndef KALEIDOSCOPE_VIRTUAL_BUILD
-template <typename _Props>
+template<typename _Props>
 class ATmega32U4 : public kaleidoscope::driver::mcu::Base<_Props> {
  public:
   void detachFromHost() {
@@ -73,12 +73,16 @@ class ATmega32U4 : public kaleidoscope::driver::mcu::Base<_Props> {
     if (_Props::disable_clock_division)
       disableClockDivision();
   }
+
+  bool USBConfigured() {
+    return USBDevice.configured();
+  }
 };
 #else
-template <typename _Props>
+template<typename _Props>
 class ATmega32U4 : public kaleidoscope::driver::mcu::Base<_Props> {};
-#endif // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
+#endif  // ifndef KALEIDOSCOPE_VIRTUAL_BUILD
 
-}
-}
-}
+}  // namespace mcu
+}  // namespace driver
+}  // namespace kaleidoscope

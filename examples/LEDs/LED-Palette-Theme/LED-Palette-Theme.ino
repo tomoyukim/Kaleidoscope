@@ -27,7 +27,7 @@ class TestLEDMode : public kaleidoscope::plugin::LEDMode {
  public:
   TestLEDMode() {}
 
-  kaleidoscope::EventHandlerResult onFocusEvent(const char *command);
+  kaleidoscope::EventHandlerResult onFocusEvent(const char *input);
 
  protected:
   void setup() final;
@@ -39,26 +39,24 @@ class TestLEDMode : public kaleidoscope::plugin::LEDMode {
 
 uint16_t TestLEDMode::map_base_;
 
-void
-TestLEDMode::setup() {
+void TestLEDMode::setup() {
   map_base_ = LEDPaletteTheme.reserveThemes(1);
 }
 
-void
-TestLEDMode::update(void) {
+void TestLEDMode::update(void) {
   LEDPaletteTheme.updateHandler(map_base_, 0);
 }
 
 kaleidoscope::EventHandlerResult
-TestLEDMode::onFocusEvent(const char *command) {
-  return LEDPaletteTheme.themeFocusEvent(command, PSTR("testLedMode.map"), map_base_, 1);
+TestLEDMode::onFocusEvent(const char *input) {
+  return LEDPaletteTheme.themeFocusEvent(input, PSTR("testLedMode.map"), map_base_, 1);
 }
 
-}
+}  // namespace example
 
 example::TestLEDMode TestLEDMode;
 
-// *INDENT-OFF*
+// clang-format off
 KEYMAPS(
   [0] = KEYMAP_STACKED
   (
@@ -78,7 +76,7 @@ KEYMAPS(
     Key_RightShift, Key_RightAlt, Key_Spacebar, Key_RightControl,
     Key_NoKey),
 )
-// *INDENT-ON*
+// clang-format on
 
 KALEIDOSCOPE_INIT_PLUGINS(Focus, LEDPaletteTheme, TestLEDMode, EEPROMSettings);
 
