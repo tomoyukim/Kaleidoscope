@@ -18,7 +18,7 @@
  */
 
 #ifndef BUILD_INFORMATION
-#define BUILD_INFORMATION "t7m.keymap.20210430"
+#define BUILD_INFORMATION "t7m.keymap.20230129"
 #endif
 
 #include "Kaleidoscope.h"
@@ -84,15 +84,15 @@ KEYMAPS(
 
   [UPPER] = KEYMAP_STACKED
   (
-       Key_Insert                ,Key_Home         ,Key_UpArrow     ,Key_End           ,Key_PageUp
-      ,M(MACRO_VERSION_INFO)     ,Key_LeftArrow    ,Key_DownArrow   ,Key_RightArrow    ,Key_PageDown
-      ,XXX                       ,XXX              ,XXX             ,XXX               ,XXX           ,___
-      ,___                       ,___              ,___             ,___               ,___           ,___
+       Key_PrintScreen           ,Key_F9           ,Key_F10         ,Key_F11           ,Key_F12
+      ,Key_ScrollLock            ,Key_F5           ,Key_F6          ,Key_F7            ,Key_F8
+      ,XXX                       ,Key_F1           ,Key_F2          ,Key_F3            ,Key_F4        ,___
+      ,___                       ,XXX              ,___             ,___               ,___           ,___
 
-                  ,Key_F12       ,Key_F7          ,Key_F8          ,Key_F9         ,Key_PrintScreen
-                  ,Key_F11       ,Key_F4          ,Key_F5          ,Key_F6         ,Key_ScrollLock
-      ,Key_Delete ,Key_F10       ,Key_F1          ,Key_F2          ,Key_F3         ,XXX
-      ,___        ,___           ,___             ,___             ,___            ,___
+                  ,Key_Insert                ,Key_Home         ,Key_UpArrow     ,Key_End           ,Key_PageUp
+                  ,M(MACRO_VERSION_INFO)     ,Key_LeftArrow    ,Key_DownArrow   ,Key_RightArrow    ,Key_PageDown
+      ,Key_Delete ,XXX                       ,XXX              ,XXX             ,XXX               ,XXX
+      ,___        ,___                       ,XXX              ,XXX             ,XXX               ,XXX
    )
 )
 // clang-format on
