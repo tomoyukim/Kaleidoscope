@@ -18,7 +18,7 @@
  */
 
 #ifndef BUILD_INFORMATION
-#define BUILD_INFORMATION "t7m.keymap.20230129"
+#define BUILD_INFORMATION "t7m.keymap.20230503"
 #endif
 
 #include "Kaleidoscope.h"
@@ -144,7 +144,7 @@ void setup() {
     kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 7), MO(FUN)),
   )
   Qukeys.setHoldTimeout(1000);
-  Qukeys.setOverlapThreshold(50);
+  Qukeys.setOverlapThreshold(30);
   Qukeys.setMinimumHoldTime(100);
   Qukeys.setMinimumPriorInterval(80);
 
