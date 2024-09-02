@@ -18,7 +18,7 @@
  */
 
 #ifndef BUILD_INFORMATION
-#define BUILD_INFORMATION "t7m.keymap.20230503"
+#define BUILD_INFORMATION "t7m.keymap.20240902"
 #endif
 
 #include "Kaleidoscope.h"
@@ -66,7 +66,7 @@ KEYMAPS(
                       ,Key_Y     ,Key_U      ,Key_I          ,Key_O         ,Key_P
                       ,Key_H     ,Key_J      ,Key_K          ,Key_L         ,Key_Semicolon
        ,Key_Backspace ,Key_N     ,Key_M      ,Key_Comma      ,Key_Period    ,Key_Slash
-       ,Key_Enter     ,Key_Space ,Key_Equals ,Key_Minus      ,Key_Quote     ,Key_Backslash
+       ,Key_Enter     ,Key_Space ,MO(FUN)    ,Key_Minus      ,Key_Quote     ,Key_Backslash
   ),
 
   [FUN] = KEYMAP_STACKED
@@ -77,8 +77,8 @@ KEYMAPS(
       ,___              ,___              ,Key_Lang1            ,Key_Lang2             ,___                   ,___
 
                     ,Key_Slash     ,Key_7      ,Key_8         ,Key_9     ,Key_Minus
-                    ,Key_Star      ,Key_4      ,Key_5         ,Key_6     ,Key_Plus
-      ,___          ,Key_0         ,Key_1      ,Key_2         ,Key_3     ,Key_Equals
+                    ,Key_Star      ,Key_4      ,Key_5         ,Key_6     ,Key_Equals
+      ,___          ,Key_0         ,Key_1      ,Key_2         ,Key_3     ,Key_Plus
       ,___          ,___           ,___           ,___              ,___             ,___
    ),
 
@@ -89,10 +89,10 @@ KEYMAPS(
       ,XXX                       ,Key_F1           ,Key_F2          ,Key_F3            ,Key_F4        ,___
       ,___                       ,XXX              ,___             ,___               ,___           ,___
 
-                  ,Key_Insert                ,Key_Home         ,Key_UpArrow     ,Key_End           ,Key_PageUp
-                  ,M(MACRO_VERSION_INFO)     ,Key_LeftArrow    ,Key_DownArrow   ,Key_RightArrow    ,Key_PageDown
-      ,Key_Delete ,XXX                       ,XXX              ,XXX             ,XXX               ,XXX
-      ,___        ,___                       ,XXX              ,XXX             ,XXX               ,XXX
+                  ,M(MACRO_VERSION_INFO)  ,Key_Insert       ,Key_Home        ,Key_End           ,Key_PageUp
+                  ,Key_LeftArrow          ,Key_DownArrow    ,Key_UpArrow     ,Key_RightArrow    ,Key_PageDown
+      ,Key_Delete ,XXX                    ,XXX              ,XXX             ,XXX               ,XXX
+      ,___        ,___                    ,XXX              ,XXX             ,XXX               ,XXX
    )
 )
 // clang-format on
@@ -141,7 +141,7 @@ void setup() {
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 4), Key_LeftControl),
 //    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 5), Key_LeftShift),
     // R
-    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 7), MO(FUN)),
+//    kaleidoscope::plugin::Qukey(QWERTY, KeyAddr(3, 7), MO(FUN)),
   )
   Qukeys.setHoldTimeout(1000);
   Qukeys.setOverlapThreshold(30);
